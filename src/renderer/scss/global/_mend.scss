@@ -1,0 +1,11 @@
+@charset "utf-8";
+#app {
+    .el-divider__text {
+        color: $cyan;
+    }
+    .is-view {
+        .el-form-item {
+            margin-bottom: 0;
+        }
+    }
+}
