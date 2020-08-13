@@ -10,7 +10,7 @@
             <span :class="{'el-icon-caret-bottom': isActive, 'el-icon-caret-right': !isActive}"></span>
             <span class="ml-1">{{ title }}</span>
         </div>
-        <div v-show="isActive" class="pl-5 gray-700">
+        <div v-show="isActive" class="pr-2 pl-5 gray-700">
             <slot />            
         </div>
     </div>

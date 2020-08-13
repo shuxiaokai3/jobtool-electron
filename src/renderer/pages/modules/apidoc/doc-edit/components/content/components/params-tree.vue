@@ -6,6 +6,7 @@
 */
 <template>
     <s-card2 :title="title" collapse :fold="fold" class="collapse-wrap">
+        <slot name="operation" slot="operation" />
         <div class="params-edit">
             <el-tree 
                     ref="tree"
@@ -234,11 +235,11 @@ export default {
                 const parentNode = node.parent;
                 const parentData = node.parent.data;
                 if (parentNode.level === 0) { //根节点直接往数据里面push，非根节点往children里push
-                    if (parentData[parentData.length - 1].key && parentData[parentData.length - 1].keytrim() !== "") {
+                    if (parentData[parentData.length - 1].key && parentData[parentData.length - 1].key.trim() !== "") {
                         parentData.push(this.generateParams());
                     }
                 } else {
-                    if (parentData.children[parentData.children.length - 1].key && parentData.children[parentData.children.length - 1].keytrim() !== "") {
+                    if (parentData.children[parentData.children.length - 1].key && parentData.children[parentData.children.length - 1].key.trim() !== "") {
                         parentData.children.push(this.generateParams());
                     }
                 }

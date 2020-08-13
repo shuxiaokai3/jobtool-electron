@@ -67,7 +67,7 @@
         <s-collapse title="请求参数">
             <s-tree-json :data="requestParams"></s-tree-json>
         </s-collapse>
-        <s-collapse title="返回参数">
+        <s-collapse title="响应参数">
             <s-tree-json :data="requestData.responseParams"></s-tree-json>
         </s-collapse>
         <s-collapse title="远程结果">
@@ -90,21 +90,23 @@
                 </div>
             </div>
             <div v-loading="loading" :element-loading-text="randomTip()" element-loading-background="rgba(255, 255, 255, 0.9)">
-                <s-json v-if="responseData && responseData.type === 'json'" :data="responseData.data" :check-data="checkJsonData" @export="handleExport"></s-json>
-                <span v-else-if="responseData && responseData.type === 'svg'" v-html="responseData.data"></span>
-                <img v-else-if="responseData && responseData.type === 'image'" :src="responseData.data" alt="无法显示">
-                <pre v-else-if="responseData && responseData.type === 'text'" v-text="responseData.data" class="res-text"></pre>
-                <iframe v-else-if="responseData && responseData.type === 'pdf'" :src="responseData.data" class="res-pdf"></iframe>
+                <s-json v-if="responseData && responseData.contentType.includes('application/json')" :data="responseData.data" :check-data="checkJsonData" @export="handleExport"></s-json>
+                <span v-else-if="responseData && responseData.contentType.includes('image/svg+xml')" v-html="responseData.data"></span>
+                <img v-else-if="responseData && responseData.contentType.includes('image/')" :src="responseData.data" alt="无法显示">
+                <pre v-else-if="responseData && responseData.contentType.includes('text/')" v-text="responseData.data" class="res-text"></pre>
+                <iframe v-else-if="responseData && responseData.contentType.includes('application/pdf/')" :src="responseData.data" class="res-pdf"></iframe>
                 <pre v-else>{{ responseData }}</pre>
             </div>
-            
         </s-collapse>
     </div>
 </template>
 
 <script>
+import FileType from "file-type/browser";
+import querystring from "querystring"
 import { dfsForest } from "@/lib/utils"
 import uuid from "uuid/v4"
+import urllib from "urllib"
 export default {
     components: {},
     props: {
@@ -126,8 +128,7 @@ export default {
             const copyData = JSON.parse(JSON.stringify(this.requestData.requestParams)); //扁平数据拷贝
             dfsForest(copyData, {
                 rCondition(value) {
-
-                    return value ? value.children : [];
+                    return value ? value.children : null;
                 },
                 rKey: "children",
                 hooks: (val, i, forestData, parent) => {
@@ -169,7 +170,7 @@ export default {
     data() {
         return {
             responseData: null, //---返回结果对象
-            checkJsonData: null, //--用于对比本地书写的返回参数与实际返回参数
+            checkJsonData: {}, //--用于对比本地书写的返回参数与实际返回参数
             loading: false, //-------返回结果加载状态
         };
     },
@@ -177,98 +178,112 @@ export default {
 
     },
     methods: {
-        //=====================================前后端交互====================================//
+        //=====================================发送请求====================================//
         sendRequest() {
-            return new Promise((resolve, reject) => {
-                let copyData = JSON.parse(JSON.stringify(this.requestData)); //扁平数据拷贝
-                let requestParams = this.convertPlainParamsToTreeData(copyData.requestParams, true);
-                const headerParams = this.convertPlainParamsToTreeData(copyData.header);
-                if (this.requestData.requestType === "formData") {
-                    requestParams = this.requestData.requestParams.filter(val => val.key && val.value).map(val => ({ key: val.key, type: val.type, value: val.value }));
-                }
+            return new Promise(async (resolve, reject) => {
                 this.loading = true;
-                setTimeout(() => { //超时取消
+                const requestInfo = this.formatRequestParams();
+                const urllibOptions = this.formatUrllibOptions(requestInfo);
+                console.log("请求参数", urllibOptions)
+                urllib.request(requestInfo.url, urllibOptions).then(res => {
+                    console.log(res)
+                    const response = res.res;
+                    this.responseData = {};
+                    this.responseData.headers = response.headers;
+                    this.responseData.rt = response.rt;
+                    this.responseData.size = (response.size / 1024).toFixed(2);
+                    this.responseData.status = response.status;
+                    this.responseData.contentType = response.headers["content-type"];
+                    this.responseData.cookie = response.headers["set-cookie"];
+                    this.responseData.data = this.formatResponseData(response);
+                    console.log(this.responseData)
+                    resolve();
+                    this.checkResponseParams();
+                }).catch(function (err) {
+                    reject(err)
+                }).finally(() => {
                     this.loading = false;
-                    reject(new Error("请求超时"));
-                }, 5000);
-                const params = {
-                    url: this.requestData.url.host + this.requestData.url.path,
-                    method: this.requestData.methods,
-                    header: headerParams,
-                    requestParams: requestParams,
-                    requestType: this.requestData.requestType
-                };
-                window.postMessage({
-                    type: "jobtool_proxy_web_request",
-                    data: params
                 });
-                window.addEventListener("message", (msg) => {
-                    const responseType = msg.data.type
-                    const response = msg.data.data;
-                    if (responseType === "jobtool_proxy_web_response") {
-                        this.loading = false;
-                        this.responseData = response;
-                        if (this.responseData.type === "excel") {
-                            const arrayData = this.responseData.data.data
-                            let ab = new ArrayBuffer(arrayData.length);
-                            let view = new Uint8Array(ab);
-                            for (var i = 0; i < arrayData.length; ++i) {
-                                view[i] = arrayData[i];
-                            }
-                            const blob = new Blob([view], {
-                                type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                            });
-                            let blobUrl = "";
-                            blobUrl = URL.createObjectURL(blob);
-                            const downloadElement = document.createElement("a");
-                            downloadElement.href = blobUrl;
-                            downloadElement.download = decodeURIComponent(this.responseData.fileName) || "未命名"; //下载后文件名
-                            document.body.appendChild(downloadElement);
-                            downloadElement.click(); //点击下载
-                            document.body.removeChild(downloadElement); //下载完成移除元素
-                            window.URL.revokeObjectURL(blobUrl); //释放掉blob对象
-                            resolve();
-                        } else {
-                            this.checkResponseParams();
-                            resolve(response);
-                        }
-                    } else if (responseType === "jobtool_proxy_web_response_error") {
-                        reject(msg.data);
-                    }
-                });
-                // this.axios.post("/proxy", params).then((res) => {
-                //     this.responseData = res.data;
-                //     if (this.responseData.type === "excel") {
-                //         const arrayData = this.responseData.data.data
-                //         let ab = new ArrayBuffer(arrayData.length);
-                //         let view = new Uint8Array(ab);
-                //         for (var i = 0; i < arrayData.length; ++i) {
-                //             view[i] = arrayData[i];
-                //         }
-                //         const blob = new Blob([view], {
-                //             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                //         });
-                //         let blobUrl = "";
-                //         blobUrl = URL.createObjectURL(blob);
-                //         const downloadElement = document.createElement("a");
-                //         downloadElement.href = blobUrl;
-                //         downloadElement.download = decodeURIComponent(this.responseData.fileName) || "未命名"; //下载后文件名
-                //         document.body.appendChild(downloadElement);
-                //         downloadElement.click(); //点击下载
-                //         document.body.removeChild(downloadElement); //下载完成移除元素
-                //         window.URL.revokeObjectURL(blobUrl); //释放掉blob对象
-                //         resolve();
-                //     } else {
-                //         this.checkResponseParams();
-                //         resolve(res.data);
-                //     }
-                // }).catch(err => {
-                //     console.error(err);
-                //     reject();
-                // }).finally(() => {
-                //     this.loading = false;
-                // });                
             })
+        },
+        //格式化请求参数
+        formatRequestParams() {
+            const copyRequestData = JSON.parse(JSON.stringify(this.requestData)); //扁平数据拷贝
+            const requestParams = this.convertPlainParamsToTreeData(copyRequestData.requestParams, true); //请求参数
+            const headerParams = this.convertPlainParamsToTreeData(copyRequestData.header); //请求头
+            const requestInfo = {
+                method: copyRequestData.methods.toLowerCase(),
+                url: copyRequestData.url.host + copyRequestData.url.path,
+                headers: headerParams,
+                contentType: copyRequestData.requestType,
+                requestParams 
+            };
+            return requestInfo;
+        },
+        //格式化urllib配置信息
+        formatUrllibOptions(requestInfo) {
+            const contentType = requestInfo.contentType; //query json formData x-www-form-urlencoded
+            const requestOptions = {};
+            /*eslint-disable indent*/ 
+            switch (contentType) {
+                case "query":
+                    requestOptions.method = requestInfo.method;
+                    requestOptions.data = requestInfo.requestParams;
+                    // requestOptions.contentType = requestInfo.contentType;
+                    requestOptions.headers = requestInfo.headers;
+                    break;
+                case "json":
+                    requestOptions.method = requestInfo.method;
+                    requestOptions.data = requestInfo.requestParams;
+                    requestOptions.contentType = requestInfo.contentType;
+                    requestOptions.headers = requestInfo.headers;
+                    break;
+                case "formData":
+                    requestOptions.method = requestInfo.method;
+                    requestOptions.data = requestInfo.requestParams;
+                    requestOptions.contentType = requestInfo.contentType;
+                    requestOptions.headers = requestInfo.headers;
+                    break;
+                case "x-www-form-urlencoded":
+                    requestOptions.method = requestInfo.method;
+                    requestOptions.data = requestInfo.requestParams;
+                    requestOptions.contentType = requestInfo.contentType;
+                    requestOptions.headers = requestInfo.headers;
+                    break;
+                default:
+                    requestOptions.method = requestInfo.method;
+                    requestOptions.data = requestInfo.requestParams;
+                    requestOptions.contentType = requestInfo.contentType;
+                    requestOptions.headers = requestInfo.headers;
+                    break;
+            }
+            return requestOptions
+        },
+        //格式化返回参数
+        formatResponseData(response) {
+            let result = null;
+            if (response.headers["content-type"].includes("application/json")) { //常规json格式
+                result = JSON.parse(response.data.toString());
+            } else if (response.headers["content-type"].includes("image/svg+xml")) { //svg格式，一般为验证码
+                result = response.data.toString();
+            } else if (response.headers["content-type"].includes("text/")) {
+                result = response.data.toString();
+            } else if (response.headers["content-type"].includes("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")) {
+                const contentDisposition = response.headers["content-disposition"];
+                const fileInfo = contentDisposition ? contentDisposition.match(/filename=([^=]+)/) : null;
+                const fileName = fileInfo ? fileInfo[1] : "";
+                const arrayData = response.data
+                const ab = new ArrayBuffer(arrayData.length);
+                const view = new Uint8Array(ab);
+                for (var i = 0; i < arrayData.length; ++i) {
+                    view[i] = arrayData[i];
+                }
+                result = new Blob([view], {
+                    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                });
+                this.blobDownload(result, fileName);
+            }
+            return result;
         },
         //=====================================组件间交互====================================//  
         //将扁平数据转换为树形结构数据
@@ -441,7 +456,7 @@ export default {
         },
         //检查返回值与响应参数是否一致
         checkResponseParams() {
-            if (this.responseData.type === "json") {
+            if (this.responseData.headers["content-type"].includes("application/json")) {
                 const remoteParams = this.responseData.data;
                 const localParams = this.responseParams;
                 this.checkJsonData = localParams;
