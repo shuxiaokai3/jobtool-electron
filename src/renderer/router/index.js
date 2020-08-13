@@ -7,7 +7,7 @@ import { BaseConfig } from "@/config.default.js"
 //=====================================注册登陆页面====================================//
 import login from "@/pages/login/login"
 //=====================================业务模块====================================//
-//=====================================测试界面====================================//
+import docEdit from "@/pages/modules/apidoc/doc-edit/doc-edit"
 
 
 Vue.use(Router)
@@ -27,7 +27,7 @@ const allRoutes = [
         meta: {
             title: "文档编辑"
         },
-        component: () => import("@/pages/modules/apidoc/doc-edit/doc-edit"),
+        component: docEdit,
     },
     {
         path: "/v1/b/b",
