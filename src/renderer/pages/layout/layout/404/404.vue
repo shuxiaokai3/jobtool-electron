@@ -6,7 +6,7 @@
 */
 <template>
     <div>
-        404
+        <el-button @click="handleJumpToLogin">返回登录</el-button>
     </div>
 </template>
 
@@ -21,6 +21,9 @@ export default {
 
     },
     methods: {
+        handleJumpToLogin() {
+            this.$router.push("/login")
+        },
         //=====================================获取远程数据==================================//
 
         //=====================================前后端交互====================================//
