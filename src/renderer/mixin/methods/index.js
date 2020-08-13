@@ -86,6 +86,25 @@ export default {
             }
         }
         foo(this.$children, componentName, eventName, params);
+    },
+
+    /** 
+     * @description        全局blob下载
+     * @author              shuxiaokai
+     * @create             2020-08-13 15:47
+     * @param {Blob}       blob - blob对象       
+     * @param {Number}     age - 数字类型       
+     */
+    blobDownload(blob, fileName) {
+        let blobUrl = "";
+        blobUrl = URL.createObjectURL(blob);
+        const downloadElement = document.createElement("a");
+        downloadElement.href = blobUrl;
+        downloadElement.download = decodeURIComponent(fileName) || "未命名"; //下载后文件名
+        document.body.appendChild(downloadElement);
+        downloadElement.click(); //点击下载
+        document.body.removeChild(downloadElement); //下载完成移除元素
+        window.URL.revokeObjectURL(blobUrl); //释放掉blob对象
     }
 };
 
