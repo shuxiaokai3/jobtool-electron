@@ -3,6 +3,7 @@ import App from "./App.vue";
 import ElementUI from "element-ui";
 import router from "./router";
 import store from "./store";
+import { BaseConfig } from "@/config.default.js";
 import utils from "@/lib"
 import "element-ui/lib/theme-chalk/index.css";
 import "element-ui/lib/theme-chalk/display.css";
@@ -10,10 +11,9 @@ import "./components/index";
 import "./mixin"
 import "./directive"
 import "@/assets/css/index.css"
-import vueElectron from "vue-electron"
 import axios from "./api/api"
 
-if (!process.env.IS_WEB) Vue.use(vueElectron);
+if (!process.env.IS_WEB) Vue.use(require("vue-electron"));
 
 
 import Logs from "@/logs/index.js"
@@ -37,6 +37,10 @@ Vue.config.warnHandler = logs.warningCatch;
 
 /* eslint-disable no-new */
 new Vue({
+    data: {
+        VUE_BASE_CONFIG: BaseConfig,
+        ENVIROMENT: process.env.NODE_ENV
+    },
     components: { App },
     router,
     store,
