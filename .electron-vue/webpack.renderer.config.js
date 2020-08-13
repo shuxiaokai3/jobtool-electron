@@ -34,7 +34,9 @@ let whiteListedModules = [
     "vuedraggable",
     "ali-oss",
     "json5",
-    "echarts"
+    "echarts",
+    "brace",
+    "urllib"
 ];
 
 let rendererConfig = {
