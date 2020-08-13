@@ -20,7 +20,19 @@
                     <!-- <el-menu-item index="/v1/h/h">代码走查</el-menu-item> -->
                 </el-menu>
             </div>
-            <div class="header-right fr"></div>
+            <div class="header-right mr-5 fr">
+                <el-dropdown>
+                    <span class="cursor-pointer">
+                        <span>{{ userInfo.realName }}</span>
+                        <i class="el-icon-arrow-down el-icon--right"></i>
+                    </span>
+                    <el-dropdown-menu slot="dropdown">
+                        <el-dropdown-item>个人中心</el-dropdown-item>
+                        <el-dropdown-item>新消息推送</el-dropdown-item>
+                        <el-dropdown-item @click.native="logout">退出登陆</el-dropdown-item>
+                    </el-dropdown-menu>
+                </el-dropdown>
+            </div>
         </div>
         <router-view></router-view>
     </div>
@@ -30,13 +42,16 @@
 export default {
     data() {
         return {
-            activeMenu: "/v1/a/a"
+            activeMenu: "/v1/a/a",
         };
     },
     computed: {
         menus() {
             return this.$store.state.permission.menus;
-        }
+        },
+        userInfo() {
+            return this.$store.state.permission.userInfo
+        },
     },
     created() {
         this.initCurrentMenu();
@@ -47,8 +62,13 @@ export default {
         },
         //跳转到首页
         jumpToHome() {
-            this.$router.push("/v1/a/a");
+            this.$router.push("/v1/apidoc/doc-list");
         },
+        //退出登录
+        logout() {
+            sessionStorage.clear();
+            this.$router.push("/login");
+        }
     }
 };
 </script>
@@ -67,6 +87,12 @@ export default {
         }
         .header-right {
             height: 100%;
+            display: flex;
+            align-items: center;
+            color: $white;
+        }
+        .el-dropdown {
+            color: $white;
         }
     }
 }
