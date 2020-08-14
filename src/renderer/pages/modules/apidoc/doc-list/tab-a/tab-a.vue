@@ -15,7 +15,7 @@
         <div v-loading="loading" :element-loading-text="randomTip()" element-loading-background="rgba(255, 255, 255, 0.9)" class="project-wrap mt-3">
             <div v-for="(item, index) in projectList" :key="index" class="project-list">
                 <div class="project-header">
-                    <div class="title theme-color text-ellipsis">{{ item.projectName }}</div>
+                    <div :title="item.projectName" class="title theme-color text-ellipsis">{{ item.projectName }}</div>
                     <div class="operator">
                         <div title="编辑" @click="handleOpenEditDialog(item)">
                             <i class="el-icon-edit"></i>
