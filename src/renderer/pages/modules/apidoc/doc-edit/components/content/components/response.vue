@@ -184,10 +184,12 @@ export default {
                 this.loading = true;
                 const requestInfo = this.formatRequestParams();
                 const urllibOptions = this.formatUrllibOptions(requestInfo);
+                urllibOptions.timeout = 5000;
                 console.log("请求参数", urllibOptions)
                 urllib.request(requestInfo.url, urllibOptions).then(res => {
                     console.log(res)
                     const response = res.res;
+
                     this.responseData = {};
                     this.responseData.headers = response.headers;
                     this.responseData.rt = response.rt;
@@ -195,7 +197,12 @@ export default {
                     this.responseData.status = response.status;
                     this.responseData.contentType = response.headers["content-type"];
                     this.responseData.cookie = response.headers["set-cookie"];
-                    this.responseData.data = this.formatResponseData(response);
+                    if (response.status === 302 || response.status === 301) {
+                        this.responseData.contentType = "text/redirect"
+                        this.responseData.data = response.headers.location;
+                    } else {
+                        this.responseData.data = this.formatResponseData(response);
+                    }
                     console.log(this.responseData)
                     resolve();
                     this.checkResponseParams();
