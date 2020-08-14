@@ -16,8 +16,7 @@ module.exports = {
   ],
   'rules': {
 	
-    'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
-    'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
+   
 	'indent': [2, 4],//强制为4格缩进
 	'quotes': [2, 'double', { //强制双引号
       'avoidEscape': true,
