@@ -1,4 +1,5 @@
-import { app, BrowserWindow } from 'electron' // eslint-disable-line
+import { app, BrowserWindow, ipcMain  } from 'electron' // eslint-disable-line
+
 
 /**
  * Set `__static` path to static files in production
@@ -20,14 +21,21 @@ function createWindow () {
     mainWindow = new BrowserWindow({
         height: 563,
         useContentSize: true,
-        width: 1000
+        width: 1000,
+        webPreferences: {webSecurity: true}
     })
 
     mainWindow.loadURL(winURL)
-
     mainWindow.on("closed", () => {
         mainWindow = null
     })
+    mainWindow.openDevTools();
+    ipcMain.on("vue-fresh-content", (event, status) => {
+        mainWindow.webContents.reload()
+    })
+    // setInterval(() => {
+    //     mainWindow.webContents.reload()
+    // }, 4000);
 }
 
 app.on("ready", createWindow)

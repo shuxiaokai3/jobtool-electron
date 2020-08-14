@@ -21,6 +21,17 @@
                 </el-menu>
             </div>
             <div class="header-right mr-5 fr">
+                <div class="operation">
+                    <div title="刷新" class="op_item" @click="freshContent">
+                        <span class="el-icon-refresh-right"></span>
+                    </div>
+                    <div title="后退" class="op_item" @click="goBack">
+                        <span class="el-icon-back"></span>
+                    </div>
+                    <div class="op_item" @click="goForward">
+                        <span title="前进" class="el-icon-right"></span>    
+                    </div>                    
+                </div>
                 <el-dropdown>
                     <span class="cursor-pointer">
                         <span>{{ userInfo.realName }}</span>
@@ -39,6 +50,7 @@
 </template>
 
 <script>
+import { ipcRenderer  } from "electron";
 export default {
     data() {
         return {
@@ -68,7 +80,21 @@ export default {
         logout() {
             sessionStorage.clear();
             this.$router.push("/login");
+        },
+        //=====================================页面操作====================================//
+        //刷新页面
+        freshContent() {
+            ipcRenderer.send("vue-fresh-content")
+        },
+        //后退
+        goBack() {
+            this.$router.back()
+        },
+        //前进
+        goForward() {
+            this.$router.forward();
         }
+
     }
 };
 </script>
@@ -90,6 +116,26 @@ export default {
             display: flex;
             align-items: center;
             color: $white;
+            .operation {
+                margin-right: size(10);
+                display: flex;
+                height: 100%;
+                align-items: center;
+                .op_item {
+                    width: size(30);
+                    height: size(30);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    cursor: pointer;
+                    font-size: size(20);
+                    border-radius: 50%;
+                    &:hover {
+                        background: $gray-600;
+                        // color: $theme-color;
+                    }
+                }
+            }
         }
         .el-dropdown {
             color: $white;
