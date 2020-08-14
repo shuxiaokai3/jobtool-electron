@@ -6,7 +6,7 @@ const path = require("path");
 const { dependencies } = require("../package.json");
 const webpack = require("webpack");
 
-const MinifyPlugin = require("babel-minify-webpack-plugin");
+// const MinifyPlugin = require("babel-minify-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
@@ -207,7 +207,7 @@ if (process.env.NODE_ENV === "production") {
     rendererConfig.devtool = "";
 
     rendererConfig.plugins.push(
-        new MinifyPlugin(),
+        // new MinifyPlugin(),
         new CopyWebpackPlugin([
             {
                 from: path.join(__dirname, "../static"),
