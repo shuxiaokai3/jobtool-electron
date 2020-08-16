@@ -64,12 +64,33 @@
             <div class="params-wrap">
                 <s-params-tree :tree-data="request.requestParams" title="请求参数" :ready="ready" :is-form-data="request.requestType === 'formData'" showCheckbox :plain="request.methods === 'get'">
                     <div slot="operation" class="operation d-flex h-100 flex1 pl-3 d-flex a-center">
-                        <div class="op_item" @click.stop="dialogVisible3 = true">值映射</div>
+                        <div class="op_item" @click.stop="dialogVisible3 = true">json转换</div>
+                        <el-dropdown trigger="click" :show-timeout="0" @command="handleSelectPresetParams(e)">
+                            <span class="cursor-pointer hover-theme-color" @click.stop="() => {}">快捷参数</span>
+                            <div class="op_item" slot="dropdown">
+                                <el-dropdown-menu>
+                                    <div class="manage-params d-flex a-center cursor-pointer">
+                                        <span class="ml-1">配置常见参数</span>
+                                        <span slot="reference">
+                                            <i class="el-icon-setting"></i>
+                                        </span>    
+                                        <!-- <el-popover placement="top" trigger="hover" content="配置常见参数" class="ml-auto mr-1">
+                                        </el-popover> -->
+                                    </div>
+                                    <el-dropdown-item command="a">
+                                        <span class="d-flex between">
+                                            <span>xxxx</span>
+                                            <span class="gray-500 text-ellipsis">aaaa</span>
+                                        </span>
+                                    </el-dropdown-item>
+                                </el-dropdown-menu>                        
+                            </div>
+                        </el-dropdown>
                     </div>
                 </s-params-tree>
                 <s-params-tree :tree-data="request.responseParams" title="响应参数">
                     <div slot="operation" class="operation d-flex h-100 flex1 pl-3 d-flex a-center">
-                        <div class="op_item" @click.stop="dialogVisible4 = true">值映射</div>
+                        <div class="op_item" @click.stop="dialogVisible4 = true">json转换</div>
                     </div>
                 </s-params-tree>
                 <s-params-tree :tree-data="request.header" title="请求头" plain :fold="foldHeader" :valid-key="false"></s-params-tree>            
@@ -502,6 +523,9 @@ export default {
         handleConvertJsonToResponseParams(val) {
             this.request.responseParams = val;
         },
+        handleSelectPresetParams(e) {
+            console.log(e)
+        },
         //=====================================其他操作=====================================//
         //检查参数是否完备
         validateParams() {
@@ -659,6 +683,10 @@ export default {
             }
         }
     }
-    
+}
+.manage-params {
+    width: 220px;
+    height: 40px;
+    background: $gray-200;
 }
 </style>
