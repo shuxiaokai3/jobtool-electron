@@ -38,13 +38,13 @@
                         <span v-else class="green el-icon-success"></span>
                         <span class="mx-1 gray-400">|</span>
                     </div>
-                    <div class="flex0">
+                    <!-- <div class="flex0">
                         <span>本地参数&nbsp;</span>
                         <span v-if="currentCondition.localParams === -1" class="gray-600 el-icon-question"></span>
                         <span v-else-if="currentCondition.localParams === 0" class="red el-icon-error"></span>
                         <span v-else class="green el-icon-success"></span>
                         <span class="mx-1 gray-400">|</span>
-                    </div>
+                    </div> -->
                     <div class="flex0" :title="`${currentCondition.responseErrorType}`">
                         <span>返回参数&nbsp;</span>
                         <span v-if="currentCondition.remoteResponse === -1" class="gray-600 el-icon-question"></span>
@@ -204,10 +204,14 @@ export default {
                         this.responseData.data = this.formatResponseData(response);
                     }
                     console.log(this.responseData)
+                    this.currentCondition.connected = 1; //连通
+                    this.currentCondition.status = this.responseData.status;
+                    this.currentCondition.size = this.responseData.size;
                     resolve();
                     this.checkResponseParams();
-                }).catch(function (err) {
+                }).catch(err => {
                     reject(err)
+                    this.currentCondition.connected = 0; //未连通
                 }).finally(() => {
                     this.loading = false;
                 });
