@@ -32,7 +32,7 @@ export default {
             default: ""
         },
         leftWidth: {
-            type: Number,
+            type: [Number, String],
             default: 300
         },
         minLeftWidth: {
@@ -62,11 +62,16 @@ export default {
             this.wrapWidth = this.$refs["curdWrap"].getBoundingClientRect()["width"];
             this.leftDom = this.$refs["leftDom"];
             this.rightDom = this.$refs["rightDom"];
-            this.leftDom.style.width = this.leftDomWidth / this.wrapWidth * 100 + "%";
-            this.rightDom.style.width = (1 - this.leftDomWidth / this.wrapWidth) * 100 + "%";
+            if (typeof this.leftDomWidth === "string") {
+                this.leftDom.style.width = this.leftDomWidth;
+                this.rightDom.style.width = (100 - parseInt(this.leftDomWidth)) + "%";
+            } else {
+                this.leftDom.style.width = this.leftDomWidth / this.wrapWidth * 100 + "%";
+                this.rightDom.style.width = (1 - this.leftDomWidth / this.wrapWidth) * 100 + "%";
+            }
             this.resizeBarDom = this.$refs["resizeBar"];
             document.documentElement.addEventListener("mouseup", (e) => {
-                e.stopPropagation();
+                // e.stopPropagation();
                 this.leftDomWidth = this.leftDom.getBoundingClientRect()["width"]
                 document.documentElement.removeEventListener("mousemove", this.handleResizeMousemove);
             })
@@ -105,13 +110,11 @@ export default {
         handleResizeMousemove(e) {
             e.stopPropagation();
             e.preventDefault();
-            const moveLeft = e.clientX - this.mousedownLeft + this.leftDomWidth;
-
+            const leftDomWidth = (typeof this.leftDomWidth === "string") ? (parseInt(this.leftDomWidth) / 100 * this.wrapWidth)  : this.leftDomWidth
+            const moveLeft = e.clientX - this.mousedownLeft + leftDomWidth;
             if (moveLeft < this.minLeftWidth) {
                 return;
             }
-            // this.leftDom.style.width = moveLeft + "px";
-            console.log(this.leftDomWidth / this.wrapWidth)
             this.leftDom.style.width = moveLeft / this.wrapWidth * 100 + "%";
             this.rightDom.style.width = (1 - moveLeft / this.wrapWidth) * 100 + "%";
         },
