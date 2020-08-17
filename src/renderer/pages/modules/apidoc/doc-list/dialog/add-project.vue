@@ -119,13 +119,14 @@ export default {
                 ...this.formInfo,
                 members: this.selectUserData.map(val => {
                     return {
-                        userId: val._id,
+                        userId: val.userId,
                         permission: val.permission,
                         loginName: val.loginName,
                         realName: val.realName
                     };
                 })
             };
+            console.log(params)
             this.axios.post("/api/project/add_project", params).then(() => {
                 this.handleClose();
                 this.$emit("success");
@@ -140,7 +141,7 @@ export default {
         handleSelectUser(item) {
             this.remoteMembers = [];
             this.remoteQueryName = "";
-            const hasUser = this.selectUserData.find(val => val._id === item._id);
+            const hasUser = this.selectUserData.find(val => val.userId === item.userId);
             if (hasUser) {
                 this.$message.warning("请勿重复添加");
                 return;
