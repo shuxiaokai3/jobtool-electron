@@ -69,7 +69,7 @@ export default {
     computed: {
         labelWidth() { //搜索框文案宽度
             const widgets = this.$slots.default.map(val => {
-                if (!val.componentOptions.propsData.label) {
+                if (!val || !val.componentOptions || !val.componentOptions.propsData || !val.componentOptions.propsData.label) {
                     return 0;
                 } else {
                     return val.componentOptions.propsData.label.length 
