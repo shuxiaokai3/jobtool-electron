@@ -63,21 +63,24 @@
             <!-- 请求参数 -->
             <div class="params-wrap">
                 <s-params-tree :tree-data="request.requestParams" title="请求参数" :ready="ready" :is-form-data="request.requestType === 'formData'" showCheckbox :plain="request.methods === 'get'">
-                    <div slot="operation" class="operation d-flex h-100 flex1 pl-3 d-flex a-center">
+                    <div slot="operation" class="operation d-flex h-100 flex1 pl-3 a-center">
                         <div class="op_item" @click.stop="dialogVisible3 = true">json转换</div>
                         <el-dropdown trigger="click" :show-timeout="0" @command="handleSelectPresetParams(e)">
-                            <span class="cursor-pointer hover-theme-color" @click.stop="() => {}">快捷参数</span>
+                            <span class="cursor-pointer hover-theme-color" @click.stop.prevent="handleGetRequestPresetParamsEnum">快捷参数</span>
                             <div class="op_item" slot="dropdown">
                                 <el-dropdown-menu>
-                                    <div class="manage-params d-flex a-center cursor-pointer">
-                                        <span class="ml-1">配置常见参数</span>
-                                        <span slot="reference">
-                                            <i class="el-icon-setting"></i>
-                                        </span>    
-                                        <!-- <el-popover placement="top" trigger="hover" content="配置常见参数" class="ml-auto mr-1">
-                                        </el-popover> -->
+                                    <div class="manage-params">
+                                        <s-collapse title="常用">
+                                            <span class="params-item">参数一参数一参数一</span>
+                                            <span class="params-item">参数二</span>
+                                            <span class="params-item">参数三</span>
+                                        </s-collapse>
+                                        <div class="manage-ipt">
+                                            <input placeholder="输入关键字过滤" size="mini"></input>
+                                            <span class="theme-color cursor-pointer px-2" @click="dialogVisible5 = true,presetParamsType = 'request'">新增参数</span>
+                                        </div>
                                     </div>
-                                    <el-dropdown-item command="a">
+                                    <el-dropdown-item v-for="(item, index) in 10" :key="index" command="a">
                                         <span class="d-flex between">
                                             <span>xxxx</span>
                                             <span class="gray-500 text-ellipsis">aaaa</span>
@@ -103,6 +106,7 @@
         <s-variable-manage v-if="dialogVisible2" :visible.sync="dialogVisible2" @change="handleVariableChange"></s-variable-manage>
         <s-json-schema :visible.sync="dialogVisible3" plain @success="handleConvertJsonToRequestParams"></s-json-schema>
         <s-json-schema :visible.sync="dialogVisible4" @success="handleConvertJsonToResponseParams"></s-json-schema>
+        <s-preset-params :visible.sync="dialogVisible5" :type="presetParamsType"></s-preset-params>
     </div>
     <div v-else></div>
 </template>
@@ -114,6 +118,7 @@ import response from "./components/response"
 import hostManage from "./dialog/host-manage"
 import variableManage from "./dialog/variable-manage"
 import jsonSchema from "./dialog/json-schema"
+import presetParams from "./dialog/preset-params"
 import { dfsForest, findParentNode } from "@/lib/utils"
 import uuid from "uuid/v4"
 import qs from "qs"
@@ -125,6 +130,7 @@ export default {
         "s-variable-manage": variableManage,
         "s-response": response,
         "s-json-schema": jsonSchema,
+        "s-preset-params": presetParams,
     },
     data() {
         return {
@@ -174,6 +180,11 @@ export default {
                 _variableChange: true, //----------hack强制触发request数据发生改变
             },
             origin: location.origin,
+            //=====================================快捷参数====================================//
+            presetRequestParamsList: [], //------请求参数预设值
+            presetResponseParamsList: [], //-----返回参数预设值
+            presetParamsType: "", //-------------
+            selectedPresetParams: "",
             //=====================================域名相关====================================//
             hostEnum: [], //---------------------域名列表
             //=====================================其他参数====================================//
@@ -188,6 +199,7 @@ export default {
             dialogVisible2: false, //------------全局变量管理弹窗
             dialogVisible3: false, //------------将json格式的请求参数转换为标准请求参数弹窗
             dialogVisible4: false, //------------将json格式的返回参数转换为标准返回参数弹窗
+            dialogVisible5: true, //------------快捷参数维护弹窗
             ready: false, //---------------------是否完成第一次数据请求
         };
     },
@@ -523,6 +535,18 @@ export default {
         handleConvertJsonToResponseParams(val) {
             this.request.responseParams = val;
         },
+        //获取请求预设参数枚举
+        handleGetRequestPresetParamsEnum() {
+            const params = {
+                presetParamsType: "request",
+                projectId: this.$route.query.id,
+            };
+            this.axios.get("/api/project/doc_preset_params_enum", { params }).then(res => {
+                this.presetRequestParamsList = res.data;
+            }).catch(err => {
+                console.error(err);
+            });
+        },
         handleSelectPresetParams(e) {
             console.log(e)
         },
@@ -685,8 +709,44 @@ export default {
     }
 }
 .manage-params {
-    width: 220px;
-    height: 40px;
-    background: $gray-200;
+    width: size(350);
+    position: sticky;
+    top: 0;
+    box-shadow: $box-shadow-sm;
+    background: $white;
+    .manage-config {
+        padding: size(0) size(10);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: size(30);
+        background: $theme-color;        
+    }
+    .manage-ipt {
+        display: flex;
+        align-items: center;
+        border-top: 1px dashed $gray-400;
+        margin-top: size(10);
+        input {
+            flex: 1;
+            height: size(30);
+            line-height: size(30);
+            border: none;
+            text-indent: 1em;
+            border-right: 1px solid $gray-400;
+        }       
+    }
+    .params-item {
+        display: inline-block;
+        padding: size(2) size(10);
+        cursor: pointer;
+        background: $gray-200;
+        margin-right: size(5);
+        &:hover {
+            background: $gray-300;
+        }
+
+    }
 }
+
 </style>
