@@ -42,48 +42,57 @@ export default {
     methods: {
         handleExport() {
             const copyData = JSON.parse(JSON.stringify(this.data));
+            console.log(copyData)
             const hasOwn = Object.hasOwnProperty;
             const result = [];
             const foo = (obj, result) => {
-                for(let i in obj) {
-                    if (!hasOwn.call(obj, i)) continue;
-                    const valueType = this.getType(obj[i]);
-                    if (valueType === "string" || valueType === "number" || valueType === "boolean") {
-                        result.push({
-                            key: i,
-                            type: valueType,
-                            value: obj[i].toString(),
-                        })
-                    } else if (valueType === "object") {
-                        const current = {
-                            key: i,
-                            type: valueType,
-                            value: "",
-                            children: []
-                        }
-                        result.push(current)
-                        foo(obj[i], current.children);
-                    } else if (valueType === "array") {
-                        const current = {
-                            key: i,
-                            type: valueType,
-                            value: "",
-                            children: []
-                        }
-                        result.push(current);
-                        if (this.getType(obj[i][0]) === "object") {
-                            current.children.push({
-                                key: "",
-                                type: "object",
+                if (this.getType(obj) === "object") {
+                    for(let i in obj) {
+                        if (!hasOwn.call(obj, i)) continue;
+                        const valueType = this.getType(obj[i]);
+                        if (valueType === "string" || valueType === "number" || valueType === "boolean") {
+                            result.push({
+                                key: i,
+                                type: valueType,
+                                value: obj[i].toString(),
+                            })
+                        } else if (valueType === "object") {
+                            const current = {
+                                key: i,
+                                type: valueType,
                                 value: "",
                                 children: []
-                            })
-                            foo(obj[i][0], current.children[0].children);
-                        } else {
-                            foo(obj[i][0], current.children);
+                            }
+                            result.push(current)
+                            foo(obj[i], current.children);
+                        } else if (valueType === "array") {
+                            const current = {
+                                key: i,
+                                type: valueType,
+                                value: "",
+                                children: []
+                            }
+                            result.push(current);
+                            if (this.getType(obj[i][0]) === "object") {
+                                current.children.push({
+                                    key: "",
+                                    type: "object",
+                                    value: "",
+                                    children: []
+                                })
+                                foo(obj[i][0], current.children[0].children);
+                            } else {
+                                foo(obj[i][0], current.children);
+                            }
                         }
-                        
                     }
+                } else {
+                    const valueType = this.getType(obj);
+                    result.push({
+                        key: "",
+                        type: valueType,
+                        value: obj,
+                    })
                 }
             }
             foo(copyData, result);
