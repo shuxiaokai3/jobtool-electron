@@ -16,6 +16,12 @@
                         <span v-else>{{ scope.row.name }}</span>
                     </template>
                 </el-table-column>
+                <el-table-column label="参数类型" prop="presetParamsType" align="center">
+                    <template slot-scope="scope">
+                        <el-tag v-if="scope.row.presetParamsType === 'request'" size="mini" type="success">请求参数</el-tag>
+                        <el-tag v-if="scope.row.presetParamsType === 'response'" size="mini" type="primary">返回参数</el-tag>
+                    </template>
+                </el-table-column>
                 <el-table-column label="操作" align="center">
                     <template slot-scope="scope">
                         <el-button type="text" size="mini" @click="handleChangeOpToEdit(scope.row)">编辑</el-button>
@@ -111,6 +117,7 @@ export default {
                     this.loading2 = true;
                     this.axios.post("/api/project/doc_preset_params", params).then(res => {
                         this.getData();
+                        this.$emit("success")
                     }).catch(err => {
                         console.error(err);
                     }).finally(() => {
@@ -132,12 +139,31 @@ export default {
                     this.loading2 = true;
                     this.axios.put("/api/project/doc_preset_params", params).then(res => {
                         this.getData();
+                        this.$emit("success")
                     }).catch(err => {
                         console.error(err);
                     }).finally(() => {
                         this.loading2 = false;
                     });
                 } 
+            });
+        },
+        //删除
+        handleDelete(_id) {
+            this.$confirm("此操作将永久删除该数据, 是否继续?", "提示", {
+                confirmButtonText: "确定",
+                cancelButtonText: "取消",
+                type: "warning"
+            }).then(() => {
+                this.axios.delete("/api/project/doc_preset_params", { data: { ids: [_id] }}).then(res => {
+                    this.$message.success("删除成功");
+                    this.getData();
+                    this.$emit("success")
+                }).catch(err => {
+                    this.$errorThrow(err, this);
+                });  
+            }).catch(() => {
+                    
             });
         },
         //=====================================操作====================================//
@@ -157,23 +183,6 @@ export default {
             this.operationType = "add";
             this.formInfo.name = "";
             this.formInfo.presetParams = [this.generateParams()];
-        },
-        //删除
-        handleDelete(_id) {
-            this.$confirm("此操作将永久删除该数据, 是否继续?", "提示", {
-                confirmButtonText: "确定",
-                cancelButtonText: "取消",
-                type: "warning"
-            }).then(() => {
-                this.axios.delete("/api/project/doc_preset_params", { data: { ids: [_id] }}).then(res => {
-                    this.$message.success("删除成功");
-                    this.getData();
-                }).catch(err => {
-                    this.$errorThrow(err, this);
-                });  
-            }).catch(() => {
-                    
-            });
         },
         //=====================================其他操作====================================//
         generateParams(type = "string") {
