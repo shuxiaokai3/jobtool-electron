@@ -84,8 +84,8 @@ export default {
         border-radius: $border-radius-sm;
         box-shadow: $box-shadow-sm;
         z-index: $zIndex-contextmenu;
-        animation: fade .2s;
-        @keyframes fade {
+        animation: ctx-fade .2s;
+        @keyframes ctx-fade {
             from {
                 transform: scale(0.8);
                 opacity: 0;
