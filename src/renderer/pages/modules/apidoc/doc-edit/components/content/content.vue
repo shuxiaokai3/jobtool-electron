@@ -62,28 +62,24 @@
             </div>
             <!-- 请求参数 -->
             <div class="params-wrap">
-                <s-params-tree :tree-data="request.requestParams" title="请求参数" :ready="ready" :is-form-data="request.requestType === 'formData'" showCheckbox :plain="request.methods === 'get'">
+                <s-params-tree ref="reqTree" :tree-data="request.requestParams" title="请求参数" :ready="ready" :is-form-data="request.requestType === 'formData'" showCheckbox :plain="request.methods === 'get'">
                     <div slot="operation" class="operation d-flex h-100 flex1 pl-3 a-center">
                         <div class="op_item" @click.stop="dialogVisible3 = true">json转换</div>
-                        <el-dropdown trigger="click" :show-timeout="0" @command="handleSelectPresetParams(e)">
-                            <span class="cursor-pointer hover-theme-color" @click.stop.prevent="handleGetRequestPresetParamsEnum">快捷参数</span>
+                        <el-dropdown trigger="click" :show-timeout="0" @command="handleSelectRequestPresetParams">
+                            <span class="cursor-pointer hover-theme-color" @click.stop.prevent="freshLocalUsefulParams">快捷参数</span>
                             <div class="op_item" slot="dropdown">
                                 <el-dropdown-menu>
                                     <div class="manage-params">
-                                        <s-collapse title="常用">
-                                            <span class="params-item">参数一参数一参数一</span>
-                                            <span class="params-item">参数二</span>
-                                            <span class="params-item">参数三</span>
-                                        </s-collapse>
-                                        <div class="manage-ipt">
-                                            <input placeholder="输入关键字过滤" size="mini"></input>
-                                            <span class="theme-color cursor-pointer px-2" @click="dialogVisible5 = true,presetParamsType = 'request'">新增参数</span>
-                                        </div>
+                                        <div class="cyan mb-2">常用</div>
+                                        <template v-for="(item, index) in usefulPresetRequestParamsList.slice(0, 3)">
+                                            <span class="params-item">{{ item.name }}</span>
+                                        </template>
+                                        <span class="theme-color cursor-pointer ml-2" @click="dialogVisible5 = true,presetParamsType = 'request'">新增</span>
+                                        <hr>
                                     </div>
-                                    <el-dropdown-item v-for="(item, index) in 10" :key="index" command="a">
+                                    <el-dropdown-item v-for="(item, index) in presetRequestParamsList.slice(0, 3)" :key="index" :command="item">
                                         <span class="d-flex between">
-                                            <span>xxxx</span>
-                                            <span class="gray-500 text-ellipsis">aaaa</span>
+                                            <span>{{ item.name }}</span>
                                         </span>
                                     </el-dropdown-item>
                                 </el-dropdown-menu>                        
@@ -91,9 +87,28 @@
                         </el-dropdown>
                     </div>
                 </s-params-tree>
-                <s-params-tree :tree-data="request.responseParams" title="响应参数">
+                <s-params-tree ref="resTree" :tree-data="request.responseParams" title="响应参数">
                     <div slot="operation" class="operation d-flex h-100 flex1 pl-3 d-flex a-center">
                         <div class="op_item" @click.stop="dialogVisible4 = true">json转换</div>
+                        <el-dropdown trigger="click" :show-timeout="0" @command="handleSelectResponsePresetParams">
+                            <span class="cursor-pointer hover-theme-color" @click.stop.prevent="freshLocalUsefulParams">快捷参数</span>
+                            <div class="op_item" slot="dropdown">
+                                <el-dropdown-menu>
+                                    <div class="manage-params">
+                                        <div class="cyan mb-2">常用</div>
+                                        <span class="params-item">参数二</span>
+                                        <span class="params-item">参数二</span>
+                                        <span class="theme-color cursor-pointer ml-2" @click="dialogVisible5 = true,presetParamsType = 'response'">新增</span>
+                                        <hr>
+                                    </div>
+                                    <el-dropdown-item v-for="(item, index) in presetResponseParamsList" :key="index" :command="item">
+                                        <span class="d-flex between">
+                                            <span>{{ item.name }}</span>
+                                        </span>
+                                    </el-dropdown-item>
+                                </el-dropdown-menu>                        
+                            </div>
+                        </el-dropdown>
                     </div>
                 </s-params-tree>
                 <s-params-tree :tree-data="request.header" title="请求头" plain :fold="foldHeader" :valid-key="false"></s-params-tree>            
@@ -106,7 +121,7 @@
         <s-variable-manage v-if="dialogVisible2" :visible.sync="dialogVisible2" @change="handleVariableChange"></s-variable-manage>
         <s-json-schema :visible.sync="dialogVisible3" plain @success="handleConvertJsonToRequestParams"></s-json-schema>
         <s-json-schema :visible.sync="dialogVisible4" @success="handleConvertJsonToResponseParams"></s-json-schema>
-        <s-preset-params :visible.sync="dialogVisible5" :type="presetParamsType"></s-preset-params>
+        <s-preset-params :visible.sync="dialogVisible5" :type="presetParamsType" @success="getPresetEnum"></s-preset-params>
     </div>
     <div v-else></div>
 </template>
@@ -182,7 +197,9 @@ export default {
             origin: location.origin,
             //=====================================快捷参数====================================//
             presetRequestParamsList: [], //------请求参数预设值
+            usefulPresetRequestParamsList: [], //常用请求参数预设值
             presetResponseParamsList: [], //-----返回参数预设值
+            usefulPresetResponseParamsList: [], //常用返回参数预设值
             presetParamsType: "", //-------------
             selectedPresetParams: "",
             //=====================================域名相关====================================//
@@ -199,7 +216,7 @@ export default {
             dialogVisible2: false, //------------全局变量管理弹窗
             dialogVisible3: false, //------------将json格式的请求参数转换为标准请求参数弹窗
             dialogVisible4: false, //------------将json格式的返回参数转换为标准返回参数弹窗
-            dialogVisible5: true, //------------快捷参数维护弹窗
+            dialogVisible5: false, //------------快捷参数维护弹窗
             ready: false, //---------------------是否完成第一次数据请求
         };
     },
@@ -230,9 +247,21 @@ export default {
     },
     mounted() {
         this.getHostEnum(); //获取host枚举值
+        this.getPresetEnum(); //获取快捷参数枚举值
     },
     methods: {
         //=====================================获取数据====================================//
+        getPresetEnum() {
+            const params = {
+                projectId: this.$route.query.id,
+            };
+            this.axios.get("/api/project/doc_preset_params_enum", { params }).then(res => {
+                this.presetRequestParamsList = res.data.filter(val => val.presetParamsType === "request").map(val => ({ name: val.name, items: val.items, id: val._id }));
+                this.presetResponseParamsList = res.data.filter(val => val.presetParamsType === "response").map(val => ({ name: val.name, items: val.items, id: val._id }));
+            }).catch(err => {
+                console.error(err);
+            });
+        },
         //获取文档详情
         getDocDetail() {
             if (!this.currentSelectDoc || !this.currentSelectDoc._id) { //没有id不请求数据
@@ -535,20 +564,74 @@ export default {
         handleConvertJsonToResponseParams(val) {
             this.request.responseParams = val;
         },
-        //获取请求预设参数枚举
-        handleGetRequestPresetParamsEnum() {
-            const params = {
-                presetParamsType: "request",
-                projectId: this.$route.query.id,
-            };
-            this.axios.get("/api/project/doc_preset_params_enum", { params }).then(res => {
-                this.presetRequestParamsList = res.data;
-            }).catch(err => {
-                console.error(err);
-            });
+        //选择快捷请求参数
+        handleSelectRequestPresetParams(item) {
+            let currentLocalData = localStorage.getItem("pages/presetParams/request") || "[]";
+            currentLocalData = JSON.parse(currentLocalData);
+            const findDoc = currentLocalData.find(val => val.id === item.id)
+            if (!findDoc) {
+                currentLocalData.push(item)
+            } else {
+                if (!findDoc.selectNum) {
+                    findDoc.selectNum = 0;
+                }
+                findDoc.selectNum ++;                
+            }
+            localStorage.setItem("pages/presetParams/request", JSON.stringify(currentLocalData))
+            const preParams = item.items.filter(val => val.key !== "" && val.value !== "");
+            const reqParams = this.request.requestParams;
+            for(let i = 0, len = preParams.length; i < len; i++) {
+                const element = preParams[i];
+                if (element.key === "" || element.value === "") {
+                    continue;
+                }
+                if (!reqParams.find(val => val.key === element.key)) {
+                    element.id = element._id;
+                    reqParams.unshift(element);
+                    setTimeout(() => { //hack
+                        this.$refs["reqTree"].$refs["tree"].setChecked(element.id, true)
+                    })
+                }
+            }
         },
-        handleSelectPresetParams(e) {
-            console.log(e)
+        //选择快捷返回参数
+        handleSelectResponsePresetParams(item) {
+            let currentLocalData = localStorage.getItem("pages/presetParams/response") || "[]";
+            currentLocalData = JSON.parse(currentLocalData);
+            const findDoc = currentLocalData.find(val => val.id === item.id)
+            if (!findDoc) {
+                currentLocalData.push(item)
+            } else {
+                if (!findDoc.selectNum) {
+                    findDoc.selectNum = 0;
+                }
+                findDoc.selectNum ++;                
+            }
+            localStorage.setItem("pages/presetParams/request", JSON.stringify(currentLocalData))
+            const preParams = item.items.filter(val => val.key !== "" && val.value !== "");
+            const reqParams = this.request.responseParams;
+            for(let i = 0, len = preParams.length; i < len; i++) {
+                const element = preParams[i];
+                if (element.key === "" || element.value === "") {
+                    continue;
+                }
+                if (!reqParams.find(val => val.key === element.key)) {
+                    element.id = element._id;
+                    reqParams.unshift(element);
+                    setTimeout(() => { //hack
+                        this.$refs["resTree"].$refs["tree"].setChecked(element.id, true)
+                    })
+                }
+            }
+        },
+        //刷新本地快捷参数
+        freshLocalUsefulParams() {
+            let localReqParams = localStorage.getItem("pages/presetParams/request") || "[]";
+            localReqParams = JSON.parse(localReqParams).sort((a, b) => a.selectNum < b.selectNum);
+            let localResParams = localStorage.getItem("pages/presetParams/request") || "[]";
+            localResParams = JSON.parse(localResParams).sort((a, b) => a.selectNum < b.selectNum);
+            this.usefulPresetResponseParamsList = localReqParams;
+            this.usefulPresetRequestParamsList = localResParams;
         },
         //=====================================其他操作=====================================//
         //检查参数是否完备
@@ -580,7 +663,7 @@ export default {
                         this.$set(data, "_keyError", true);
                         isValidRequest = false;
                     }       
-                    console.log(data.value)
+                    // console.log(data.value)
                     if (!isComplex && data.value.toString().trim() === "") {
                         this.$set(data, "_valueError", true);
                         isValidRequest = false;
@@ -712,8 +795,9 @@ export default {
     width: size(350);
     position: sticky;
     top: 0;
-    box-shadow: $box-shadow-sm;
+    // box-shadow: $box-shadow-sm;
     background: $white;
+    padding: size(10) size(15) 0;
     .manage-config {
         padding: size(0) size(10);
         display: flex;
@@ -741,7 +825,7 @@ export default {
         padding: size(2) size(10);
         cursor: pointer;
         background: $gray-200;
-        margin-right: size(5);
+        margin-left: size(10);
         &:hover {
             background: $gray-300;
         }
