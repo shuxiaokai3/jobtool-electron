@@ -10,8 +10,8 @@
             class="widget-card" 
             :style="{ width: width }"
     >
-        <header v-if="$slots.operation || title" :class="{collapse: collapse}" @click="showContent = !showContent">
-            <div class="d-flex flex0 a-center">
+        <header v-if="$slots.operation || title" :class="{collapse: collapse}">
+            <div class="tail d-flex flex0 a-center" @click="showContent = !showContent">
                 <span v-if="!showContent" class="el-icon-caret-right"></span>
                 <span v-else class="el-icon-caret-bottom"></span>
                 <div class="ml-2 title" :title="title" :style="{ color: titleColor }">{{ title }}</div>
@@ -94,7 +94,14 @@ export default {
         align-items: center;
         flex: 0 0 size(40);
         height: size(40);
-        padding: 0 size(20);
+        // padding: 0 size(20);
+        .tail {
+            padding-left: size(20);
+            cursor: pointer;
+            &:hover {
+                background: $gray-300;
+            }            
+        }
         .title {
             max-width: 80%;
             overflow: hidden;
