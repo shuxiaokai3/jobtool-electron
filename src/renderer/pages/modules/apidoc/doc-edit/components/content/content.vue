@@ -233,6 +233,9 @@ export default {
         currentCondition() { //预发布满足提交的条件
             return this.$store.state.apidocRules.currentCondition
         },
+        keyWhiteList() {
+            return this.$store.state.apidocRules.keyWhiteList
+        }
     },
     watch: {
         currentSelectDoc: {
@@ -645,10 +648,10 @@ export default {
             const projectId = this.$route.query.id;
             let localReqParams = localStorage.getItem("pages/presetParams/request") || "{}";
             localReqParams = JSON.parse(localReqParams)[projectId] || [];
-            localReqParams = JSON.parse(localReqParams).sort((a, b) => a.selectNum < b.selectNum);
+            localReqParams = localReqParams.sort((a, b) => a.selectNum < b.selectNum);
             let localResParams = localStorage.getItem("pages/presetParams/response") || "{}";
             localResParams = JSON.parse(localResParams)[projectId] || [];
-            localResParams = JSON.parse(localResParams).sort((a, b) => a.selectNum < b.selectNum);
+            localResParams = localReqParams.sort((a, b) => a.selectNum < b.selectNum);
             this.usefulPresetResponseParamsList = localResParams;
             this.usefulPresetRequestParamsList = localReqParams;
         },
@@ -696,7 +699,7 @@ export default {
                     }
                     sameDoc._selectNum ++;                
                 }
-                localStorage.setItem("pages/presetParams/request", JSON.stringify(currentLocalRequestMindParams))
+                localStorage.setItem("pages/mindParams/request", JSON.stringify(currentLocalRequestMindParams))
             }
             for (let i = 0; i < mindResponseParams.length; i++ ) {
                 const ele = mindResponseParams[i];
@@ -709,16 +712,18 @@ export default {
                     }
                     sameDoc._selectNum ++;                
                 }
-                localStorage.setItem("pages/presetParams/response", JSON.stringify(currentLocalResponseMindParams))
+                localStorage.setItem("pages/mindParams/response", JSON.stringify(currentLocalResponseMindParams))
             }
-            const mindParamsList = [...mindRequestParams, ...mindResponseParams]
-            console.log(mindRequestParams, mindResponseParams)
+            const mindParamsList = [...mindRequestParams, ...mindResponseParams];
+            mindParamsList.forEach(val => {
+                val._projectId = this.$route.query.id
+            })
+            // console.log(mindRequestParams, mindResponseParams)
             this.axios.post("/api/project/doc_params_mind", { mindParamsList }).then(res => {
                 
             }).catch(err => {
                 console.error(err);
             });
-
         },
         //=====================================其他操作=====================================//
         //检查参数是否完备
@@ -741,7 +746,7 @@ export default {
                     }
                     const p = findParentNode(data.id, this.request.responseParams);
                     const isParentArray = (p && p.type === "array");
-                    if (data.key === "_id") { //白名单
+                    if (this.keyWhiteList.includes(data.key)) { //白名单
                         this.$set(data, "_keyError", false)
                     } else if (!isParentArray && data.key.trim() === "") { //非空校验
                         this.$set(data, "_keyError", true);
@@ -773,7 +778,7 @@ export default {
                     }
                     const p = findParentNode(data.id, this.request.requestParams);
                     const isParentArray = (p && p.type === "array");
-                    if (data.key === "_id") { //白名单
+                    if (this.keyWhiteList.includes(data.key)) { //白名单
                         this.$set(data, "_keyError", false)
                     } else if (!isParentArray && data.key.trim() === "") { //非空校验
                         this.$set(data, "_keyError", true);
@@ -804,7 +809,7 @@ export default {
                     }
                     const p = findParentNode(data.id, this.request.header);
                     const isParentArray = (p && p.type === "array");
-                    if (data.key === "_id") { //白名单
+                    if (this.keyWhiteList.includes(data.key)) { //白名单
                         this.$set(data, "_keyError", false)
                     } else if (!isParentArray && data.key.trim() === "") { //非空校验
                         this.$set(data, "_keyError", true);

@@ -174,6 +174,9 @@ export default {
             } else {
                 return ""
             }
+        },
+        keyWhiteList() {
+            return this.$store.state.apidocRules.keyWhiteList
         }
     },
     watch: {
@@ -315,7 +318,7 @@ export default {
                 return;
             }
             if (nodeIndex !== parentData.length - 1) { //只要不是最后一个值都需要做数据校验 
-                if (data.key === "_id") { //白名单
+                if (this.keyWhiteList.includes(data.key)) { //白名单
                     this.$set(data, "_keyError", false)
                 } else if (data.key.trim() === "") { //非空校验
                     this.$set(data, "_keyError", true)

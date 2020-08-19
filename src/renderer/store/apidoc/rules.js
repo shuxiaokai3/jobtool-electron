@@ -9,7 +9,7 @@
 export default {
     namespaced: true,
     state: {
-        keyWhiteList: ["_id"], //请求参数key白名单
+        keyWhiteList: ["_id", "__v"], //请求参数key白名单
         allCondition: {
 
         },
