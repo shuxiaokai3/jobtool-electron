@@ -5,7 +5,7 @@
     备注：xxxx
 */
 <template>
-    <div v-if="tabs && tabs.length > 0" class="edit-content d-flex">
+    <div v-if="tabs && tabs.length > 0" class="edit-content d-flex" tabindex="0">
         <div v-loading="loading2" :element-loading-text="randomTip()" element-loading-background="rgba(255, 255, 255, 0.9)" class="border-right-teal w-65">
             <!-- 基本配置 -->
             <div class="request mb-2">
@@ -30,7 +30,7 @@
                                 placeholder="只需要输入接口地址，前面不需要加域名，加了会被忽略"
                                 size="small"
                                 @blur="checkUrlRule"
-                                @keyup.enter.native="checkUrlRule"
+                                @keyup.enter.native.stop="checkUrlRule"
                         >
                             <div slot="prepend" class="request-input">
                                 <el-select v-model="request.methods" @change="handleChangeRequestMethods">
@@ -78,8 +78,9 @@
                                         <hr>
                                     </div>
                                     <el-dropdown-item v-for="(item, index) in presetRequestParamsList.slice(0, 3)" :key="index" :command="item">
-                                        <span class="d-flex between">
+                                        <span class="d-flex j-between">
                                             <span>{{ item.name }}</span>
+                                            <span class="gray-400">{{ item.creatorName }}</span>
                                         </span>
                                     </el-dropdown-item>
                                 </el-dropdown-menu>                        
@@ -96,14 +97,16 @@
                                 <el-dropdown-menu>
                                     <div class="manage-params">
                                         <div class="cyan mb-2">常用</div>
-                                        <span class="params-item">参数二</span>
-                                        <span class="params-item">参数二</span>
-                                        <span class="theme-color cursor-pointer ml-2" @click="dialogVisible5 = true,presetParamsType = 'response'">新增</span>
+                                        <template v-for="(item, index) in usefulPresetResponseParamsList.slice(0, 3)">
+                                            <span class="params-item">{{ item.name }}</span>
+                                        </template>
+                                        <span class="theme-color cursor-pointer ml-2" @click="dialogVisible5 = true,presetParamsType = 'request'">新增</span>
                                         <hr>
                                     </div>
                                     <el-dropdown-item v-for="(item, index) in presetResponseParamsList" :key="index" :command="item">
-                                        <span class="d-flex between">
+                                        <span class="d-flex j-between">
                                             <span>{{ item.name }}</span>
+                                            <span class="gray-400">{{ item.creatorName }}</span>
                                         </span>
                                     </el-dropdown-item>
                                 </el-dropdown-menu>                        
@@ -248,6 +251,13 @@ export default {
     mounted() {
         this.getHostEnum(); //获取host枚举值
         this.getPresetEnum(); //获取快捷参数枚举值
+        window.addEventListener("keydown", (e) => {
+            if (this.tabs && this.tabs.length > 0 && e.ctrlKey && e.key === "s" && this.loading === false) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.saveRequest()
+            }
+        })
     },
     methods: {
         //=====================================获取数据====================================//
@@ -256,8 +266,8 @@ export default {
                 projectId: this.$route.query.id,
             };
             this.axios.get("/api/project/doc_preset_params_enum", { params }).then(res => {
-                this.presetRequestParamsList = res.data.filter(val => val.presetParamsType === "request").map(val => ({ name: val.name, items: val.items, id: val._id }));
-                this.presetResponseParamsList = res.data.filter(val => val.presetParamsType === "response").map(val => ({ name: val.name, items: val.items, id: val._id }));
+                this.presetRequestParamsList = res.data.filter(val => val.presetParamsType === "request");
+                this.presetResponseParamsList = res.data.filter(val => val.presetParamsType === "response");
             }).catch(err => {
                 console.error(err);
             });
@@ -497,6 +507,7 @@ export default {
                         description: this.request.description, 
                     }
                 };
+                this.saveMindParams(); //保存快捷联想参数
                 this.loading = true;
                 this.axios.post("/api/project/fill_doc", params).then(() => {
                     this.$store.commit("changeTabInfo", {
@@ -517,45 +528,50 @@ export default {
             }
         },
         publishRequest() {
-            this.loading4 = true;
-            this.sendRequest().then(res => {
-                this.$store.commit("apidocRules/changeCurrentCondition", {
-                    connected: 1, 
-                    status: res.status, 
-                    size: res.size,
-                    localParams: 1, 
-                    resType: res.type, 
-                });
-                const r = this.currentCondition;
-                if (r.connected === 1 && r.status >= 200 && r.status < 300 && r.size < 10 && r.localParams === 1 && r.remoteResponse === 1) {
-                    this.axios.put("/api/project/publish_doc", { _id: this.currentSelectDoc._id }).then(() => {
-                        this.$message.success("发布成功")
-                    }).catch(err => {
-                        this.$errorThrow(err, this);
-                    }).finally(() => {
-                        this.loading4 = false;
+            const validParams = this.validateParams();
+            if (!validParams) {
+                this.$message.error("参数校验错误");
+            } else {
+                this.loading4 = true;
+                this.$refs["response"].sendRequest().then(res => {
+                    this.$store.commit("apidocRules/changeCurrentCondition", {
+                        connected: 1, 
+                        status: res.status, 
+                        size: res.size,
+                        localParams: 1, 
+                        resType: res.resType, 
                     });
-                } else {
-                    this.$confirm("接口未通过验证，无法提交", "提示", {
-                        confirmButtonText: "确定",
-                        cancelButtonText: "取消",
-                        type: "warning"
-                    }).then(() => {
-                    
-                    }).catch(err => {
-                        if (err === "cancel" || err === "close") {
-                            return;
-                        }
-                        this.$errorThrow(err, this);
-                    });
-                }
-            }).catch(() => {
-                this.$store.commit("apidocRules/changeCurrentCondition", {
-                    localParams: 0, 
-                })
-            }).finally(() => {
-                this.loading4 = false;
-            })
+                    const r = this.currentCondition;
+                    if (r.connected === 1 && r.status >= 200 && r.status < 300 && r.size < 10 && r.localParams === 1 && r.remoteResponse === 1) {
+                        this.axios.put("/api/project/publish_doc", { _id: this.currentSelectDoc._id }).then(() => {
+                            this.$message.success("发布成功")
+                        }).catch(err => {
+                            this.$errorThrow(err, this);
+                        }).finally(() => {
+                            this.loading4 = false;
+                        });
+                    } else {
+                        this.$confirm("接口未通过验证，无法提交", "提示", {
+                            confirmButtonText: "确定",
+                            cancelButtonText: "取消",
+                            type: "warning"
+                        }).then(() => {
+                        
+                        }).catch(err => {
+                            if (err === "cancel" || err === "close") {
+                                return;
+                            }
+                            this.$errorThrow(err, this);
+                        });
+                    }
+                }).catch(() => {
+                    this.$store.commit("apidocRules/changeCurrentCondition", {
+                        localParams: 0, 
+                    })
+                }).finally(() => {
+                    this.loading4 = false;
+                })                
+            }  
         },
         //=====================================快捷操作====================================//
         handleConvertJsonToRequestParams(val) {
@@ -568,7 +584,7 @@ export default {
         handleSelectRequestPresetParams(item) {
             let currentLocalData = localStorage.getItem("pages/presetParams/request") || "[]";
             currentLocalData = JSON.parse(currentLocalData);
-            const findDoc = currentLocalData.find(val => val.id === item.id)
+            const findDoc = currentLocalData.find(val => val._id === item._id)
             if (!findDoc) {
                 currentLocalData.push(item)
             } else {
@@ -598,7 +614,7 @@ export default {
         handleSelectResponsePresetParams(item) {
             let currentLocalData = localStorage.getItem("pages/presetParams/response") || "[]";
             currentLocalData = JSON.parse(currentLocalData);
-            const findDoc = currentLocalData.find(val => val.id === item.id)
+            const findDoc = currentLocalData.find(val => val._id === item._id)
             if (!findDoc) {
                 currentLocalData.push(item)
             } else {
@@ -607,7 +623,7 @@ export default {
                 }
                 findDoc.selectNum ++;                
             }
-            localStorage.setItem("pages/presetParams/request", JSON.stringify(currentLocalData))
+            localStorage.setItem("pages/presetParams/response", JSON.stringify(currentLocalData))
             const preParams = item.items.filter(val => val.key !== "" && val.value !== "");
             const reqParams = this.request.responseParams;
             for(let i = 0, len = preParams.length; i < len; i++) {
@@ -626,12 +642,83 @@ export default {
         },
         //刷新本地快捷参数
         freshLocalUsefulParams() {
-            let localReqParams = localStorage.getItem("pages/presetParams/request") || "[]";
+            const projectId = this.$route.query.id;
+            let localReqParams = localStorage.getItem("pages/presetParams/request") || "{}";
+            localReqParams = JSON.parse(localReqParams)[projectId] || [];
             localReqParams = JSON.parse(localReqParams).sort((a, b) => a.selectNum < b.selectNum);
-            let localResParams = localStorage.getItem("pages/presetParams/request") || "[]";
+            let localResParams = localStorage.getItem("pages/presetParams/response") || "{}";
+            localResParams = JSON.parse(localResParams)[projectId] || [];
             localResParams = JSON.parse(localResParams).sort((a, b) => a.selectNum < b.selectNum);
-            this.usefulPresetResponseParamsList = localReqParams;
-            this.usefulPresetRequestParamsList = localResParams;
+            this.usefulPresetResponseParamsList = localResParams;
+            this.usefulPresetRequestParamsList = localReqParams;
+        },
+        //保存快捷输入参数
+        saveMindParams() {
+            const mindRequestParams = [];
+            const mindResponseParams = [];
+            dfsForest(this.request.responseParams, {
+                rCondition(value) {
+                    return value.children;
+                },
+                rKey: "children",
+                hooks: (data) => {
+                    if (data.key !== "" && data.value !== "" && data.description !== "") {
+                        mindResponseParams.push(data);
+                    }
+                }
+            });
+            dfsForest(this.request.requestParams, {
+                rCondition(value) {
+                    return value.children;
+                },
+                rKey: "children",
+                hooks: (data) => {
+                    if (data.key !== "" && data.value !== "" && data.description !== "") {
+                        mindRequestParams.push(data);
+                    }
+                }
+            });
+            const projectId = this.$route.query.id;
+            let currentLocalRequestMindParams = localStorage.getItem("pages/mindParams/request") || "{}";
+            let currentLocalResponseMindParams = localStorage.getItem("pages/mindParams/response") || "{}";
+            currentLocalRequestMindParams = JSON.parse(currentLocalRequestMindParams);
+            currentLocalResponseMindParams = JSON.parse(currentLocalResponseMindParams);
+            currentLocalRequestMindParams[projectId] || (currentLocalRequestMindParams[projectId] = []); 
+            currentLocalResponseMindParams[projectId] || (currentLocalResponseMindParams[projectId] = []); 
+            for (let i = 0; i < mindRequestParams.length; i++ ) {
+                const ele = mindRequestParams[i];
+                const sameDoc = currentLocalRequestMindParams[projectId].find(val => (val.key === ele.key && val.value === ele.value && val.description === ele.description));
+                if (!sameDoc) {
+                    currentLocalRequestMindParams[projectId].push(ele)
+                } else {
+                    if (!sameDoc._selectNum) {
+                        sameDoc._selectNum = 0;
+                    }
+                    sameDoc._selectNum ++;                
+                }
+                localStorage.setItem("pages/presetParams/request", JSON.stringify(currentLocalRequestMindParams))
+            }
+            for (let i = 0; i < mindResponseParams.length; i++ ) {
+                const ele = mindResponseParams[i];
+                const sameDoc = currentLocalResponseMindParams[projectId].find(val => (val.key === ele.key && val.value === ele.value && val.description === ele.description));
+                if (!sameDoc) {
+                    currentLocalResponseMindParams[projectId].push(ele)
+                } else {
+                    if (!sameDoc._selectNum) {
+                        sameDoc._selectNum = 0;
+                    }
+                    sameDoc._selectNum ++;                
+                }
+                localStorage.setItem("pages/presetParams/response", JSON.stringify(currentLocalResponseMindParams))
+            }
+            const mindParamsList = [...mindRequestParams, ...mindResponseParams]
+            console.log(mindRequestParams, mindResponseParams)
+            this.axios.post("/api/project/doc_params_mind", { mindParamsList }).then(res => {
+                
+            }).catch(err => {
+                console.error(err);
+            });
+
         },
         //=====================================其他操作=====================================//
         //检查参数是否完备
@@ -647,9 +734,9 @@ export default {
                     return value.children;
                 },
                 rKey: "children",
-                hooks: (data, index, pData) => {
+                hooks: (data, index, pData, parent, deep) => {
                     const isComplex = (data.type === "object" || data.type === "array");
-                    if (pData.length - 1 === index) { //最后一个数据不做处理
+                    if (deep === 0 && pData.length - 1 === index) { //最后一个数据不做处理
                         return;
                     }
                     const p = findParentNode(data.id, this.request.responseParams);
