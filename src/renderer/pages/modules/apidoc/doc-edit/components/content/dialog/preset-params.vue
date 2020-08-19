@@ -16,6 +16,7 @@
                         <span v-else>{{ scope.row.name }}</span>
                     </template>
                 </el-table-column>
+                <el-table-column label="创建者名称" prop="creatorName" align="center"></el-table-column>
                 <el-table-column label="参数类型" prop="presetParamsType" align="center">
                     <template slot-scope="scope">
                         <el-tag v-if="scope.row.presetParamsType === 'request'" size="mini" type="success">请求参数</el-tag>
@@ -177,7 +178,7 @@ export default {
         //新增
         handleChangeOpToAdd() {
             if (this.operationType === "add") {
-                this.$message.warning("当前已处于新增状态");
+                this.$message.warning("在右侧进行新增");
                 return
             }
             this.operationType = "add";
