@@ -42,6 +42,8 @@
                                     :disabled="scope.node.parent.data.type === 'array'"
                                     :title="`${scope.node.parent.data.type === 'array' ?  '父元素为list不必填写参数名称' : '参数名称，例如：age name job'}`"
                                     :placeholder="`${scope.node.parent.data.type === 'array' ?  '父元素为list不必填写参数名称' : '参数名称，例如：age name job'}`"
+                                    remote
+                                    @mindParamsSelect="(val) => { handleAddMindParams(scope.data, val) }"
                                     @input="addNewLine(scope)"
                                     @focus="enableDrag = false"
                                     @blur="handleCheckKey(scope);enableDrag=true"
@@ -295,6 +297,14 @@ export default {
                 this.$set(val, "_select", true)
             })
         },
+        //快捷新增一条参数
+        handleAddMindParams(data, val) {
+            if (this.plain && val.type !== "string") {
+                val.type = "string";
+            }
+            val.uuid = uuid();
+            Object.assign(data, val)
+        },
         //=====================================数据校验====================================//
         //检查参数是否输入完备
         handleCheckKey({ node, data }) {
@@ -388,6 +398,7 @@ export default {
         background: $gray-200;
     }
     .params-edit {
+        overflow-y: auto;
         .el-tree-node__content {
             height: 60px;
         }
