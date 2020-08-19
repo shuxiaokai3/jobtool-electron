@@ -51,9 +51,8 @@ export default {
     },
     methods: {
         spliceStr() {
-            const index = this.value.indexOf(this.keyword); //匹配位置
+            const index = this.value.toLowerCase().indexOf(this.keyword); //匹配位置
             const offset = this.keyword.length; //偏移位置
-            // console.log(index, offset)
             if (index === -1 || this.keyword.trim() === "") {
                 this.leftStr = this.value;
                 this.emphasizeStr = "";
@@ -64,7 +63,6 @@ export default {
             this.leftStr = strArr.slice(0, index).join("");
             this.emphasizeStr = strArr.slice(index, index + offset).join("");
             this.rightStr = strArr.slice(index + offset).join("");
-            console.log(strArr.slice(0, index), strArr.slice(index, index + offset), strArr.slice(index + offset))
         }
     }
 };
