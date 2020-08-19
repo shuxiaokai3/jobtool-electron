@@ -75,8 +75,8 @@ export default {
         //初始化联想参数
         initMindParams() {
             const projectId = this.$route.query.id;
-            let reqMindParams = localStorage.getItem("pages/presetParams/request") || "{}";
-            let resMindParams = localStorage.getItem("pages/presetParams/response") || "{}";
+            let reqMindParams = localStorage.getItem("pages/mindParams/request") || "{}";
+            let resMindParams = localStorage.getItem("pages/mindParams/response") || "{}";
             reqMindParams = JSON.parse(reqMindParams);
             resMindParams = JSON.parse(resMindParams);
             reqMindParams[projectId] || (reqMindParams[projectId] = []) 
