@@ -180,7 +180,7 @@ export default {
     methods: {
         //=====================================发送请求====================================//
         sendRequest() {
-            return new Promise(async (resolve, reject) => {
+            return new Promise((resolve, reject) => {
                 this.loading = true;
                 const requestInfo = this.formatRequestParams();
                 const urllibOptions = this.formatUrllibOptions(requestInfo);
@@ -207,8 +207,8 @@ export default {
                     this.currentCondition.connected = 1; //连通
                     this.currentCondition.status = this.responseData.status;
                     this.currentCondition.size = this.responseData.size;
-                    resolve();
                     this.checkResponseParams();
+                    resolve(this.currentCondition);
                 }).catch(err => {
                     reject(err)
                     this.currentCondition.connected = 0; //未连通
