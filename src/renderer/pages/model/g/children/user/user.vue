@@ -21,6 +21,7 @@
                 <el-button :loading="loading2" size="mini" type="primary" icon="el-icon-upload">导入用户</el-button>
             </s-upload-plain>
         </s-search>
+        <br>
         <!-- 表格展示 -->
         <s-table ref="table" url="/api/security/user_list">
             <el-table-column prop="loginName" label="登录名称" align="center"></el-table-column>
