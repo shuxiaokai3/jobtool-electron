@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain  } from 'electron' // eslint-disable-line
+import { app, BrowserWindow, ipcMain, net  } from 'electron' // eslint-disable-line
 
 
 /**
@@ -15,14 +15,14 @@ const winURL = process.env.NODE_ENV === "development"
     : `file://${__dirname}/index.html`
 
 function createWindow () {
-    /**
-   * Initial window options
-   */
     mainWindow = new BrowserWindow({
         height: 563,
         useContentSize: true,
         width: 1000,
-        webPreferences: {webSecurity: true}
+        webPreferences: {
+            nodeIntegration: true,
+            nodeIntegrationInWorker: true
+        }
     })
 
     mainWindow.loadURL(winURL)
@@ -33,6 +33,7 @@ function createWindow () {
     ipcMain.on("vue-fresh-content", (event, status) => {
         mainWindow.webContents.reload()
     })
+    n
     // setInterval(() => {
     //     mainWindow.webContents.reload()
     // }, 4000);
