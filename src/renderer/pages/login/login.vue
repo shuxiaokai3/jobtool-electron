@@ -29,6 +29,10 @@
                             <el-form-item>
                                 <el-button :loading="loading" type="primary" native-type="submit" size="small" class="w-100">登录</el-button>
                             </el-form-item>
+                            <div>
+                                <div>登录名称为自己姓名的拼音,如：张三 => zhangsan</div>
+                                <div>密码初始为  111111</div>
+                            </div>
                         </el-form>
                     </el-tab-pane>
                     <!-- 手机号登录 -->
@@ -60,8 +64,8 @@ export default {
         return {
             //=====================================登录参数====================================//
             userInfo: { //账号密码登录
-                loginName: "shu", //-----------登录名称
-                password: "111111", //---------密码
+                loginName: process.env.NODE_ENV === "development" ? "shu" : "", //-----------登录名称
+                password: process.env.NODE_ENV === "development" ? "111111" : "", //---------密码
                 captcha: "", //----------------验证码
             },
             userInfo2: { //手机号密码登录
