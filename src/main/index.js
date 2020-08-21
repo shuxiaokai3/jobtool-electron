@@ -16,15 +16,15 @@ const winURL = process.env.NODE_ENV === "development"
 
 function createWindow () {
     mainWindow = new BrowserWindow({
-        height: 563,
+        height: 768,
+        width: 1024,
         useContentSize: true,
-        width: 1000,
         webPreferences: {
             nodeIntegration: true,
             nodeIntegrationInWorker: true
         }
     })
-
+    mainWindow.maximize()
     mainWindow.loadURL(winURL)
     mainWindow.on("closed", () => {
         mainWindow = null
@@ -33,7 +33,6 @@ function createWindow () {
     ipcMain.on("vue-fresh-content", (event, status) => {
         mainWindow.webContents.reload()
     })
-    n
     // setInterval(() => {
     //     mainWindow.webContents.reload()
     // }, 4000);
