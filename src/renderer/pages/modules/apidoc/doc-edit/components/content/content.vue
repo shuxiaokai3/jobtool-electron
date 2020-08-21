@@ -41,7 +41,8 @@
                                 </el-select>
                             </div>                        
                         </s-v-input>
-                        <el-button :loading="loading3" type="success" size="small" @click="sendRequest">发送请求</el-button>
+                        <el-button v-if="!loading3" type="success" size="small" @click="sendRequest">发送请求</el-button>
+                        <el-button v-if="loading3" type="danger" size="small" @click="stopRequest">取消请求</el-button>
                         <el-button :loading="loading" type="primary" size="small" @click="saveRequest">保存接口</el-button>
                         <el-button :loading="loading4" type="primary" size="small" @click="publishRequest">发布接口</el-button>
                         <el-button type="primary" size="small" @click="dialogVisible2 = true" @close="dialogVisible2 = false">全局变量</el-button>
@@ -480,6 +481,7 @@ export default {
                 this.$message.error("参数校验错误");
             } else {
                 this.loading3 = true;
+
                 this.$refs["response"].sendRequest().then(() => {
                     
                 }).catch(err => {
@@ -489,6 +491,11 @@ export default {
                 });
                 
             }  
+        },
+        //取消请求
+        stopRequest() {
+            this.loading3 = false;
+            this.$refs["response"].stopRequest();
         },
         //=====================================保存接口====================================//
         saveRequest() {
@@ -523,11 +530,6 @@ export default {
                 }).finally(() => {
                     this.loading = false;
                 }); 
-            } else {
-                this.$nextTick(() => {
-                    const errorIptDom = document.querySelector(".v-input.valid-error .el-input__inner");
-                    errorIptDom ? errorIptDom.focus() : null;
-                })
             }
         },
         publishRequest() {
@@ -741,7 +743,7 @@ export default {
                 rKey: "children",
                 hooks: (data, index, pData, parent, deep) => {
                     const isComplex = (data.type === "object" || data.type === "array");
-                    if (deep === 0 && pData.length - 1 === index) { //最后一个数据不做处理
+                    if (pData.length - 1 === index && data.key.trim() === "") { //最后一个数据并且未填写值则不做处理
                         return;
                     }
                     const p = findParentNode(data.id, this.request.responseParams);
@@ -773,7 +775,7 @@ export default {
                 rKey: "children",
                 hooks: (data, index, pData) => {
                     const isComplex = (data.type === "object" || data.type === "array");
-                    if (pData.length - 1 === index) { //最后一个数据不做处理
+                    if (pData.length - 1 === index && data.key.trim() === "") { //最后一个数据并且未填写值则不做处理
                         return;
                     }
                     const p = findParentNode(data.id, this.request.requestParams);
@@ -804,7 +806,7 @@ export default {
                 rKey: "children",
                 hooks: (data, index, pData) => {
                     const isComplex = (data.type === "object" || data.type === "array");
-                    if (pData.length - 1 === index) { //最后一个数据不做处理
+                    if (pData.length - 1 === index && data.key.trim() === "") { //最后一个数据并且未填写值则不做处理
                         return;
                     }
                     const p = findParentNode(data.id, this.request.header);
@@ -828,6 +830,12 @@ export default {
                     }
                 }
             });
+            if (!isValidRequest) {
+                this.$nextTick(() => {
+                    const errorIptDom = document.querySelector(".v-input.valid-error .el-input__inner");
+                    errorIptDom ? errorIptDom.focus() : null;
+                })
+            }
             return isValidRequest;
         },
         //全局变量改变

@@ -95,6 +95,7 @@
                 <img v-else-if="responseData && responseData.contentType.includes('image/')" :src="responseData.data" alt="无法显示">
                 <pre v-else-if="responseData && responseData.contentType.includes('text/')" v-text="responseData.data" class="res-text"></pre>
                 <iframe v-else-if="responseData && responseData.contentType.includes('application/pdf/')" :src="responseData.data" class="res-pdf"></iframe>
+                <pre v-else-if="responseData && responseData.contentType === 'error'">{{ responseData.data }}</pre>
                 <pre v-else>{{ responseData }}</pre>
             </div>
         </s-collapse>
@@ -106,7 +107,8 @@ import FileType from "file-type/browser";
 import querystring from "querystring"
 import { dfsForest } from "@/lib/utils"
 import uuid from "uuid/v4"
-import urllib from "urllib"
+import HttpClient from "@/api/net.js"
+const httpClient = new HttpClient();
 export default {
     components: {},
     props: {
@@ -155,6 +157,10 @@ export default {
         variables() {
             return this.$store.state.apidoc.variables || [];
         },
+        // //发送请求---取消请求 文案
+        // sendText() {
+
+        // }
        
     },
     watch: {
@@ -172,6 +178,7 @@ export default {
             responseData: null, //---返回结果对象
             checkJsonData: {}, //--用于对比本地书写的返回参数与实际返回参数
             loading: false, //-------返回结果加载状态
+            sendText: "发送请求"
         };
     },
     created() {
@@ -184,38 +191,43 @@ export default {
                 this.loading = true;
                 const requestInfo = this.formatRequestParams();
                 const urllibOptions = this.formatUrllibOptions(requestInfo);
-                urllibOptions.timeout = 5000;
                 console.log("请求参数", urllibOptions)
-                urllib.request(requestInfo.url, urllibOptions).then(res => {
-                    console.log(res)
-                    const response = res.res;
-
+                httpClient.request(requestInfo.url, {
+                    method: urllibOptions.method,
+                    headers: urllibOptions.headers,
+                    data: urllibOptions.data
+                }).then(response => {
+                    console.log(response);
                     this.responseData = {};
                     this.responseData.headers = response.headers;
                     this.responseData.rt = response.rt;
                     this.responseData.size = (response.size / 1024).toFixed(2);
                     this.responseData.status = response.status;
-                    this.responseData.contentType = response.headers["content-type"];
+                    this.responseData.contentType = response.contentType;
                     this.responseData.cookie = response.headers["set-cookie"];
-                    if (response.status === 302 || response.status === 301) {
-                        this.responseData.contentType = "text/redirect"
-                        this.responseData.data = response.headers.location;
-                    } else {
-                        this.responseData.data = this.formatResponseData(response);
-                    }
-                    console.log(this.responseData)
+                    this.responseData.data = response.data;
                     this.currentCondition.connected = 1; //连通
                     this.currentCondition.status = this.responseData.status;
                     this.currentCondition.size = this.responseData.size;
-                    this.checkResponseParams();
-                    resolve(this.currentCondition);
+                    resolve(response);
                 }).catch(err => {
-                    reject(err)
+                    console.error(err);
+                    this.responseData = {};
+                    this.responseData.contentType = "error";
+                    this.responseData.data = err;
                     this.currentCondition.connected = 0; //未连通
+                    reject(err)
                 }).finally(() => {
                     this.loading = false;
                 });
             })
+        },
+        stopRequest() {
+            this.responseData = {};
+            this.responseData.contentType = "error";
+            this.responseData.data = "请求取消!";
+            httpClient.stopReqeust();
+            this.loading = false;
         },
         //格式化请求参数
         formatRequestParams() {
@@ -572,6 +584,8 @@ export default {
         top: 0;
         background: $white;
         z-index: 1;
+        box-shadow: $box-shadow-sm;
+        padding-bottom: size(10);
     }
     .res-data {
         min-height: size(100);
