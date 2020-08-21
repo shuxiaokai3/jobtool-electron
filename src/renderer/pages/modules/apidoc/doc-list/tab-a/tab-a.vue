@@ -131,11 +131,12 @@ export default {
             this.projectId = item._id;
         },
         //跳转至界面详情
-        jumpToProject(id) {
+        jumpToProject(id, name) {
             this.$router.push({
                 path: "/v1/apidoc/doc-edit",
                 query: {
-                    id
+                    id,
+                    name
                 },
             });
         },

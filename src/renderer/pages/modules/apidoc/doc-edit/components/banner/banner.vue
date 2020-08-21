@@ -8,7 +8,7 @@
     <div class="banner">
         <!-- 工具栏 -->
         <div class="tool">
-            <h2 class="gray-700 f-lg text-center">测试文档</h2>
+            <h2 class="gray-700 f-lg text-center text-ellipsis" :title="$route.query.name">{{ $route.query.name }}</h2>
             <el-input v-model="query" class="doc-search" placeholder="支持文档名称，文档url搜索" clearable @input="handleSearchTree"></el-input>
             <div class="tool-icon d-flex j-between mt-1 px-1">
                 <el-tooltip class="item" effect="dark" content="新增文件夹" :open-delay="300">
