@@ -15,6 +15,10 @@ export default {
                 e.preventDefault();
                 ipcRenderer.send("vue-fresh-content")
             }
+            if (e.ctrlKey && e.key === "F12") {
+                e.preventDefault();
+                ipcRenderer.send("open-dev-tools")
+            }
         })
     },
 };

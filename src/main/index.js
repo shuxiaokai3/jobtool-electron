@@ -18,20 +18,23 @@ function createWindow () {
     mainWindow = new BrowserWindow({
         height: 768,
         width: 1024,
-        useContentSize: true,
+        // useContentSize: true,
         webPreferences: {
             nodeIntegration: true,
             nodeIntegrationInWorker: true
         }
     })
-    mainWindow.maximize()
+    // mainWindow.maximize()
     mainWindow.loadURL(winURL)
     mainWindow.on("closed", () => {
         mainWindow = null
     })
-    mainWindow.openDevTools();
+    // mainWindow.openDevTools();
     ipcMain.on("vue-fresh-content", (event, status) => {
         mainWindow.webContents.reload()
+    })
+    ipcMain.on("open-dev-tools", (event, status) => {
+        mainWindow.openDevTools();
     })
     // setInterval(() => {
     //     mainWindow.webContents.reload()
