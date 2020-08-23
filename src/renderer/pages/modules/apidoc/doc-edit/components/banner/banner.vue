@@ -22,7 +22,7 @@
                     </svg>               
                 </el-tooltip>
                 <el-tooltip class="item" effect="dark" content="历史记录" :open-delay="300">
-                    <svg class="svg-icon" aria-hidden="true">
+                    <svg class="svg-icon" aria-hidden="true" @click="dialogVisible4 = true">
                         <use xlink:href="#iconlishi"></use>
                     </svg>               
                 </el-tooltip>
@@ -129,6 +129,7 @@
         <s-add-folder-dialog v-if="dialogVisible" :visible.sync="dialogVisible" :pid="docParentId" @success="handleAddFileAndFolderCb"></s-add-folder-dialog>
         <s-add-file-dialog v-if="dialogVisible2" :visible.sync="dialogVisible2" :pid="docParentId" @success="handleAddFileAndFolderCb"></s-add-file-dialog>
         <s-import-doc-dialog v-if="dialogVisible3" :visible.sync="dialogVisible3" @success="init"></s-import-doc-dialog>
+        <s-history-dialog v-if="dialogVisible4" :visible.sync="dialogVisible4"></s-history-dialog>
     </div>
 </template>
 
@@ -138,12 +139,14 @@ import { findoNode, forEachForest, findPreviousSibling, findNextSibling, findPar
 import addFolderDialog from "../../dialog/add-folder"
 import addFileDialog from "../../dialog/add-file"
 import importDoc from "../../dialog/import-doc"
+import historyDialog from "./dialog/history"
 import contextmenu from "./components/contextmenu"
 export default {
     components: {
         "s-add-folder-dialog": addFolderDialog,
         "s-add-file-dialog": addFileDialog,
         "s-import-doc-dialog": importDoc,
+        "s-history-dialog": historyDialog,
     },
     computed: {
         navTreeData() { //----树形导航数据
@@ -182,6 +185,7 @@ export default {
             dialogVisible: false, //-----新增文件夹弹窗
             dialogVisible2: false, //----新增文件弹窗
             dialogVisible3: false, //----导入第三方文档弹窗
+            dialogVisible4: true, //----查看历史记录
             loading: false, //-----------左侧树形导航加载
         };
     },
