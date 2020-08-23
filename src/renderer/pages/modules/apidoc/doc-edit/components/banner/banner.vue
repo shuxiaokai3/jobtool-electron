@@ -9,7 +9,7 @@
         <!-- 工具栏 -->
         <div class="tool">
             <h2 class="gray-700 f-lg text-center text-ellipsis" :title="$route.query.name">{{ $route.query.name }}</h2>
-            <el-input v-model="query" class="doc-search" placeholder="支持文档名称，文档url搜索" clearable @input="handleSearchTree"></el-input>
+            <el-input v-model="queryData" class="doc-search" placeholder="支持文档名称，文档url搜索" clearable @input="handleSearchTree"></el-input>
             <div class="tool-icon d-flex j-between mt-1 px-1">
                 <el-tooltip class="item" effect="dark" content="新增文件夹" :open-delay="300">
                     <svg class="svg-icon" aria-hidden="true" @click="handleOpenAddFolderDialog();docParentId = '';">
@@ -56,6 +56,7 @@
                     :expand-on-click-node="true" 
                     :draggable="enableDrag"
                     :allow-drop="handleCheckNodeCouldDrop"
+                    :filter-node-method="filterNode"
                     @node-contextmenu="handleContextmenu"
                     @node-drop="handleNodeDropSuccess"
                     @node-expand="clearContextmenu"
@@ -80,7 +81,8 @@
                             <span v-else-if="scope.data.item.methods === 'put'" class="label blue">put</span>
                             <span v-else-if="scope.data.item.methods === 'delete'" class="label red">del</span>  
                             <img v-else :src="require('@/assets/imgs/apidoc/file.png')" width="16px" height="16px"/> 
-                            <span v-if="renameNodeId !== scope.data._id" :title="scope.data.docName" class="node-name text-ellipsis ml-1">{{ scope.data.docName }}</span>
+                            <s-emphasize v-if="renameNodeId !== scope.data._id" :title="scope.data.docName" :value="scope.data.docName" :keyword="queryData" class="node-name text-ellipsis ml-1"></s-emphasize>
+                            <!-- <span v-if="renameNodeId !== scope.data._id" :title="scope.data.docName" class="node-name text-ellipsis ml-1">{{ scope.data.docName }}</span> -->
                             <input v-else v-model="scope.data.docName" placeholder="不能为空" type="text" class="rename-ipt f-sm ml-1" @blur="handleChangeNodeName(scope.data)" @keydown.enter="handleChangeNodeName(scope.data)">
                             <el-dropdown 
                                     v-show="hoverNodeId === scope.data._id"
@@ -135,7 +137,7 @@
 
 <script>
 import Vue from "vue"
-import { findoNode, forEachForest, findPreviousSibling, findNextSibling, findParentNode } from "@/lib/utils"
+import { findoNode, forEachForest, findPreviousSibling, findNextSibling, findParentNode, debounce } from "@/lib/utils"
 import addFolderDialog from "../../dialog/add-folder"
 import addFileDialog from "../../dialog/add-file"
 import importDoc from "../../dialog/import-doc"
@@ -172,7 +174,7 @@ export default {
     data() {
         return {
             //=====================================文档增删改查====================================//
-            query: "", //----------------导航
+            queryData: "", //------------文档过滤条件
             docParentId: "", //----------文档父id
             contextmenu: null, //--------右键弹窗
             renameNodeId: "", //---------正在重命名的节点
@@ -185,7 +187,7 @@ export default {
             dialogVisible: false, //-----新增文件夹弹窗
             dialogVisible2: false, //----新增文件弹窗
             dialogVisible3: false, //----导入第三方文档弹窗
-            dialogVisible4: true, //----查看历史记录
+            dialogVisible4: false, //----查看历史记录
             loading: false, //-----------左侧树形导航加载
         };
     },
@@ -455,7 +457,36 @@ export default {
             });
         },
         //=====================================前后端交互====================================//
-        handleSearchTree() {},
+        handleSearchTree() {
+            this.search();
+        },
+        search: debounce(function() {
+            this.searchResult = [];
+            const params = {
+                projectId: this.$route.query.id,
+                url: this.queryData.trim()
+            };
+            this.axios.get("/api/project/filter_doc", { params }).then(res => {
+                if (res.data.length === 0) {
+                    this.defaultExpandedKeys = [];
+                    this.searchResult = [];
+                } else {
+                    this.defaultExpandedKeys = Array.from(new Set(this.defaultExpandedKeys.concat(res.data.map(val => val._id))))
+                    this.searchResult = Array.from(new Set(this.searchResult.concat(res.data.map(val => val))));                    
+                }
+                this.$refs.docTree.filter();
+            }).catch(err => {
+                this.$errorThrow(err, this);
+            }).finally(() => {
+                this.loading = false;
+            });
+        }),
+        filterNode(value, data) {
+            const matchName = !!this.searchResult.find(val => val.docName === data.label);
+            const matchUrl = !!this.searchResult.find(val => val._id === data._id);
+            const matchAll = this.queryData.trim() === "";
+            return matchName || matchUrl || matchAll;
+        },
         //删除某一项
         handleDeleteItem(data, node) {
             let deleteId = [];
