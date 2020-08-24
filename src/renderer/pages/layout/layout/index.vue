@@ -30,7 +30,10 @@
                     </div>
                     <div class="op_item" @click="goForward">
                         <span title="前进" class="el-icon-right"></span>    
-                    </div>                    
+                    </div>  
+                    <!-- <div class="op_item">
+                        <span title="前进">更新</span>    
+                    </div>                      -->
                 </div>
                 <el-dropdown>
                     <span class="cursor-pointer">
@@ -78,6 +81,7 @@ export default {
         },
         //退出登录
         logout() {
+            this.$store.commit("permission/clearAllPermission");
             sessionStorage.clear();
             this.$router.push("/login");
         },
