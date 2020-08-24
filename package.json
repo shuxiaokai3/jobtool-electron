@@ -1,6 +1,6 @@
 {
     "name": "jobtool",
-    "version": "0.0.1",
+    "version": "0.8.1",
     "author": "shuxiaokai <2581105856@qq.com>",
     "description": "An electron-vue project",
     "license": "MIT",
@@ -21,6 +21,12 @@
     "build": {
         "productName": "jobtool",
         "appId": "com.example.yourapp",
+        "publish": [
+            {
+                "provider": "generic",
+                "url": "http://job.xrdev.cn/electron/windows"
+            }
+        ],
         "directories": {
             "output": "build"
         },
@@ -58,6 +64,7 @@
         "brace": "^0.11.1",
         "core-js": "^3.6.5",
         "echarts": "^4.6.0",
+        "electron-updater": "^4.3.1",
         "element-ui": "^2.13.0",
         "file-type": "^14.7.1",
         "js-cookie": "^2.2.1",
