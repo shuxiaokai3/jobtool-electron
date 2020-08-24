@@ -31,9 +31,10 @@
                     <div class="op_item" @click="goForward">
                         <span title="前进" class="el-icon-right"></span>    
                     </div>  
-                    <!-- <div class="op_item">
-                        <span title="前进">更新</span>    
-                    </div>                      -->
+                </div>
+                <div v-if="checkDownload" class="process">
+                    <span v-if="progress !== 100" title="更新进度">{{ progress.toFixed(1) }}%</span>
+                    <span v-else class="cursor-pointer hover-teal" @click="handleInstall">安装</span>
                 </div>
                 <el-dropdown>
                     <span class="cursor-pointer">
@@ -42,7 +43,7 @@
                     </span>
                     <el-dropdown-menu slot="dropdown">
                         <el-dropdown-item>个人中心</el-dropdown-item>
-                        <el-dropdown-item>新消息推送</el-dropdown-item>
+                        <el-dropdown-item @click.native="handleCheckUpdate">检查更新</el-dropdown-item>
                         <el-dropdown-item @click.native="logout">退出登陆</el-dropdown-item>
                     </el-dropdown-menu>
                 </el-dropdown>
@@ -58,6 +59,8 @@ export default {
     data() {
         return {
             activeMenu: "/v1/a/a",
+            progress: 0,
+            checkDownload: false
         };
     },
     computed: {
@@ -68,10 +71,34 @@ export default {
             return this.$store.state.permission.userInfo
         },
     },
-    created() {
+    mounted() {
         this.initCurrentMenu();
+        this.initUploadEvent();
     },
     methods: {
+        initUploadEvent() {
+            ipcRenderer.on("vue-update-downloaded", (e, upload) => {
+                this.progress = 100;
+                console.log("下载完成", e, upload);
+            });
+            ipcRenderer.on("vue-download-progress", (e, progressObj) => {
+                console.log("下载种", e, progressObj);
+                this.progress = progressObj.percent;
+            });
+            ipcRenderer.on("vue-download-error", (e, error) => {
+                console.error(error);
+            });
+        },
+        handleInstall() {
+            ipcRenderer.send("quit-and-install");
+            
+        },
+        //
+        handleCheckUpdate() {
+            this.checkDownload = true;
+            ipcRenderer.send("upload");
+        },
+        //=========================================================================//
         initCurrentMenu() {
             this.activeMenu = this.$route.path;
         },
@@ -139,6 +166,9 @@ export default {
                         // color: $theme-color;
                     }
                 }
+            }
+            .process {
+                margin-right: size(10);
             }
         }
         .el-dropdown {
