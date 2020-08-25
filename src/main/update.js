@@ -22,12 +22,25 @@ function update() {
     if (process.env.NODE_ENV === "development") {
         autoUpdater.updateConfigPath = path.join(__dirname, "../../dev-app-update.yml");
     }
-    ipcMain.on("upload", () => { 
+    //=====================================render进程事件====================================//
+    ipcMain.on("checkUpdate", () => { 
         autoUpdater.checkForUpdates()
     })
+    ipcMain.on("quit-and-install", () => { 
+        autoUpdater.quitAndInstall()
+    })
+    //=====================================参数设置====================================//
     autoUpdater.currentVersion = config.updateConfig.version;
     autoUpdater.setFeedURL(url);
     //=====================================反馈更新事件给render进程====================================//
+    //存在可用更新
+    autoUpdater.on("update-available", (progressObj) => {
+        win.webContents.send("vue-update-available", progressObj);
+    });
+    //不存在可用更新
+    autoUpdater.on("update-not-available", (progressObj) => {
+        win.webContents.send("vue-update-not-available", progressObj);
+    });
     //下载完成
     autoUpdater.on("update-downloaded", (event, releaseNotes, releaseName) => {
         win.webContents.send("vue-update-downloaded", {

@@ -5,21 +5,26 @@
 </template>
  
 <script>
-import { ipcRenderer  } from "electron";
+let ipcRenderer = null;
+if (!process.env.IS_WEB) {
+    ipcRenderer = require("electron").ipcRenderer;
+}
 
 export default {
     mounted() {
-        window.addEventListener("keyup", (e) => {
-            e.stopPropagation();
-            if (e.ctrlKey && e.key === "F5") {
-                e.preventDefault();
-                ipcRenderer.send("vue-fresh-content")
-            }
-            if (e.ctrlKey && e.key === "F12") {
-                e.preventDefault();
-                ipcRenderer.send("open-dev-tools")
-            }
-        })
+        if (!process.env.IS_WEB) {
+            window.addEventListener("keyup", (e) => {
+                e.stopPropagation();
+                if (e.ctrlKey && e.key === "F5") {
+                    e.preventDefault();
+                    ipcRenderer.send("vue-fresh-content")
+                }
+                if (e.ctrlKey && e.key === "F12") {
+                    e.preventDefault();
+                    ipcRenderer.send("open-dev-tools")
+                }
+            })
+        }
     },
     methods: {
         handleTest() {

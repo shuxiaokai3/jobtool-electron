@@ -32,9 +32,9 @@
                         <span title="前进" class="el-icon-right"></span>    
                     </div>  
                 </div>
-                <div v-if="checkDownload" class="process">
+                <div v-if="downloading" class="process">
                     <span v-if="progress !== 100" title="更新进度">{{ progress.toFixed(1) }}%</span>
-                    <span v-else class="cursor-pointer hover-teal" @click="handleInstall">安装</span>
+                    <span v-else class="cursor-pointer yellow" @click="handleInstall">安装</span>
                 </div>
                 <el-dropdown>
                     <span class="cursor-pointer">
@@ -43,7 +43,8 @@
                     </span>
                     <el-dropdown-menu slot="dropdown">
                         <el-dropdown-item>个人中心</el-dropdown-item>
-                        <el-dropdown-item @click.native="handleCheckUpdate">检查更新</el-dropdown-item>
+                        <el-dropdown-item v-if="!isWeb" :disabled="downloading" @click.native="handleCheckUpdate">检查更新</el-dropdown-item>
+                        <el-dropdown-item >版本{{ config.updateConfig.version }}</el-dropdown-item>
                         <el-dropdown-item @click.native="logout">退出登陆</el-dropdown-item>
                     </el-dropdown-menu>
                 </el-dropdown>
@@ -54,13 +55,19 @@
 </template>
 
 <script>
-import { ipcRenderer  } from "electron";
+let ipcRenderer = null;
+if (!process.env.IS_WEB) {
+    ipcRenderer = require("electron").ipcRenderer;
+}
+import config from "@/../config.js"
 export default {
     data() {
         return {
             activeMenu: "/v1/a/a",
             progress: 0,
-            checkDownload: false
+            downloading: false,
+            config,
+            isWeb: process.env.IS_WEB
         };
     },
     computed: {
@@ -77,26 +84,46 @@ export default {
     },
     methods: {
         initUploadEvent() {
-            ipcRenderer.on("vue-update-downloaded", (e, upload) => {
-                this.progress = 100;
-                console.log("下载完成", e, upload);
-            });
-            ipcRenderer.on("vue-download-progress", (e, progressObj) => {
-                console.log("下载种", e, progressObj);
-                this.progress = progressObj.percent;
-            });
-            ipcRenderer.on("vue-download-error", (e, error) => {
-                console.error(error);
-            });
+            if (!process.env.IS_WEB) {
+                //存在可用更新
+                ipcRenderer.on("vue-update-available", (e) => {
+                    console.log("存在可用更新")
+                });
+                //没有可用更新
+                ipcRenderer.on("vue-update-not-available", (e, progressObj) => {
+                    console.log("没有可用更新")
+                    this.$message.warning("暂无可用更新");
+                });
+                //下载中
+                ipcRenderer.on("vue-download-progress", (e, progressObj) => {
+                    console.log("下载中", e, progressObj);
+                    this.downloading = true;
+                    this.progress = progressObj.percent;
+                });
+                //下载完成
+                ipcRenderer.on("vue-update-downloaded", (e, upload) => {
+                    this.progress = 100;
+                    console.log("下载完成", e, upload);
+                });
+                ipcRenderer.on("vue-download-error", (e, error) => {
+                    this.$message.warning("更新异常请稍后再试");
+                    this.downloading = false;
+                    console.error(error);
+                });                
+            }
+
         },
         handleInstall() {
-            ipcRenderer.send("quit-and-install");
-            
+            if (!process.env.IS_WEB) {
+                ipcRenderer.send("quit-and-install");          
+            }
         },
         //
         handleCheckUpdate() {
-            this.checkDownload = true;
-            ipcRenderer.send("upload");
+            this.downloading = true;
+            if (!process.env.IS_WEB) {
+                ipcRenderer.send("checkUpdate");      
+            }
         },
         //=========================================================================//
         initCurrentMenu() {
@@ -115,7 +142,9 @@ export default {
         //=====================================页面操作====================================//
         //刷新页面
         freshContent() {
-            ipcRenderer.send("vue-fresh-content")
+            if (!process.env.IS_WEB) {
+                ipcRenderer.send("vue-fresh-content")      
+            }
         },
         //后退
         goBack() {
