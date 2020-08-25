@@ -101,7 +101,7 @@
                                         <template v-for="(item, index) in usefulPresetResponseParamsList.slice(0, 3)">
                                             <span class="params-item">{{ item.name }}</span>
                                         </template>
-                                        <span class="theme-color cursor-pointer ml-2" @click="dialogVisible5 = true,presetParamsType = 'request'">新增</span>
+                                        <span class="theme-color cursor-pointer ml-2" @click="dialogVisible5 = true,presetParamsType = 'response'">新增</span>
                                         <hr>
                                     </div>
                                     <el-dropdown-item v-for="(item, index) in presetResponseParamsList" :key="index" :command="item">
