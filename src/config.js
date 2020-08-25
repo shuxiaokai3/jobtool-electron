@@ -11,4 +11,5 @@ export default {
         server: "http://job.xrdev.cn",
         filePath: "/electron/windows"
     },
+    onlineUrl: "https://jobtool.cn"
 };
