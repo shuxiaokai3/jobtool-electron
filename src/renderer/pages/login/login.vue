@@ -32,6 +32,7 @@
                             <div>
                                 <div>登录名称为自己姓名的拼音,如：张三 => zhangsan</div>
                                 <div>密码初始为  111111</div>
+                                <div>当前版本：{{ version }}</div>
                             </div>
                         </el-form>
                     </el-tab-pane>
@@ -94,6 +95,9 @@ export default {
             const isProcess = this.$root.VUE_BASE_CONFIG.isProcess
             const requestUrl = isProcess ? this.$root.VUE_BASE_CONFIG.devUrl : this.$root.VUE_BASE_CONFIG.proUrl;
             return requestUrl + `/api/security/captcha?width=120&height=40&random=${this.random}`;
+        },
+        version() {
+            return this.$store.state.config.version
         }
     },
     created() {},

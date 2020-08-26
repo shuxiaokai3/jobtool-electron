@@ -6,9 +6,10 @@
  * @create             2020-01-09 18:39
  * @update             2020-01-09 18:39
  */
-
+import config from "@/../config.js"
 export default {
     state: {
+        version: config.updateConfig.version,
         pageConfig: {
             layout: "layout", //layout 
         },
