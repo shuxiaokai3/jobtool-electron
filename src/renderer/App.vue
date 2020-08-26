@@ -23,6 +23,14 @@ export default {
                     e.preventDefault();
                     ipcRenderer.send("open-dev-tools")
                 }
+                if (e.ctrlKey && e.key === "ArrowLeft") {
+                    e.preventDefault();
+                    this.$router.go(-1);
+                }
+                if (e.ctrlKey && e.key === "ArrowRight") {
+                    e.preventDefault();
+                    this.$router.go(1);
+                }
             })
         }
     },
