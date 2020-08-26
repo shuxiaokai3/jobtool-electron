@@ -17,7 +17,7 @@ export default {
                 e.stopPropagation();
                 if (e.ctrlKey && e.key === "F5") {
                     e.preventDefault();
-                    ipcRenderer.send("vue-fresh-content")
+                    ipcRenderer.send("vue-strong-reload")
                 }
                 if (e.ctrlKey && e.key === "F12") {
                     e.preventDefault();
