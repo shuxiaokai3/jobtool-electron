@@ -8,6 +8,7 @@ import { BaseConfig } from "@/config.default.js"
 import login from "@/pages/login/login"
 //=====================================业务模块====================================//
 import docEdit from "@/pages/modules/apidoc/doc-edit/doc-edit"
+import docView from "@/pages/modules/apidoc/doc-view/doc-view"
 
 
 Vue.use(Router)
@@ -28,6 +29,14 @@ const allRoutes = [
             title: "文档编辑"
         },
         component: docEdit,
+    },
+    {
+        path: "/v1/apidoc/doc-view",
+        name: "文档工具-文档预览",
+        meta: {
+            title: "文档预览"
+        },
+        component: docView,
     },
     {
         path: "/v1/b/b",

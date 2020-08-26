@@ -92,6 +92,7 @@ export default {
                 //没有可用更新
                 ipcRenderer.on("vue-update-not-available", (e, progressObj) => {
                     console.log("没有可用更新")
+                    this.downloading = false;
                     this.$message.warning("暂无可用更新");
                 });
                 //下载中

@@ -20,8 +20,8 @@
                         <div title="编辑" @click="handleOpenEditDialog(item)">
                             <i class="el-icon-edit"></i>
                         </div>
-                        <div title="分享">
-                            <i class="el-icon-share"></i>
+                        <div title="查看" @click="handleView(item)">
+                            <i class="el-icon-view"></i>
                         </div>
                         <div title="删除" @click="deleteProject(item._id)">
                             <i class="el-icon-delete"></i>
@@ -139,6 +139,17 @@ export default {
                     name
                 },
             });
+        },
+        //查看页面
+        handleView(item) {
+            this.$router.push({
+                path: "/v1/apidoc/doc-view",
+                query: {
+                    id: item._id,
+                    name: item.projectName
+                }
+            });
+            console.log(item);
         },
         //=====================================其他操作=====================================//
     }

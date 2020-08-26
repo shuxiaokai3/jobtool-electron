@@ -27,7 +27,7 @@
                     </svg>               
                 </el-tooltip>
                 <el-tooltip class="item" effect="dark" content="预览文档" :open-delay="300">
-                    <svg class="svg-icon" aria-hidden="true">
+                    <svg class="svg-icon" aria-hidden="true" @click="handleViewDoc">
                         <use xlink:href="#iconpreview"></use>
                     </svg>               
                 </el-tooltip>
@@ -614,6 +614,16 @@ export default {
         //打开文件新增弹窗
         handleOpenAddFileDialog() {
             this.dialogVisible2 = true;
+        },
+        //预览文档
+        handleViewDoc() {
+            this.$router.push({
+                path: "/v1/apidoc/doc-view",
+                query: {
+                    id: this.$route.query.id,
+                    name: this.$route.query.name
+                }
+            });
         },
         //=====================================其他操作=====================================//
         //清除contextmenu

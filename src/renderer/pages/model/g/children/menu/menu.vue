@@ -267,10 +267,12 @@ export default {
         },
         //删除节点
         deleteCurrentNode(data) {
-            const ids = [data._id];
+            console.log(data)
+            const cpData = JSON.parse(JSON.stringify(data))
+            const ids = [cpData._id];
             
             recursion({
-                data: data.children || [],
+                data: cpData.children || [],
                 before: (val) => {
                     ids.push(val._id)
                 },
