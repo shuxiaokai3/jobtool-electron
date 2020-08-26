@@ -6,7 +6,7 @@
 */
 <template>
     <el-tooltip effect="light" placement="top-start" :content="value.toString()" :disabled="isOverflow">
-        <span ref="text" class="s-ellipsis-content">{{ value }}</span>
+        <span ref="text" class="s-ellipsis-content" @dblclick="handleSelect">{{ value }}</span>
     </el-tooltip>
 </template>
 
@@ -52,6 +52,13 @@ export default {
         }
     },
     methods: {
+        handleSelect(e) {
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            const range = document.createRange();
+            range.selectNodeContents(e.target);
+            selection.addRange(range);
+        }
         //=====================================获取远程数据==================================//
 
         //=====================================前后端交互====================================//
