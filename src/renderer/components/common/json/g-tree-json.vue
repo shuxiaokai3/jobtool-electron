@@ -1,75 +1,20 @@
 /*
     创建者：shuxiaokai
-    创建时间：2020-07-28 15:21
-    模块名称：json类型数据展示，支持备注信息
+    创建时间：2020-08-26 16:21
+    模块名称：
     备注：xxxx
 */
 <template>
-    <div class="s-tree-json" :class="{'json-wrap': level === 0}">
-        <span v-if="level === 0" class="symbol">{</span>
-        <div v-for="(item, index) in data" :key="index" class="indent">
-            <!-- 常规数据类型 -->
-            <template v-if="item.type !== 'array' && item.type !== 'object' && item.value">
-                <span>
-                    <span v-if="!isArray" class="key">{{ item.key }}</span>
-                    <span v-if="!isArray" class="symbol">:&nbsp;</span>
-                    <!-- 对象 -->
-                    <template v-if="item.type === 'object'">
-                        <span class="symbol">{</span>
-                        <s-tree-json :data="item.children" :level="level + 1"></s-tree-json>
-                        <span class="symbol">}</span>
-                    </template>
-                    <!-- 数组 -->
-                    <template v-else-if="item.type === 'array'">
-                        <span class="symbol">[</span>
-                        <s-ellipsis-content ref="comment" class="comment" :value="`//${item.description}`"></s-ellipsis-content>
-                        <s-tree-json :data="item.children" :level="level + 1"></s-tree-json>
-                        <span class="symbol">]</span>
-                    </template>
-                    <!-- 常规数据 -->
-                    <template v-else>
-                        <s-ellipsis-content v-if="item.type === 'string'" class="string-value" :value='`"${item.value}"`'></s-ellipsis-content>
-                        <s-ellipsis-content v-if="item.type === 'number'" class="number-value" :value="item.value"></s-ellipsis-content>
-                        <s-ellipsis-content v-if="item.type === 'boolean'" class="boolean-value" :value="item.value"></s-ellipsis-content>
-                    </template>
-                    <span class="symbol">,</span>
-                    <s-ellipsis-content v-show="item.type !== 'object' || item.type !== 'array'" ref="comment" class="comment" :value="`//${item.description}`"></s-ellipsis-content>
-                    <span v-if="item.required" class="comment">(必填)</span>
-                </span>                
-            </template>
-            <!-- 对象和数组类型 -->
-            <template v-else-if="item.type === 'array'|| item.type === 'object'">
-                <span>
-                    <span v-if="!isArray" class="key">{{ item.key }}</span>
-                    <span v-if="!isArray" class="symbol">:&nbsp;</span>
-                    <template v-if="item.type === 'object'">
-                        <span class="symbol">{</span>
-                        <s-ellipsis-content ref="comment" class="comment" :value="`//${item.description}`"></s-ellipsis-content>
-                        <s-tree-json :data="item.children" :level="level + 1"></s-tree-json>
-                        <span class="symbol">}</span>
-                    </template>
-                    <template v-else-if="item.type === 'array'">
-                        <span class="symbol">[</span>
-                        <s-ellipsis-content ref="comment" class="comment" :value="`//${item.description}`"></s-ellipsis-content>
-                        <s-tree-json :data="item.children" :level="level + 1" is-array></s-tree-json>
-                        <span class="symbol">]</span>
-                    </template>
-                    <template v-else>
-                        <s-ellipsis-content v-if="item.type === 'string'" class="string-value" :value='`"${item.value}"`'></s-ellipsis-content>
-                        <s-ellipsis-content v-if="item.type === 'number'" class="number-value" :value="item.value"></s-ellipsis-content>
-                        <s-ellipsis-content v-if="item.type === 'boolean'" class="boolean-value" :value="item.value"></s-ellipsis-content>
-                    </template>
-                    <span class="symbol">,</span>
-                </span> 
-            </template>
+    <div class="tree-json">
+        <div class="operation">
+            <div v-copy="JSON.stringify(convertPlainParamsToTreeData(data))" class="item" title="复制为json" @click="handleCopy">复制为json</div>
         </div>
-        <span v-if="level === 0" class="symbol">}</span>
+        <s-tree-json-inner :data="data" v-bind="$attrs"></s-tree-json-inner>
     </div>
 </template>
 
 <script>
 export default {
-    name: "STreeJson",
     props: {
         data: {
             type: [Object, Array],
@@ -77,54 +22,72 @@ export default {
                 return {};
             }
         },
-        level: {
-            type: Number,
-            default: 0
-        },
-        indent: {
-            type: Number,
-            default: 20
-        },
-        path: {
-            type: String,
-            default: ""
-        },
-        options: {
-            type: Object,
-            default() {
-                return {
-                    key: "key",
-                    value: "value",
-                    type: "type",
-                    description: "description"
-                }
-            }
-        },
-        isArray: {
-            type: Boolean,
-            default: false
-        },
-    },
-    watch: {
-        data: {
-            handler(val) {
-                if (val && this.$refs["comment"] && this.$refs["comment"].length > 0) {
-                    this.$refs["comment"].forEach(commentDom => {
-                        // const previouseElementSiblingOffsetLeft = commentDom.$el.previousElementSibling.offsetLeft;
-                        commentDom.$el.style.marginLeft = 5 + "px"
-                    });
-                }
-            },
-            deep: true
-        }
     },
     data() {
-        return { 
+        return {
+
         };
     },
-    mounted() {
+    created() {
+
     },
     methods: {
+        handleCopy() {
+            console.log(this.data)
+            console.log(this.convertPlainParamsToTreeData(this.data));
+
+        },
+        //将扁平数据转换为树形结构数据
+        convertPlainParamsToTreeData(plainData, jumpChecked) {
+            const result = {};
+            const foo = (plainData, result) => {
+                for(let i = 0,len = plainData.length; i < len; i++) {
+                    if (jumpChecked && !plainData[i]._select) { //若请求参数未选中则不发送请求
+                        continue;
+                    }
+                    const key = plainData[i].key.trim();
+                    const value = plainData[i].value;
+                    const type = plainData[i].type;
+                    const resultIsArray = Array.isArray(result);
+                    const isComplex = (type === "object" || type === "array");
+                    let arrTypeResultLength = 0; //数组类型值长度，用于数组里面嵌套对象时候对象取值
+                    if (!isComplex && (key === "" || value === "")) { //非复杂数据需要填写参数名称才可以显示
+                        continue
+                    }
+                    /*eslint-disable indent*/ 
+                    switch (type) {
+                        case "number": //数字类型需要转换为数字，转换前所有值都为字符串
+                            resultIsArray ? result.push(Number(value)) : result[key] = Number(value);
+                            break;
+                        case "boolean": //字符串类型不做处理
+                            resultIsArray ? result.push(result[key] = (value === "true" ? true : false)) : (result[key] = (value === "true" ? true : false));
+                            break;
+                        case "object":
+                            resultIsArray ? (arrTypeResultLength = result.push({})) : (result[key] = {});
+                            if (plainData[i].children && plainData[i].children.length > 0) {
+                                foo(plainData[i].children, resultIsArray ? (result[arrTypeResultLength - 1]) : result[key]);
+                            }
+                            break;
+                        case "array":
+                            result[key] = [];
+                            if (plainData[i].children && plainData[i].children.length > 0) {
+                                foo(plainData[i].children, result[key]);
+                            }
+                            break;
+                        default: //字符串或其他类型类型不做处理
+                            resultIsArray ? result.push(value) : (result[key] = value);
+                            break;
+                    }
+                }
+            }
+            foo(plainData, result);
+            return result;
+        },
+        //=====================================获取远程数据==================================//
+
+        //=====================================前后端交互====================================//
+
+        //=====================================组件间交互====================================//  
         
         //=====================================其他操作=====================================//
 
@@ -135,37 +98,28 @@ export default {
 
 
 <style lang="scss">
-.s-tree-json {
+.tree-json {
     background: #1E1E1E;
-    // background: #F0F0F0;
     font-family: SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace;
     font-size: size(13);
-    .indent {
-        padding-left: 2em;
-    }
-    .key {
-        color: $blue,
-    }
-    .symbol {
-        color: $gray-300;
-    }
-    .string-value {
-        color: $orange;
-    }
-    .boolean-value {
-        color: #499CB3;
-    }
-    .number-value {
-        color: #80C0A8;
-    }
-    .comment {
-        color: #6A9955;
-    }
-
-}
-.json-wrap {
     padding: size(10) size(10);
     position: relative; //递归组件只在外层添加relative，否则offsetleft取值会出现问题
     border-radius: $border-radius-sm;
+    .operation {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        height: size(20);
+        color: $gray-500;
+        font-family: Helvetica Neue,Helvetica,PingFang SC,Hiragino Sans GB,Microsoft YaHei,SimSun,sans-serif;
+        .item {
+            cursor: pointer;
+            user-select: none;
+            margin-right: size(10);
+            &.active {
+                color: $green;
+            }
+        }
+    }
 }
 </style>
