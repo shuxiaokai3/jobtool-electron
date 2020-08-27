@@ -1,6 +1,6 @@
 import Vue from "vue";
 import Vuex from "vuex";
-import tabs from "./tabs/tabs"
+// import tabs from "./tabs/tabs"
 import viewTabs from "./view-tabs/view-tabs"
 import docs from "./docs/docs"
 import userInfo from "./userInfo/userInfo"
@@ -20,7 +20,7 @@ const store = new Vuex.Store({
         
     },
     modules: {
-        tabs,
+        // tabs,
         userInfo,
         docs,
         viewTabs,
