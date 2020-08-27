@@ -7,10 +7,10 @@
 export default {
     isDev: process.env.NODE_ENV === "development",
     updateConfig: {
-        version: "0.8.3",
+        version: "0.8.4",
         server: "http://job.xrdev.cn",
         filePath: "/electron/windows"
     },
-    onlineUrl: `file://${__dirname}/index.html`
-    // onlineUrl: "https://jobtool.cn"
+    // onlineUrl: `file://${__dirname}/index.html`
+    onlineUrl: "https://jobtool.cn"
 };

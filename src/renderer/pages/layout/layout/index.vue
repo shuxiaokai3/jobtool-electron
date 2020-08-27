@@ -21,6 +21,8 @@
                 </el-menu>
             </div>
             <div class="header-right mr-5 fr">
+                <!-- <div v-copy="ip" v-copy2="`http://${ip}`" class="mr-2 cursor-pointer">{{ ip }}</div> -->
+                <!-- <div class="mr-2 cursor-pointer" @click="getIp">ip</div> -->
                 <div class="operation">
                     <div title="刷新" class="op_item" @click="freshContent">
                         <span class="el-icon-refresh-right"></span>
@@ -56,10 +58,11 @@
 
 <script>
 let ipcRenderer = null;
-if (!process.env.IS_WEB) {
-    ipcRenderer = require("electron").ipcRenderer;
+if (window.require) {
+    ipcRenderer = window.require("electron").ipcRenderer;
 }
 import config from "@/../config.js"
+
 export default {
     data() {
         return {
@@ -67,7 +70,8 @@ export default {
             progress: 0,
             downloading: false,
             config,
-            isWeb: process.env.IS_WEB
+            isWeb: !window.require,
+            ip: null
         };
     },
     computed: {
@@ -84,7 +88,7 @@ export default {
     },
     methods: {
         initUploadEvent() {
-            if (!process.env.IS_WEB) {
+            if (window.require) {
                 //存在可用更新
                 ipcRenderer.on("vue-update-available", (e) => {
                     console.log("存在可用更新")
@@ -115,14 +119,13 @@ export default {
 
         },
         handleInstall() {
-            if (!process.env.IS_WEB) {
+            if (window.require) {
                 ipcRenderer.send("quit-and-install");          
             }
         },
-        //
         handleCheckUpdate() {
             this.downloading = true;
-            if (!process.env.IS_WEB) {
+            if (window.require) {
                 ipcRenderer.send("checkUpdate");      
             }
         },
@@ -143,7 +146,7 @@ export default {
         //=====================================页面操作====================================//
         //刷新页面
         freshContent() {
-            if (!process.env.IS_WEB) {
+            if (window.require) {
                 ipcRenderer.send("vue-fresh-content")      
             }
         },

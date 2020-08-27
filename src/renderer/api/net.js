@@ -1,4 +1,8 @@
-const { net } = require("electron").remote;
+let net = null;
+
+if (window.require){
+    net = window.require("electron").remote.net
+}
 
 
 class HttpClient {
@@ -107,7 +111,7 @@ class HttpClient {
 }
 
 
-export { HttpClient }
+export default HttpClient
 
 
 

@@ -6,14 +6,15 @@
  
 <script>
 let ipcRenderer = null;
-if (!process.env.IS_WEB) {
-    ipcRenderer = require("electron").ipcRenderer;
+if (window.require) {
+    ipcRenderer = window.require("electron").ipcRenderer;
 }
 
 export default {
     mounted() {
-        if (!process.env.IS_WEB) {
+        if (window.require) {
             window.addEventListener("keyup", (e) => {
+                // console.log(e, e.ctrlKey)
                 e.stopPropagation();
                 if (e.ctrlKey && e.key === "F5") {
                     e.preventDefault();

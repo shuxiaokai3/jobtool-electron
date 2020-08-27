@@ -103,16 +103,12 @@
 </template>
 
 <script>
-let HttpClient = null;
-let httpClient = null;
 import FileType from "file-type/browser";
 import querystring from "querystring"
 import { dfsForest } from "@/lib/utils"
 import uuid from "uuid/v4"
-if (!process.env.IS_WEB) {
-    HttpClient = require("@/api/net.js").HttpClient;
-    httpClient = new HttpClient();
-}
+import HttpClient from "@/api/net.js"
+const httpClient = new HttpClient();
 export default {
     components: {},
     props: {

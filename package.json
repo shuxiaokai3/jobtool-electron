@@ -1,6 +1,6 @@
 {
     "name": "jobtool",
-    "version": "0.8.3",
+    "version": "0.8.4",
     "author": "shuxiaokai <2581105856@qq.com>",
     "description": "An electron-vue project",
     "license": "MIT",
@@ -67,6 +67,7 @@
         "electron-updater": "^4.3.1",
         "element-ui": "^2.13.0",
         "file-type": "^14.7.1",
+        "ip": "^1.1.5",
         "js-cookie": "^2.2.1",
         "json5": "^2.1.1",
         "jszip": "^3.2.2",
