@@ -9,26 +9,40 @@
         <div v-loading="loading2" :element-loading-text="randomTip()" element-loading-background="rgba(255, 255, 255, 0.9)" class="border-right-teal w-65">
             <!-- 基本配置 -->
             <div class="request mb-2">
-                <div class="view-title w-100 f-bg mb-2">{{ request._description }}</div>
-                <div class="mb-2">
-                    <el-radio-group v-model="request.url.host" size="mini">
-                        <el-popover placement="top-start" trigger="hover" :close-delay="0" :content="origin">
-                            <el-radio slot="reference" :label="origin" border>本地</el-radio>
-                        </el-popover>
-                        <el-popover v-for="(item, index) in hostEnum" :key="index" :close-delay="0" placement="top-start" trigger="hover" :content="item.url">
-                            <el-radio slot="reference" :label="item.url" border>{{ item.name }}</el-radio>
-                        </el-popover>
-                    </el-radio-group>
-                    <el-button type="text" size="small" @click="dialogVisible = true;">域名维护</el-button>
-                </div>
-                <div class="d-flex a-center j-center">
-                    <el-tag>{{ request.methods.toUpperCase() }}</el-tag>
-                    <pre class="w-100">{{ request.url.host }}{{ request.url.path }}</pre>
+                <!-- <div class="d-flex a-center">
+                    <div>
+                        <el-radio-group v-model="request.url.host" size="mini">
+                            <el-popover placement="top-start" trigger="hover" :close-delay="0" :content="origin">
+                                <el-radio slot="reference" :label="origin" border>本地</el-radio>
+                            </el-popover>
+                            <el-popover v-for="(item, index) in hostEnum" :key="index" :close-delay="0" placement="top-start" trigger="hover" :content="item.url">
+                                <el-radio slot="reference" :label="item.url" border>{{ item.name }}</el-radio>
+                            </el-popover>
+                        </el-radio-group>
+                        <el-button type="text" size="small" @click="dialogVisible = true;">域名维护</el-button>
+                    </div>
                     <el-button v-if="!loading3" type="success" size="small" @click="sendRequest">发送请求</el-button>
                     <el-button v-if="loading3" type="danger" size="small" @click="stopRequest">取消请求</el-button>
                     <el-button type="primary" size="small" @click="dialogVisible3 = true">修改记录</el-button>
-                </div>
+                </div> -->
             </div>
+            <s-collapse title="基本信息" class="baseInfo">
+                <div>
+                    <div class="my-2 d-flex a-center">
+                        <span class="flex0">请求地址：</span>
+                        <s-ellipsis-content :value="request.url.host + request.url.path" max-width="100%"></s-ellipsis-content>
+                    </div>
+                    <div class="my-2">
+                        <span>请求方式：</span>
+                        <span class="green">{{ request.methods.toUpperCase() }}</span>
+                    </div>
+                    <div class="my-2">
+                        <span>文档id：</span>
+                        <span v-copy="currentSelectDoc._id" class="cursor-pointer theme-color">{{ currentSelectDoc._id }}</span>
+                        <span v-copy="currentSelectDoc._id" class="cursor-pointer">(点击复制)</span>
+                    </div>
+                </div>
+            </s-collapse>
             <!-- 请求参数 -->
             <div class="params-wrap">
                 <s-collapse title="请求头">
@@ -53,7 +67,6 @@
         </div>
         <s-history-dialog v-if="dialogVisible3" :visible.sync="dialogVisible3"></s-history-dialog>
         <s-host-manage v-if="dialogVisible" :visible.sync="dialogVisible" @change="getHostEnum"></s-host-manage>
-        <s-variable-manage v-if="dialogVisible2" :visible.sync="dialogVisible2" @change="handleVariableChange"></s-variable-manage>
     </div>
     <div v-else></div>
 </template>
@@ -62,7 +75,6 @@
 import axios from "axios" 
 import response from "./components/response"
 import hostManage from "./dialog/host-manage"
-import variableManage from "./dialog/variable-manage"
 import historyDialog from "./dialog/history"
 import { dfsForest, findParentNode } from "@/lib/utils"
 import uuid from "uuid/v4"
@@ -71,7 +83,6 @@ const CancelToken = axios.CancelToken;
 export default {
     components: {
         "s-host-manage": hostManage,
-        "s-variable-manage": variableManage,
         "s-response": response,
         "s-history-dialog": historyDialog,
     },
@@ -321,10 +332,7 @@ export default {
         .view-title {
             padding: size(5) size(10);
             height: size(38);
-            border: 1px solid transparent;
-            &:hover {
-                border: 1px dashed $gray-500;
-            }        
+            border: 1px dashed $gray-500;
         }
         .el-radio {
             margin-right: size(10);
