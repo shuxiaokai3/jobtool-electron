@@ -25,7 +25,7 @@ export default {
             }
         },
         checkData: {
-            type: [Object, Array],
+            type: [Object, Array, String, Number, Boolean],
             default() {
                 return {};
             },

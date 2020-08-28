@@ -64,7 +64,7 @@
                 <template v-for="(item, index) in requestData.header">
                     <div v-if="item.key" class="d-flex a-center mt" :key="index">
                         <span v-if="item.key" class="flex0">{{ item.key }}：</span>
-                        <s-ellipsis-content :value="convertVariable(item.value)" max-width="100%" copy></s-ellipsis-content>
+                        <s-ellipsis-content :value="convertVariable(item.value)" :max-width="300" copy></s-ellipsis-content>
                     </div>                    
                 </template>
             </template>
@@ -545,6 +545,9 @@ export default {
         },
         //=====================================其他操作=====================================//
         convertVariable(val) {
+            if (typeof val !== "string") {
+                val = val.toString();
+            }
             const matchedData = val.match(/{{\s*(\w+)\s*}}/);
             if (val && matchedData) {
                 const varInfo = this.variables.find(v => {
@@ -561,6 +564,7 @@ export default {
         },
         //获取参数类型
         getType(value) {
+            // console.log(value, 999)
             if (typeof value === "string") {
                 return "string"
             } else if (typeof value === "number") { //NaN
