@@ -9,7 +9,7 @@ if (window.require){
 class HttpClient {
     constructor(config = {}) {
         this.instance = null;
-        this.timeout = config.timeout || 3000; //超时时间
+        this.timeout = config.timeout || 30000; //超时时间
         this.timer = null;
     }
     request(url, options) {
