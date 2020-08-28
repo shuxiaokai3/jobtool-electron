@@ -542,7 +542,7 @@ export default {
                     this.$store.commit("apidocRules/changeCurrentCondition", {
                         connected: 1, 
                         status: res.status, 
-                        size: res.size,
+                        size: (res.size / 1024).toFixed(2),
                         localParams: 1, 
                         resType: res.resType, 
                     });
