@@ -50,7 +50,7 @@
                 </div>         
                 <div class="d-flex">
                 </div>       
-                <pre class="w-100">{{ request.url.host }}{{ request.url.path }}</pre>
+                <pre v-copy="request.url.path" v-copy2="request.url.host + request.url.path" class="w-100">{{ request.url.host }}{{ request.url.path }}</pre>
                 <div class="w-100 mt-2">
                     <el-radio-group v-model="request.requestType">
                         <el-radio :disabled="request.methods !== 'get'" label="query">query</el-radio>

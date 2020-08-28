@@ -5,9 +5,13 @@
     备注：xxxx
 */
 <template>
-    <el-tooltip effect="light" placement="top-start" :content="value.toString()" :disabled="isOverflow">
-        <span ref="text" class="s-ellipsis-content" @dblclick="handleSelect">{{ value }}</span>
-    </el-tooltip>
+    <span v-copy="value" :class="{'cursor-pointer': value}">
+        <el-tooltip effect="light" placement="top-start" :content="value.toString()" :disabled="isOverflow">
+            <span ref="text" class="s-ellipsis-content" @dblclick="handleSelect">{{ value }}</span>
+        </el-tooltip>        
+        <span v-if="copy" class="el-icon-document-copy cursor-pointer orange"></span>
+    </span>
+
 </template>
 
 <script>
@@ -20,6 +24,10 @@ export default {
         maxWidth: {
             type: [String, Number],
             default: 100
+        },
+        copy: {
+            type: [Boolean],
+            default: false
         }
     },
     watch: {

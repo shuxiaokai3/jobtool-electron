@@ -194,6 +194,7 @@ export default {
                     this.currentCondition.connected = 1; //连通
                     this.currentCondition.status = this.responseData.status;
                     this.currentCondition.size = this.responseData.size;
+                    this.checkResponseParams()
                     resolve(response);
                 }).catch(err => {
                     console.error(err);

@@ -27,6 +27,7 @@ class Copy {
         dom.style.left = this.x + "px";
         dom.style.top = this.y + "px";
         dom.style["whiteSpace"] = "nowrap";
+        dom.style["zIndex"] = "1";
         dom.style.transform = `translate3D(0, -1em, 0)`;
         document.documentElement.appendChild(dom);
         requestAnimationFrame(() => {
@@ -37,7 +38,7 @@ class Copy {
         })
         setTimeout(() => {
             document.documentElement.removeChild(dom);
-        }, 600);
+        }, 800);
     }
 }
 

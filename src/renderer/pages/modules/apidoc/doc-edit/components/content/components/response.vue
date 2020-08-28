@@ -10,7 +10,11 @@
             <div>
                 <div class="my-2 d-flex a-center">
                     <span class="flex0">请求地址：</span>
-                    <s-ellipsis-content :value="requestData.url.host + requestData.url.path" max-width="100%"></s-ellipsis-content>
+                    <div v-copy="requestData.url.host" v-copy2="requestData.url.host + requestData.url.path" title="鼠标左键右键拷贝内容不一样">
+                        <s-ellipsis-content class="cursor-pointer" :value="requestData.url.host + requestData.url.path" max-width="100%"></s-ellipsis-content>
+                        <span class="el-icon-document-copy cursor-pointer orange"></span>
+                    </div>
+                    
                 </div>
                 <div class="my-2">
                     <span>请求方式：</span>
@@ -57,10 +61,12 @@
         </s-collapse>
         <s-collapse title="请求头">
             <template v-if="requestData.header.length > 1">
-                <div v-for="(item, index) in requestData.header" :key="index" class="d-flex a-center mt">
-                    <span v-if="item.key" class="flex0">{{ item.key }}：</span>
-                    <s-ellipsis-content :value="convertVariable(item.value)" :max-width="200"></s-ellipsis-content>
-                </div>
+                <template v-for="(item, index) in requestData.header">
+                    <div v-if="item.key" class="d-flex a-center mt" :key="index">
+                        <span v-if="item.key" class="flex0">{{ item.key }}：</span>
+                        <s-ellipsis-content :value="convertVariable(item.value)" max-width="100%" copy></s-ellipsis-content>
+                    </div>                    
+                </template>
             </template>
             <div v-else class="f-xs gray-500">暂无数据</div>
         </s-collapse>
@@ -209,6 +215,7 @@ export default {
                     this.currentCondition.connected = 1; //连通
                     this.currentCondition.status = this.responseData.status;
                     this.currentCondition.size = this.responseData.size;
+                    this.checkResponseParams()
                     resolve(response);
                 }).catch(err => {
                     console.error(err);
