@@ -1,3 +1,4 @@
+import qs from "qs"
 let net = null;
 
 if (window.require){
@@ -12,10 +13,15 @@ class HttpClient {
         this.timer = null;
     }
     request(url, options) {
+        const requestData = options.data;
         if (typeof url !== "string") {
             throw new Error("请求url必须为字符串");
         }
-        const requestData = options.data;
+        if (options.method === "get") {
+            url = url + "?" + qs.stringify(options.data);
+        }
+       
+        console.log(url)
         const requestOptions = {
             url: url,
             method: options.method,
