@@ -8,6 +8,7 @@
 <template>
     <div 
             class="widget-card" 
+            :class="{shadow: shadow}"
             :style="{ width: width }"
     >
         <header v-if="$slots.operation || title" :class="{collapse: collapse}">
@@ -51,6 +52,10 @@ export default {
             type: Boolean,
             default: false
         },
+        shadow: {
+            type: Boolean,
+            default: false
+        }
     },
     watch: {
         fold(val) {
@@ -83,6 +88,9 @@ export default {
     border-radius: $border-radius-base;
     display: flex;
     flex-direction: column;
+    &.shadow {
+        box-shadow: $box-shadow;
+    }
     // 头部
     .collapse {
         user-select: none;

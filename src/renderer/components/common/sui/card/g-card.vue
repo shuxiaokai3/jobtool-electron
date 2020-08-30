@@ -11,6 +11,7 @@
             :element-loading-text="randomTip()"
             element-loading-background="rgba(255, 255, 255, 0.9)"
             class="s-card" 
+            :class="{shadow: shadow}"
             :style="{width: width, display: inline ? 'inline-block' : 'block'}"
     >
         <header v-if="$slots.operation || title">
@@ -49,6 +50,10 @@ export default {
             type: String,
             default: "5px 10px"
         },
+        shadow: {
+            type: Boolean,
+            default: false
+        }
     },
     data() {
         return {
@@ -67,7 +72,7 @@ export default {
 
 
 
-<style lang="scss">
+<style lang="scss" scoped>
 .s-card {
     width: 100%;
     border: 1px solid #ecf5ff;
@@ -75,6 +80,9 @@ export default {
     border-radius: 3px;
     padding-bottom: 10px;//请不要添加margin和padding，会导致高度计算出错，出现滚动条
     // box-shadow: 0 3px 3px #eee;
+    &.shadow {
+        box-shadow: $box-shadow;
+    }
 }
 .s-card header {
     display: flex;
