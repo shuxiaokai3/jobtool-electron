@@ -44,7 +44,7 @@
                         <i class="el-icon-arrow-down el-icon--right"></i>
                     </span>
                     <el-dropdown-menu slot="dropdown">
-                        <el-dropdown-item>个人中心</el-dropdown-item>
+                        <el-dropdown-item @click.native="jumpToUserSetting">个人中心</el-dropdown-item>
                         <el-dropdown-item v-if="!isWeb" :disabled="downloading" @click.native="handleCheckUpdate">检查更新</el-dropdown-item>
                         <el-dropdown-item >版本{{ config.updateConfig.version }}</el-dropdown-item>
                         <el-dropdown-item @click.native="logout">退出登陆</el-dropdown-item>
@@ -136,6 +136,10 @@ export default {
         //跳转到首页
         jumpToHome() {
             this.$router.push("/v1/apidoc/doc-list");
+        },
+        //跳转到用户设置
+        jumpToUserSetting() {
+            this.$router.push("/v1/settings/user")
         },
         //退出登录
         logout() {

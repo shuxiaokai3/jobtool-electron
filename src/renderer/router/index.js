@@ -39,6 +39,14 @@ const allRoutes = [
         component: docView,
     },
     {
+        path: "/v1/settings/user",
+        name: "设置-用户信息",
+        meta: {
+            title: "用户信息"
+        },
+        component: () => import("@/pages/modules/settings/user/user"),
+    },
+    {
         path: "/v1/b/b",
         name: "项目管理-常用网站列表",
         meta: {
