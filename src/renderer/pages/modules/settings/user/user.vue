@@ -15,7 +15,6 @@
                 <div class="w-50 flex0">
                     <h2>
                         <span>周杰伦</span>
-                        <span class="f-bg el-icon-edit cursor-pointer hover-theme-color"></span>
                     </h2>
                     <div class="px-3">
                         <s-label-value label="部门：" value="测试部门" class="w-45"></s-label-value>
@@ -41,11 +40,19 @@ export default {
         };
     },
     created() {
-
+        this.getUserBaseInfo();
     },
     methods: {
         //=====================================获取远程数据==================================//
-
+        getUserBaseInfo() {
+            this.axios.get("/api/security/user_info").then(res => {
+                
+            }).catch(err => {
+                console.error(err);
+            }).finally(() => {
+                this.loading = false;
+            });
+        },
         //=====================================前后端交互====================================//
 
         //=====================================组件间交互====================================//  

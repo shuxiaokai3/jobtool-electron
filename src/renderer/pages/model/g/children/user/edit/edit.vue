@@ -61,7 +61,7 @@ export default {
         //获取用户基本信息
         getUserInfo() {
             this.loading2 = true;
-            this.axios.get("/api/security/user_info", { params: { _id: this.id }}).then(res => {
+            this.axios.get("/api/security/user_info_by_id", { params: { _id: this.id }}).then(res => {
                 this.formInfo = res.data;
             }).catch(err => {
                 this.$errorThrow(err, this);
