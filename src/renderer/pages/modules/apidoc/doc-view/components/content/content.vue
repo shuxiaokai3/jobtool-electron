@@ -8,24 +8,6 @@
     <div v-if="tabs && tabs.length > 0" class="view-content d-flex" tabindex="0">
         <div v-loading="loading2" :element-loading-text="randomTip()" element-loading-background="rgba(255, 255, 255, 0.9)" class="border-right-teal w-65">
             <!-- 基本配置 -->
-            <div class="request mb-2">
-                <!-- <div class="d-flex a-center">
-                    <div>
-                        <el-radio-group v-model="request.url.host" size="mini">
-                            <el-popover placement="top-start" trigger="hover" :close-delay="0" :content="origin">
-                                <el-radio slot="reference" :label="origin" border>本地</el-radio>
-                            </el-popover>
-                            <el-popover v-for="(item, index) in hostEnum" :key="index" :close-delay="0" placement="top-start" trigger="hover" :content="item.url">
-                                <el-radio slot="reference" :label="item.url" border>{{ item.name }}</el-radio>
-                            </el-popover>
-                        </el-radio-group>
-                        <el-button type="text" size="small" @click="dialogVisible = true;">域名维护</el-button>
-                    </div>
-                    <el-button v-if="!loading3" type="success" size="small" @click="sendRequest">发送请求</el-button>
-                    <el-button v-if="loading3" type="danger" size="small" @click="stopRequest">取消请求</el-button>
-                    <el-button type="primary" size="small" @click="dialogVisible3 = true">修改记录</el-button>
-                </div> -->
-            </div>
             <s-collapse title="基本信息" class="baseInfo">
                 <div>
                     <div class="my-2 d-flex a-center">
@@ -42,15 +24,38 @@
                         <span v-copy="currentSelectDoc._id" class="cursor-pointer">(点击复制)</span>
                     </div>
                 </div>
+
+            </s-collapse>
+            <s-collapse title="操作">
+                <div class="request mb-2">
+                    <div class="d-flex a-center">
+                        <div>
+                            <el-radio-group v-model="request.url.host" size="mini">
+                                <el-popover placement="top-start" trigger="hover" :close-delay="0" content="mock">
+                                    <el-radio slot="reference" label="__mock__" border>mock</el-radio>
+                                </el-popover>
+                                <el-popover v-for="(item, index) in hostEnum" :key="index" :close-delay="0" placement="top-start" trigger="hover" :content="item.url">
+                                    <el-radio slot="reference" :label="item.url" border>{{ item.name }}</el-radio>
+                                </el-popover>
+                            </el-radio-group>
+                        </div>
+                        <el-button v-if="!loading3" type="success" size="mini" @click="sendRequest">发送请求</el-button>
+                        <el-button v-if="loading3" type="danger" size="mini" @click="stopRequest">取消请求</el-button>
+                        <el-button size="mini" type="primary" @click="dialogVisible2 = true;">变量管理</el-button>
+                        <el-button type="primary" size="mini" @click="dialogVisible3 = true">修改记录</el-button>
+                    </div>
+                </div>                
             </s-collapse>
             <!-- 请求参数 -->
             <div class="params-wrap">
                 <s-collapse title="请求头">
                     <template v-if="request.header.length > 1">
-                        <div v-for="(item, index) in request.header" :key="index" class="d-flex a-center mt">
-                            <span v-if="item.key" class="flex0">{{ item.key }}：</span>
-                            <s-ellipsis-content :value="item.value" :max-width="200"></s-ellipsis-content>
-                        </div>
+                        <template v-for="(item, index) in request.header">
+                            <div v-if="item.key" class="d-flex a-center mt" :key="index">
+                                <span v-if="item.key" class="flex0">{{ item.key }}：</span>
+                                <s-ellipsis-content :value="convertVariable(item.value)" :max-width="400" copy></s-ellipsis-content>
+                            </div>                    
+                        </template>
                     </template>
                     <div v-else class="f-xs gray-500">暂无数据</div>
                 </s-collapse>
@@ -67,6 +72,7 @@
         </div>
         <s-history-dialog v-if="dialogVisible3" :visible.sync="dialogVisible3"></s-history-dialog>
         <s-host-manage v-if="dialogVisible" :visible.sync="dialogVisible" @change="getHostEnum"></s-host-manage>
+        <s-variable-manage v-if="dialogVisible2" :visible.sync="dialogVisible2" @change="handleVariableChange"></s-variable-manage>
     </div>
     <div v-else></div>
 </template>
@@ -76,6 +82,7 @@ import axios from "axios"
 import response from "./components/response"
 import hostManage from "./dialog/host-manage"
 import historyDialog from "./dialog/history"
+import variableManage from "./dialog/variable-manage"
 import { dfsForest, findParentNode } from "@/lib/utils"
 import uuid from "uuid/v4"
 import qs from "qs"
@@ -85,6 +92,7 @@ export default {
         "s-host-manage": hostManage,
         "s-response": response,
         "s-history-dialog": historyDialog,
+        "s-variable-manage": variableManage,
     },
     data() {
         return {
@@ -133,7 +141,6 @@ export default {
                 _description: "", //-------------请求描述拷贝
                 _variableChange: true, //----------hack强制触发request数据发生改变
             },
-            origin: location.origin,
             //=====================================域名相关====================================//
             hostEnum: [], //---------------------域名列表
             //=====================================其他参数====================================//
@@ -172,6 +179,10 @@ export default {
                 }
             });
             return copyData;
+        },
+        //全局变量
+        variables() {
+            return this.$store.state.apidoc.variables || [];
         },
     },
     watch: {
@@ -299,8 +310,10 @@ export default {
         //=====================================发送请求====================================//
         //发送请求
         sendRequest() {
+            console.log(this.request.url.host)
             this.loading3 = true;
-            this.$refs["response"].sendRequest().then(() => {
+            const isMock = this.request.url.host === "__mock__";
+            this.$refs["response"].sendRequest(isMock).then(() => {
                 
             }).catch(err => {
                 console.error(err);
@@ -314,6 +327,22 @@ export default {
             this.$refs["response"].stopRequest();
         },
         //=====================================其他操作=====================================//
+        convertVariable(val) {
+            console.log(val, this.variables)
+            const matchedData = val.match(/{{\s*(\w+)\s*}}/);
+            if (val && matchedData) {
+                const varInfo = this.variables.find(v => {
+                    return v.name === matchedData[1];
+                });
+                if (varInfo) {
+                    return val.replace(/{{\s*(\w+)\s*}}/, varInfo.value);
+                } else {
+                    return val;
+                }
+            } else {
+                return val;
+            }
+        },
         //全局变量改变
         handleVariableChange() {
             console.log("change")

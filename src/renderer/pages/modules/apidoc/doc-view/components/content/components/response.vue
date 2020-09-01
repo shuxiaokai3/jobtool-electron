@@ -93,6 +93,7 @@ import querystring from "querystring"
 import { dfsForest } from "@/lib/utils"
 import uuid from "uuid/v4"
 import HttpClient from "@/api/net.js"
+import { BaseConfig } from "@/config.default"
 const httpClient = new HttpClient();
 export default {
     components: {},
@@ -171,12 +172,21 @@ export default {
     },
     methods: {
         //=====================================发送请求====================================//
-        sendRequest() {
+        sendRequest(isMock) {
             return new Promise((resolve, reject) => {
                 this.loading = true;
                 const requestInfo = this.formatRequestParams();
                 const urllibOptions = this.formatUrllibOptions(requestInfo);
                 console.log("请求参数", urllibOptions)
+                if (isMock) {
+                    if (process.env.NODE_ENV === "development") {
+                        requestInfo.url = `${BaseConfig.devUrl}/api/project/doc_mock`;
+                    } else {
+                        requestInfo.url = `${BaseConfig.proUrl}/api/project/doc_mock`;
+                    }
+                    urllibOptions.method = "get";
+                    urllibOptions.data._id = this.currentSelectDoc._id;
+                } 
                 httpClient.request(requestInfo.url, {
                     method: urllibOptions.method,
                     headers: urllibOptions.headers,
