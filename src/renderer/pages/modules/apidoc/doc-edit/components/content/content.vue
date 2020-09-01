@@ -255,13 +255,10 @@ export default {
     mounted() {
         this.getHostEnum(); //获取host枚举值
         this.getPresetEnum(); //获取快捷参数枚举值
-        window.addEventListener("keydown", (e) => {
-            if (this.tabs && this.tabs.length > 0 && e.ctrlKey && e.key === "s" && this.loading === false) {
-                e.preventDefault();
-                e.stopPropagation();
-                this.saveRequest()
-            }
-        })
+        window.addEventListener("keydown", this.shortcutSave)
+    },
+    beforeDestroy() {
+        window.removeEventListener("keydown", this.shortcutSave)
     },
     methods: {
         //=====================================获取数据====================================//
@@ -501,6 +498,7 @@ export default {
         saveRequest() {
             const validParams = this.validateParams();
             if (validParams) {
+                console.log(this.currentSelectDoc, this.request, "selected")
                 const params = {
                     _id: this.currentSelectDoc._id,
                     projectId: this.$route.query.id,
@@ -520,9 +518,9 @@ export default {
                 this.saveMindParams(); //保存快捷联想参数
                 this.loading = true;
                 this.axios.post("/api/project/fill_doc", params).then(() => {
-                    this.$store.commit("changeTabInfo", {
+                    this.$store.commit("apidoc/changeTabInfoById", {
                         projectId: this.$route.query.id,
-                        tabId: this.currentSelectDoc._id,
+                        _id: this.currentSelectDoc._id,
                         method: this.request.methods,
                     })
                 }).catch(err => {
@@ -721,11 +719,19 @@ export default {
                 val._projectId = this.$route.query.id
             })
             // console.log(mindRequestParams, mindResponseParams)
-            this.axios.post("/api/project/doc_params_mind", { mindParamsList }).then(res => {
+            // this.axios.post("/api/project/doc_params_mind", { mindParamsList }).then(res => {
                 
-            }).catch(err => {
-                console.error(err);
-            });
+            // }).catch(err => {
+            //     console.error(err);
+            // });
+        },
+        //ctrl + s 保存
+        shortcutSave(e) {
+            if (this.tabs && this.tabs.length > 0 && e.ctrlKey && e.key === "s" && this.loading === false) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.saveRequest()
+            }
         },
         //=====================================其他操作=====================================//
         //检查参数是否完备
