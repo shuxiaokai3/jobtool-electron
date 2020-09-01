@@ -64,7 +64,6 @@ export default {
                 Vue.set(state.tabs, projectId, []);
             }
             state.tabs[projectId] = tabs;
-            localStorage.setItem("apidoc/editTabs", JSON.stringify(state.tabs))
         },
         //根据位置删除tab
         deleteTabByPosition(state, payload) {
