@@ -20,16 +20,18 @@
         />
         <script src="https://at.alicdn.com/t/font_1072300_rnwjdjn05yb.js"></script>
         <script src="https://cdn.bootcdn.net/ajax/libs/echarts/4.8.0/echarts.min.js"></script>
-        <script>
-            var _hmt = _hmt || [];
-            (function() {
-                var hm = document.createElement("script");
-                hm.src =
-                    "https://hm.baidu.com/hm.js?5dec8380d36d7ec5894fcbb8dd26bf00";
-                var s = document.getElementsByTagName("script")[0];
-                s.parentNode.insertBefore(hm, s);
-            })();
-        </script>
+        <% if (process.env.NODE_ENV === "production") { %>
+            <script>
+                var _hmt = _hmt || [];
+                (function() {
+                    var hm = document.createElement("script");
+                    hm.src =
+                        "https://hm.baidu.com/hm.js?5dec8380d36d7ec5894fcbb8dd26bf00";
+                    var s = document.getElementsByTagName("script")[0];
+                    s.parentNode.insertBefore(hm, s);
+                })();
+            </script>            
+        <% } %>
     </head>
     <body>
         <div id="app"></div>
