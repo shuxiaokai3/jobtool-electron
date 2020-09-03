@@ -37,12 +37,12 @@
                     >
                         <!-- file渲染 -->
                         <template v-if="!scope.data.isFolder">
-                            <span v-if="scope.data.item.methods === 'get'" class="label green">get</span>
-                            <span v-else-if="scope.data.item.methods === 'post'" class="label yellow">post</span>
-                            <span v-else-if="scope.data.item.methods === 'put'" class="label blue">put</span>
-                            <span v-else-if="scope.data.item.methods === 'delete'" class="label red">del</span>  
+                            <span v-if="scope.data.item.methods === 'get'" :class="{'gray-400': !scope.data.publish, green: scope.data.publish}" class="label">get</span>
+                            <span v-else-if="scope.data.item.methods === 'post'" :class="{'gray-400': !scope.data.publish, yellow: scope.data.publish}" class="label">post</span>
+                            <span v-else-if="scope.data.item.methods === 'put'" :class="{'gray-400': !scope.data.publish, blue: scope.data.publish}" class="label">put</span>
+                            <span v-else-if="scope.data.item.methods === 'delete'" :class="{'gray-400': !scope.data.publish, red: scope.data.publish}" class="label">del</span>  
                             <img v-else :src="require('@/assets/imgs/apidoc/file.png')" width="16px" height="16px"/> 
-                            <s-emphasize v-if="renameNodeId !== scope.data._id" :title="scope.data.docName" :value="scope.data.docName" :keyword="queryData" class="node-name text-ellipsis ml-1"></s-emphasize>
+                            <s-emphasize v-if="renameNodeId !== scope.data._id" :title="scope.data.docName" :value="scope.data.docName" :keyword="queryData" :class="{'gray-400': !scope.data.publish}" class="node-name text-ellipsis ml-1"></s-emphasize>
                             <!-- <span v-if="renameNodeId !== scope.data._id" :title="scope.data.docName" class="node-name text-ellipsis ml-1">{{ scope.data.docName }}</span> -->
                             <input v-else v-model="scope.data.docName" placeholder="不能为空" type="text" class="rename-ipt f-sm ml-1" @blur="handleChangeNodeName(scope.data)" @keydown.enter="handleChangeNodeName(scope.data)">
                         </template>
@@ -57,7 +57,6 @@
             </el-tree>
         </div>
         <!-- 弹窗 -->
-        
     </div>
 </template>
 
@@ -71,6 +70,7 @@ export default {
     },
     computed: {
         navTreeData() { //----树形导航数据
+            console.log(this.$store.state.apidoc.banner)
             return this.$store.state.apidoc.banner;
         },
         tabs() { //-----------全部tabs
@@ -150,7 +150,6 @@ export default {
             this.multiSelectNode = [];
 
         },
-      
         //=====================================前后端交互====================================//
         handleSearchTree() {
             this.search();
@@ -196,7 +195,6 @@ export default {
                 });
             }
         },
-       
         //=====================================弹窗相关====================================//  
         //=====================================其他操作=====================================//
         //清除contextmenu
