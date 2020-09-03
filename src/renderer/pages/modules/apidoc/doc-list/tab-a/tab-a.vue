@@ -45,7 +45,8 @@
                         <span class="teal">{{ item.docNum }}</span>
                     </div>
                     <div class="ml-auto">
-                        <el-button type="primary" size="mini" @click="jumpToProject(item._id, item.projectName)">进入</el-button>
+                        <el-button v-if="item.owner.name !== userInfo.realName && (item.members && item.members.find(m => m.realName === userInfo.realName && m.permission === 'readOnly'))" type="primary" size="mini" @click="handleView(item)">查看</el-button>
+                        <el-button v-else type="primary" size="mini" @click="jumpToProject(item._id, item.projectName)">进入</el-button>
                     </div>
                 </div>
             </div>
@@ -76,6 +77,11 @@ export default {
             dialogVisible2: false, //修改项目弹窗
             loading: false, //-------数据加载状态
         };
+    },
+    computed: {
+        userInfo() {
+            return this.$store.state.permission.userInfo
+        },
     },
     created() {
         this.getProjectList(); //获取项目列表
