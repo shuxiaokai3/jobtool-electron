@@ -87,12 +87,12 @@ const allRoutes = [
         component: () => import("@/pages/model/e/e")
     },
     {
-        path: "/v1/g/g",
+        path: "/v1/permission/permission",
         name: "权限管理",
         meta: {
             title: "权限管理"
         },
-        component: () => import("@/pages/model/g/g")
+        component: () => import("@/pages/modules/permission/permission")
     },
 ]
 
