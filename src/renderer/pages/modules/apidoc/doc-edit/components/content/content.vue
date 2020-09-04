@@ -123,7 +123,7 @@
         </div>
         <s-host-manage v-if="dialogVisible" :visible.sync="dialogVisible" @change="getHostEnum"></s-host-manage>
         <s-variable-manage v-if="dialogVisible2" :visible.sync="dialogVisible2" @change="handleVariableChange"></s-variable-manage>
-        <s-json-schema :visible.sync="dialogVisible3" plain @success="handleConvertJsonToRequestParams"></s-json-schema>
+        <s-json-schema :visible.sync="dialogVisible3" :plain="request.methods === 'get'" @success="handleConvertJsonToRequestParams"></s-json-schema>
         <s-json-schema :visible.sync="dialogVisible4" @success="handleConvertJsonToResponseParams"></s-json-schema>
         <s-preset-params :visible.sync="dialogVisible5" :type="presetParamsType" @success="getPresetEnum"></s-preset-params>
     </div>
@@ -579,6 +579,7 @@ export default {
         //=====================================快捷操作====================================//
         handleConvertJsonToRequestParams(val) {
             this.request.requestParams = val;
+            
         },
         handleConvertJsonToResponseParams(val) {
             this.request.responseParams = val;
