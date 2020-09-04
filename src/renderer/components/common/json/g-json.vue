@@ -6,6 +6,7 @@
 */
 <template>
     <div class="json-wrap">
+        <!-- <pre>{{ checkData }}</pre> -->
         <div class="operation">
             <div class="item" title="默认情况数组数据只展示一个，展示全部将显示完整数据" :class="{active: activeFullArray}" @click="activeFullArray = !activeFullArray">完整数据</div>
             <div class="item" title="将当前返回值应用为响应参数" @click="handleExport">应用为响应值</div>

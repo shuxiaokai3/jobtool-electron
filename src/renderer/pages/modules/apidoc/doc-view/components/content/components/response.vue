@@ -143,11 +143,6 @@ export default {
         variables() {
             return this.$store.state.apidoc.variables || [];
         },
-        // //发送请求---取消请求 文案
-        // sendText() {
-
-        // }
-       
     },
     watch: {
         currentSelectDoc: {
@@ -192,7 +187,7 @@ export default {
                     headers: urllibOptions.headers,
                     data: urllibOptions.data
                 }).then(response => {
-                    console.log(response);
+                    console.log(response, "res");
                     this.responseData = {};
                     this.responseData.headers = response.headers;
                     this.responseData.rt = response.rt;
@@ -481,6 +476,7 @@ export default {
                 this.checkJsonData = localParams;
                 let responseErrorType = null;
                 const hasOwn = Object.hasOwnProperty;
+                console.log(localParams)
                 if (Object.keys(localParams).length === 0) {
                     responseErrorType = "lackKey"
                 }

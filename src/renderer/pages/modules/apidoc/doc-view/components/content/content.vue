@@ -8,23 +8,69 @@
     <div v-if="tabs && tabs.length > 0" class="view-content d-flex" tabindex="0">
         <div v-loading="loading2" :element-loading-text="randomTip()" element-loading-background="rgba(255, 255, 255, 0.9)" class="border-right-teal w-65">
             <!-- 基本配置 -->
-            <s-collapse title="基本信息" class="baseInfo">
-                <div>
-                    <div class="my-2 d-flex a-center">
-                        <span class="flex0">请求地址：</span>
-                        <s-ellipsis-content :value="request.url.host + request.url.path" max-width="100%"></s-ellipsis-content>
+            <s-collapse title="基本信息">
+                <div class="d-flex">
+                    <div class="w-60 flex0">
+                        <div class="my-2 d-flex a-center">
+                            <span class="flex0">请求地址：</span>
+                            <s-ellipsis-content :value="request.url.host + request.url.path" max-width="100%"></s-ellipsis-content>
+                        </div>
+                        <div class="my-2">
+                            <span>请求方式：</span>
+                            <span class="green">{{ request.methods.toUpperCase() }}</span>
+                        </div>
+                        <div class="my-2">
+                            <span>文档id：</span>
+                            <span v-copy="currentSelectDoc._id" class="cursor-pointer theme-color">{{ currentSelectDoc._id }}</span>
+                            <span v-copy="currentSelectDoc._id" class="cursor-pointer">(点击复制)</span>
+                        </div>
                     </div>
-                    <div class="my-2">
-                        <span>请求方式：</span>
-                        <span class="green">{{ request.methods.toUpperCase() }}</span>
-                    </div>
-                    <div class="my-2">
-                        <span>文档id：</span>
-                        <span v-copy="currentSelectDoc._id" class="cursor-pointer theme-color">{{ currentSelectDoc._id }}</span>
-                        <span v-copy="currentSelectDoc._id" class="cursor-pointer">(点击复制)</span>
+                    <div>
+                        <div class="my-2">
+                            <span>文档状态：</span>
+                            <el-tag v-if="!docInfo.publish" size="mini" type="info">草稿</el-tag>
+                            <el-tag v-if="docInfo.publish" size="mini" type="success">已发布</el-tag>
+                        </div> 
+                        <div class="my-2">
+                            <span>最近发布人：</span>
+                            <template v-if="docInfo.publishRecords && docInfo.publishRecords[0]">
+                                <span>{{ docInfo.publishRecords[docInfo.publishRecords.length - 1].publisher }}</span>
+                            </template>
+                            <template v-else>
+                                /
+                            </template>
+                        </div>  
+                        <div class="my-2 d-flex a-center">
+                            <span>最近发布时间：</span>
+                            <template v-if="docInfo.publishRecords && docInfo.publishRecords[0]">
+                                <span class="mr-2">{{ new Date(docInfo.publishRecords[docInfo.publishRecords.length - 1].time).toLocaleString() }}</span>
+                                <el-popover placement="top-start" width="300" trigger="hover">
+                                    <el-table :data="publishRecords" size="mini">
+                                        <el-table-column prop="publisher" label="发布者" align="center"></el-table-column>
+                                        <el-table-column prop="time" label="发布时间" align="center">
+                                            <template slot-scope="scope">
+                                                {{ new Date(scope.row.time).toLocaleString() }}
+                                            </template>
+                                        </el-table-column>
+                                    </el-table>
+                                    <svg slot="reference" class="svg-icon" aria-hidden="true" @click="dialogVisible4 = true">
+                                        <use xlink:href="#iconlishi"></use>
+                                    </svg> 
+                                </el-popover>
+                            </template>
+                            <template v-else>
+                                /
+                            </template>
+                        </div>    
+                        <div class="my-2 d-flex a-center">
+                            <span>最近更新日期：</span>
+                            <span class="mr-2">{{ new Date(docInfo.updatedAt).toLocaleString() }}</span>
+                            <svg class="svg-icon" aria-hidden="true" @click="dialogVisible4 = true">
+                                <use xlink:href="#iconlishi"></use>
+                            </svg> 
+                        </div>  
                     </div>
                 </div>
-
             </s-collapse>
             <s-collapse title="操作">
                 <div class="request mb-2">
@@ -42,7 +88,7 @@
                         <el-button v-if="!loading3" type="success" size="mini" @click="sendRequest">发送请求</el-button>
                         <el-button v-if="loading3" type="danger" size="mini" @click="stopRequest">取消请求</el-button>
                         <el-button size="mini" type="primary" @click="dialogVisible2 = true;">变量管理</el-button>
-                        <el-button type="primary" size="mini" @click="dialogVisible3 = true">修改记录</el-button>
+                        <el-button type="primary" size="mini" @click="handleGetHistoryRecord">修改记录</el-button>
                     </div>
                 </div>                
             </s-collapse>
@@ -70,7 +116,6 @@
         <div class="w-35 flex1">
             <s-response ref="response" :request-data="request"></s-response>
         </div>
-        <s-history-dialog v-if="dialogVisible3" :visible.sync="dialogVisible3"></s-history-dialog>
         <s-host-manage v-if="dialogVisible" :visible.sync="dialogVisible" @change="getHostEnum"></s-host-manage>
         <s-variable-manage v-if="dialogVisible2" :visible.sync="dialogVisible2" @change="handleVariableChange"></s-variable-manage>
     </div>
@@ -141,6 +186,7 @@ export default {
                 _description: "", //-------------请求描述拷贝
                 _variableChange: true, //----------hack强制触发request数据发生改变
             },
+            docInfo: {}, //----------------------文档基本信息
             //=====================================域名相关====================================//
             hostEnum: [], //---------------------域名列表
             //=====================================其他参数====================================//
@@ -150,7 +196,6 @@ export default {
             loading3: false, //------------------发送请求状态
             dialogVisible: false, //-------------域名维护弹窗
             dialogVisible2: false, //------------全局变量管理弹窗
-            dialogVisible3: false, //------------历史记录弹窗
             ready: false, //---------------------是否完成第一次数据请求
         };
     },
@@ -184,6 +229,17 @@ export default {
         variables() {
             return this.$store.state.apidoc.variables || [];
         },
+        publishRecords() {
+            if (this.docInfo.publishRecords) {
+                return this.docInfo.publishRecords.sort((a, b) => {
+                    const aTime = new Date(a.time).valueOf();
+                    const bTime = new Date(b.time).valueOf();
+                    return bTime - aTime;
+                })
+            } else {
+                return []
+            }
+        }
     },
     watch: {
         currentSelectDoc: {
@@ -239,6 +295,7 @@ export default {
                 this.request.requestParams.forEach(val => this.$set(val, "id", val._id))
                 this.request.responseParams.forEach(val => this.$set(val, "id", val._id))
                 this.request.header.forEach(val => this.$set(val, "id", val._id))
+                this.docInfo = res.data;
 
 
                 const reqParams = this.request.requestParams;
@@ -307,6 +364,20 @@ export default {
                 children: [], //---------子参数
             };
         },
+        //获取文档历史修改记录
+        handleGetHistoryRecord() {
+            const params = {
+                projectId: this.$route.query.id,
+                docId: this.currentSelectDoc._id
+            };
+            this.axios.get("/api/docs/docs_history", { params }).then(res => {
+                
+            }).catch(err => {
+                console.error(err);
+            }).finally(() => {
+                this.loading = false;
+            });
+        },
         //=====================================发送请求====================================//
         //发送请求
         sendRequest() {
@@ -328,7 +399,6 @@ export default {
         },
         //=====================================其他操作=====================================//
         convertVariable(val) {
-            console.log(val, this.variables)
             const matchedData = val.match(/{{\s*(\w+)\s*}}/);
             if (val && matchedData) {
                 const varInfo = this.variables.find(v => {
@@ -370,6 +440,11 @@ export default {
     .params-wrap {
         height: calc(100vh - 280px);
         overflow-y: auto;
+    }
+    .svg-icon {
+        width: size(16);
+        height: size(16);
+        cursor: pointer;
     }
 }
 </style>
