@@ -367,10 +367,9 @@ export default {
         //获取文档历史修改记录
         handleGetHistoryRecord() {
             const params = {
-                projectId: this.$route.query.id,
                 docId: this.currentSelectDoc._id
             };
-            this.axios.get("/api/docs/docs_history", { params }).then(res => {
+            this.axios.get("/api/docs/docs_records", { params }).then(res => {
                 
             }).catch(err => {
                 console.error(err);
