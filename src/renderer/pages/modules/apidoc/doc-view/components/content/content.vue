@@ -88,7 +88,7 @@
                         <el-button v-if="!loading3" type="success" size="mini" @click="sendRequest">发送请求</el-button>
                         <el-button v-if="loading3" type="danger" size="mini" @click="stopRequest">取消请求</el-button>
                         <el-button size="mini" type="primary" @click="dialogVisible2 = true;">变量管理</el-button>
-                        <el-button type="primary" size="mini" @click="handleGetHistoryRecord">修改记录</el-button>
+                        <el-button type="primary" size="mini" @click="dialogVisible3 = true;">修改记录</el-button>
                     </div>
                 </div>                
             </s-collapse>
@@ -118,6 +118,7 @@
         </div>
         <s-host-manage v-if="dialogVisible" :visible.sync="dialogVisible" @change="getHostEnum"></s-host-manage>
         <s-variable-manage v-if="dialogVisible2" :visible.sync="dialogVisible2" @change="handleVariableChange"></s-variable-manage>
+        <s-doc-record-dialog  v-if="dialogVisible3" :visible.sync="dialogVisible3"></s-doc-record-dialog>
     </div>
     <div v-else></div>
 </template>
@@ -128,6 +129,7 @@ import response from "./components/response"
 import hostManage from "./dialog/host-manage"
 import historyDialog from "./dialog/history"
 import variableManage from "./dialog/variable-manage"
+import docRecord from "./dialog/doc-record/doc-record"
 import { dfsForest, findParentNode } from "@/lib/utils"
 import uuid from "uuid/v4"
 import qs from "qs"
@@ -138,6 +140,7 @@ export default {
         "s-response": response,
         "s-history-dialog": historyDialog,
         "s-variable-manage": variableManage,
+        "s-doc-record-dialog": docRecord,
     },
     data() {
         return {
@@ -196,6 +199,7 @@ export default {
             loading3: false, //------------------发送请求状态
             dialogVisible: false, //-------------域名维护弹窗
             dialogVisible2: false, //------------全局变量管理弹窗
+            dialogVisible3: true, //------------文档修改记录弹窗
             ready: false, //---------------------是否完成第一次数据请求
         };
     },
@@ -364,19 +368,7 @@ export default {
                 children: [], //---------子参数
             };
         },
-        //获取文档历史修改记录
-        handleGetHistoryRecord() {
-            const params = {
-                docId: this.currentSelectDoc._id
-            };
-            this.axios.get("/api/docs/docs_records", { params }).then(res => {
-                
-            }).catch(err => {
-                console.error(err);
-            }).finally(() => {
-                this.loading = false;
-            });
-        },
+        
         //=====================================发送请求====================================//
         //发送请求
         sendRequest() {
