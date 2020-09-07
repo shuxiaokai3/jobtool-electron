@@ -39,14 +39,6 @@ export default {
         axiosInstance.interceptors.request.use(
             config => {
                 timer = Date.now();
-                // config.cancelToken = new axios.CancelToken((c) => {
-                //     allRequestList.push(
-                //         {
-                //             url: config.url,
-                //             cancelFn: c
-                //         }
-                //     );
-                // });
                 config.headers["x-csrf-token"] = jsCookie.get("csrfToken");
                 return config
             },
@@ -107,6 +99,9 @@ export default {
                                 Vue.prototype.$message.warning("登陆已过期");
                                 Vue.prototype.$httpFailCatch(res, timer2, router.currentRoute);
                                 isExpireRequest = true;
+                                setTimeout(() => {
+                                    isExpireRequest = false;
+                                }, 1000)
                             }
                             return Promise.reject(new Error("登陆已过期"));
                         case 4002: //暂无权限
@@ -114,6 +109,9 @@ export default {
                                 Vue.prototype.$message.warning("暂无权限");
                                 Vue.prototype.$httpFailCatch(res, timer2, router.currentRoute);
                                 isExpireRequest = true;
+                                setTimeout(() => {
+                                    isExpireRequest = false;
+                                }, 1000)
                             }
                             return Promise.reject(new Error("暂无权限"));
                         case 4010: //编译错误
