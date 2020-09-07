@@ -7,17 +7,10 @@
 <template>
     <div class="s-content">
         <div class="s-header hidden-md-and-down">
-            <div class="header-left fl">
+            <div class="ml-5 header-left fl d-flex a-center">
+                <span class="f-lg mr-5 gray-200 cursor-pointer" @click="jumpToHome">内部管理工具</span>
                 <el-menu :default-active="activeMenu" mode="horizontal" background-color="#343a40" text-color="#fff" active-text-color="#ffd04b" :router="true">
-                    <el-menu-item>
-                        <span class="f-lg" @click="jumpToHome">内部管理工具</span>
-                    </el-menu-item>
-                    <el-menu-item v-for="(item, index) in menus" :key="index" :index="item.path">{{ item.name }}</el-menu-item>
-                    <!-- <el-menu-item index="/v1/b/b">项目地址</el-menu-item>
-                    <el-menu-item index="/v1/c/c">文件管理</el-menu-item>
-                    <el-menu-item index="/v1/e/e">在线面试</el-menu-item>
-                    <el-menu-item index="/v1/g/g">权限管理</el-menu-item> -->
-                    <!-- <el-menu-item index="/v1/h/h">代码走查</el-menu-item> -->
+                    <el-menu-item v-for="(item, index) in menus" :key="item.path" :index="item.path">{{ item.name }}</el-menu-item>
                 </el-menu>
             </div>
             <div class="header-right mr-5 fr">
@@ -66,7 +59,7 @@ import config from "@/../config.js"
 export default {
     data() {
         return {
-            activeMenu: "/v1/a/a",
+            activeMenu: "",
             progress: 0,
             downloading: false,
             config,
@@ -80,6 +73,11 @@ export default {
         },
         userInfo() {
             return this.$store.state.permission.userInfo
+        },
+    },
+    watch: {
+        $route(val) {
+            this.activeMenu = val.path;
         },
     },
     mounted() {
