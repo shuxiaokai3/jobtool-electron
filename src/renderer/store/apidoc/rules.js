@@ -9,10 +9,35 @@
 export default {
     namespaced: true,
     state: {
-        keyWhiteList: ["_id", "__v"], //请求参数key白名单
-        allCondition: {
-
+        fileInFolderLimit: 8, //单个文件夹默认限制文件个数
+        dominLimit: 5, //每个项目限制配置域名个数
+        requestMethod: {
+            whiteList: ["get", "post", "put", "delete"],
+            contentType: ["query", "json", "formData", "x-www-form-urlencoded"],
+            config: [
+                {
+                    name: "get",
+                    classColor: "green",
+                    contentType: ["query"], //query,json,x-www-form-urlencoded,formData
+                },
+                {
+                    name: "post",
+                    classColor: "yellow",
+                    contentType: ["json", "formData"], //query,json,x-www-form-urlencoded,formData
+                },
+                {
+                    name: "put",
+                    classColor: "blue",
+                    contentType: ["json"], //query,json,x-www-form-urlencoded,formData
+                },
+                {
+                    name: "delete",
+                    classColor: "red",
+                    contentType: ["query"], //query,json,x-www-form-urlencoded,formData
+                },
+            ],
         },
+        keyWhiteList: ["_id", "__v"], //请求参数key白名单
         currentCondition: { //当前规则条件
             connected: -1, //0代表未连通，1代表连通，-1未请求
             status: -1, //-1代表未连通，200-299代表ok
