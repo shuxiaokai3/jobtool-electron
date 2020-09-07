@@ -151,15 +151,18 @@ export default {
         "s-history-dialog": historyDialog,
     },
     computed: {
-        navTreeData() { //----树形导航数据
+        navTreeData() { //-------树形导航数据
             return this.$store.state.apidoc.banner;
         },
-        tabs() { //-----------全部tabs
+        tabs() { //--------------全部tabs
             return this.$store.state.apidoc.tabs[this.$route.query.id];
         },
-        currentSelectDoc() { //当前选中的文档
+        currentSelectDoc() { //--当前选中的文档
             return this.$store.state.apidoc.activeDoc[this.$route.query.id];
-        }
+        },
+        docRules() { //---------文档规则
+            return this.$store.state.apidocRules;
+        },
     },
     watch: {
         currentSelectDoc: {
@@ -214,7 +217,12 @@ export default {
             switch (command) {
                 case "addFile":
                     this.docParentId = data._id;
-                    this.handleOpenAddFileDialog();
+                    // console.log(node)
+                    if (node && node.childNodes.length >= this.docRules.fileInFolderLimit) {
+                        this.$message.warning(`单个文件夹里面文档个数不超过${this.docRules.fileInFolderLimit}个`);
+                    } else {
+                        this.handleOpenAddFileDialog();
+                    }
                     break;
                 case "addFolder":
                     this.docParentId = data._id;
@@ -235,7 +243,11 @@ export default {
                     this.addRestFul(data);
                     break;
                 case "copy":
-                    this.copyDoc(data, node);
+                    if (node && node.parent && node.parent.childNodes && node.parent.childNodes.length >= this.docRules.fileInFolderLimit) {
+                        this.$message.warning(`单个文件夹里面文档个数不超过${this.docRules.fileInFolderLimit}个`);
+                    } else {
+                        this.copyDoc(data, node);
+                    }
                     break;
                 default:
                     break;
@@ -264,7 +276,11 @@ export default {
             document.body.appendChild(this.contextmenu.$el);
             this.contextmenu.$on("file", () => {
                 this.docParentId = data._id;
-                this.handleOpenAddFileDialog();
+                if (node && node.childNodes.length >= this.docRules.fileInFolderLimit) {
+                    this.$message.warning(`单个文件夹里面文档个数不超过${this.docRules.fileInFolderLimit}个`);
+                } else {
+                    this.handleOpenAddFileDialog();
+                }
             })
             this.contextmenu.$on("folder", () => {
                 this.docParentId = data._id;
@@ -289,7 +305,11 @@ export default {
                 this.addRestFul(data);
             })
             this.contextmenu.$on("copy", () => {
-                this.copyDoc(data, node);
+                if (node && node.parent && node.parent.childNodes && node.parent.childNodes.length >= this.docRules.fileInFolderLimit) {
+                    this.$message.warning(`单个文件夹里面文档个数不超过${this.docRules.fileInFolderLimit}个`);
+                } else {
+                    this.copyDoc(data, node);
+                }
             })
         },   
         //处理节点上面keydown快捷方式(例如f2重命名)
