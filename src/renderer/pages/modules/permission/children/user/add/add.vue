@@ -8,9 +8,12 @@
     <s-dialog class="g-user" title="新增用户" :isShow="isShow" @close="handleClose">
         <el-divider content-position="left">基础信息</el-divider>
         <s-form ref="form" :formInfo="formInfo">
-            <s-form-item label="登录名称" vModel="loginName" required oneLine></s-form-item>
-            <s-form-item label="真实姓名" vModel="realName" required oneLine></s-form-item>
-            <s-form-item label="手机号" vModel="phone" required oneLine phone></s-form-item>
+            <s-form-item label="登录名称" vModel="loginName" required halfLine></s-form-item>
+            <s-form-item label="真实姓名" vModel="realName" required halfLine></s-form-item>
+            <s-form-item label="手机号" vModel="phone" required halfLine phone></s-form-item>
+            <s-form-item label="部门" vModel="department" required halfLine></s-form-item>
+            <s-form-item label="职位" vModel="title" required halfLine></s-form-item>
+            <s-form-item label="qq号" vModel="qq" required halfLine></s-form-item>
         </s-form>  
         <el-divider content-position="left">角色选择</el-divider>
         <el-checkbox-group v-model="formInfo.roleIds">
@@ -34,7 +37,8 @@ export default {
     data() {
         return {
             formInfo: {
-                roleIds: []
+                roleIds: [],
+                roleNames: [],
             },
             roleEnum: [], //角色枚举信息
             loading: false, //新增角色按钮
@@ -57,6 +61,10 @@ export default {
         handleAddUser() {
             this.$refs["form"].validate((valid) => {
                 if (valid) {
+                    this.formInfo.roleNames = this.formInfo.roleIds.map(val => {
+                        const user = this.roleEnum.find(role => role._id === val)
+                        return user ? user.roleName : "";
+                    })
                     this.loading = true;
                     this.axios.post("/api/security/useradd", this.formInfo).then(() => {
                         this.$emit("success");
