@@ -70,7 +70,6 @@ export default {
     },
     computed: {
         navTreeData() { //----树形导航数据
-            console.log(this.$store.state.apidoc.banner)
             return this.$store.state.apidoc.banner;
         },
         tabs() { //-----------全部tabs
