@@ -384,10 +384,19 @@ export default {
         //=====================================其他操作=====================================//
         //判断是否允许拖拽
         handleCheckNodeCouldDrop(draggingNode, dropNode, type) {
-            return type !== "inner";
+            if (this.plain) {
+                return type !== "inner";
+            }
+            if (dropNode.level === 1 && dropNode.data.key === "" && (type === "inner" || type === "after")) {
+                return false;
+            }
+            return true;
         },
-        handleNodeDrop({ data }) {
-            this.$refs["tree"].setChecked(data.id, true);
+        handleNodeDrop(draggingNode, dropNode) {
+            console.log(dropNode)
+            dropNode.data.type = "object";
+            dropNode.data.value = "";
+            this.$refs["tree"].setChecked(draggingNode.data.id, true);
         },
     }
 };
