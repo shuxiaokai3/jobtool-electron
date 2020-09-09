@@ -257,10 +257,10 @@ export default {
             height: 30px;
             width: 100%;
             &:hover {
-                background: mix($theme-color, $white, 10%);
+                background: mix($theme-color, $white, 25%);
             }
             &.active {
-                background: mix($theme-color, $white, 10%);
+                background: mix($theme-color, $white, 25%);
             }
             //selected放在后面覆盖掉active样式
             &.selected {

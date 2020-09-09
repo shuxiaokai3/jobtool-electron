@@ -61,7 +61,7 @@ export default {
         align-items: center;;
         user-select: none;
         &:hover {
-            background: mix($theme-color, $white, 10%);
+            background: mix($theme-color, $white, 25%);
         }
     }
     .h-0 {
