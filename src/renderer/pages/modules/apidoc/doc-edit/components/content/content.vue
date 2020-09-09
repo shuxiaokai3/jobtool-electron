@@ -399,7 +399,7 @@ export default {
                 this.urlInvalid = true;
                 return;
             }
-            if (this.request.methods === "get") { //只允许get请求将查询参数转换为请求参数
+            if (this.currentReqeustLimit.contentType.length === 1 && this.currentReqeustLimit.contentType[0] === "query") { //contetnType为query的自动将查询参数转换为请求参数
                 this.convertQueryToParams();
             }
             this.request.url.path = "/" + this.request.url.path; //在首部添加/方式纯字符串被替换掉
