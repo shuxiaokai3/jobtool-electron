@@ -199,7 +199,7 @@ export default {
             loading3: false, //------------------发送请求状态
             dialogVisible: false, //-------------域名维护弹窗
             dialogVisible2: false, //------------全局变量管理弹窗
-            dialogVisible3: true, //------------文档修改记录弹窗
+            dialogVisible3: false, //------------文档修改记录弹窗
             ready: false, //---------------------是否完成第一次数据请求
         };
     },

@@ -80,18 +80,31 @@ export default {
         //=====================================前后端交互====================================//
         //修改用户权限
         handleEidtUser() {
-            this.formInfo.roleNames = this.formInfo.roleIds.map(val => {
-                const user = this.roleEnum.find(role => role._id === val)
-                return user ? user.roleName : "";
-            })
-            this.loading = true;
-            this.axios.put("/api/security/user_permission", this.formInfo).then(() => {
-                this.$emit("success");
-                this.handleClose();
-            }).catch(err => {
-                this.$errorThrow(err, this);
-            }).finally(() => {
-                this.loading = false;
+            this.$refs["form"].validate((valid, invalidData) => {
+                if (valid) {
+                    this.formInfo.roleNames = this.formInfo.roleIds.map(val => {
+                        const user = this.roleEnum.find(role => role._id === val)
+                        return user ? user.roleName : "";
+                    })
+                    this.loading = true;
+                    this.axios.put("/api/security/user_permission", this.formInfo).then(() => {
+                        this.$emit("success");
+                        this.handleClose();
+                    }).catch(err => {
+                        this.$errorThrow(err, this);
+                    }).finally(() => {
+                        this.loading = false;
+                    });                    
+                } else {
+                    this.$nextTick(() => {
+                        document.querySelector(".el-form-item.is-error input") ? document.querySelector(".el-form-item.is-error input").focus() : null;
+                    });
+                    for (const invalid in invalidData) {
+                        console.log(invalidData[invalid]);
+                    }
+                    this.$message.warning("请完善必填信息");
+                    this.loading = false;
+                }
             });
         },
         //=====================================组件间交互====================================//  

@@ -94,6 +94,15 @@ const allRoutes = [
         },
         component: () => import("@/pages/modules/permission/permission")
     },
+    {
+        path: "/v1/rtc",
+        name: "音视频通讯",
+        meta: {
+            title: "音视频通讯"
+        },
+        component: () => import("@/pages/modules/rtc/rtc")
+    },
+    
 ]
 
 
