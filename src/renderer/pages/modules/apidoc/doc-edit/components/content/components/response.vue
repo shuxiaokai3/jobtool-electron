@@ -500,6 +500,7 @@ export default {
                         if (!hasOwn.call(localData, i)) {
                             continue;
                         }
+                        // console.log(remoteData)
                         const remoteKeys = Object.keys(remoteData); //-----远程keys
                         const localKeys = Object.keys(localData); //-------本地keys
                         const isLackKey = localKeys.some(val => !remoteKeys.includes(val)); //远程结果是否缺少对应字段
@@ -525,7 +526,8 @@ export default {
                         if (localType === "object") {
                             foo(localValue, remoteValue);
                         }
-                        if (localType === "array") {
+                        if (localType === "array" && remoteValue[0]) {
+                            console.log(remoteValue, remoteValue[0], 999)
                             foo(localValue[0], remoteValue[0]);
                         }
                     }                    
