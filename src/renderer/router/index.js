@@ -110,7 +110,7 @@ const router = new Router({
     routes: [
         {
             path: "/",
-            redirect: "/login"
+            redirect: "/v1/apidoc/doc-list"
         },
         {
             path: "/login",
