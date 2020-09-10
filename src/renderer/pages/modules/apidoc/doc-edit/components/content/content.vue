@@ -269,6 +269,7 @@ export default {
     mounted() {
         this.getHostEnum(); //获取host枚举值
         this.getPresetEnum(); //获取快捷参数枚举值
+        this.getMindParamsEnum(); //获取联想参数枚举
         window.addEventListener("keydown", this.shortcutSave)
     },
     beforeDestroy() {
@@ -276,6 +277,13 @@ export default {
     },
     methods: {
         //=====================================获取数据====================================//
+        //获取联想参数枚举
+        getMindParamsEnum() {
+            this.$store.dispatch("apidoc/getMindParamsEnum", {
+                projectId: this.$route.query.id,
+            });
+        },
+        //获取预设参数枚举
         getPresetEnum() {
             const params = {
                 projectId: this.$route.query.id,
@@ -704,7 +712,7 @@ export default {
             currentLocalResponseMindParams[projectId] || (currentLocalResponseMindParams[projectId] = []); 
             for (let i = 0; i < mindRequestParams.length; i++ ) {
                 const ele = mindRequestParams[i];
-                const sameDoc = currentLocalRequestMindParams[projectId].find(val => (val.key === ele.key && val.value === ele.value && val.description === ele.description));
+                const sameDoc = currentLocalRequestMindParams[projectId].find(val => (val.key === ele.key));
                 if (!sameDoc) {
                     currentLocalRequestMindParams[projectId].push(ele)
                 } else {
@@ -717,7 +725,7 @@ export default {
             }
             for (let i = 0; i < mindResponseParams.length; i++ ) {
                 const ele = mindResponseParams[i];
-                const sameDoc = currentLocalResponseMindParams[projectId].find(val => (val.key === ele.key && val.value === ele.value && val.description === ele.description));
+                const sameDoc = currentLocalResponseMindParams[projectId].find(val => (val.key === ele.key));
                 if (!sameDoc) {
                     currentLocalResponseMindParams[projectId].push(ele)
                 } else {
@@ -728,16 +736,21 @@ export default {
                 }
                 localStorage.setItem("pages/mindParams/response", JSON.stringify(currentLocalResponseMindParams))
             }
-            const mindParamsList = [...mindRequestParams, ...mindResponseParams];
-            mindParamsList.forEach(val => {
-                val._projectId = this.$route.query.id
-            })
+            // const mindParamsList = [...mindRequestParams, ...mindResponseParams];
+            // mindParamsList.forEach(val => {
+            //     val._projectId = this.$route.query.id
+            // })
             // console.log(mindRequestParams, mindResponseParams)
-            // this.axios.post("/api/project/doc_params_mind", { mindParamsList }).then(res => {
+            const params = {
+                projectId: this.$route.query.id,
+                mindRequestParams,
+                mindResponseParams,
+            };
+            this.axios.post("/api/project/doc_params_mind", params).then(res => {
                 
-            // }).catch(err => {
-            //     console.error(err);
-            // });
+            }).catch(err => {
+                console.error(err);
+            });
         },
         //ctrl + s 保存
         shortcutSave(e) {
