@@ -1,10 +1,15 @@
 {
     "name": "jobtool",
-    "version": "0.8.9",
+    "version": "0.9.0",
     "author": "shuxiaokai <2581105856@qq.com>",
     "description": "An electron-vue project",
     "license": "MIT",
     "main": "./dist/electron/main.js",
+    "husky": {
+        "hooks": {
+            "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+        }
+    },
     "scripts": {
         "build": "node .electron-vue/build.js && electron-builder",
         "build:dir": "node .electron-vue/build.js && electron-builder --dir",
@@ -87,6 +92,8 @@
         "vuex-electron": "^1.0.0"
     },
     "devDependencies": {
+        "@commitlint/cli": "^9.1.2",
+        "@commitlint/config-conventional": "^9.1.2",
         "ajv": "^6.5.0",
         "babel-core": "^6.26.3",
         "babel-eslint": "^8.2.3",
@@ -123,6 +130,7 @@
         "eslint-plugin-standard": "^3.1.0",
         "file-loader": "^1.1.11",
         "html-webpack-plugin": "^3.2.0",
+        "husky": "^4.3.0",
         "inject-loader": "^4.0.1",
         "karma": "^2.0.2",
         "karma-chai": "^0.1.0",
