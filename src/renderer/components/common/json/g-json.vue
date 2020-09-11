@@ -57,8 +57,7 @@ export default {
                         if (!hasOwn.call(obj, i)) continue;
                         const valueType = this.getType(obj[i]);
                         const matchedVal = this.mindResponseParams.find(val => val.key === i);
-                        console.log(2, matchedVal)
-                        const description = matchedVal ? matchedVal.description : "2"
+                        const description = matchedVal ? matchedVal.description : ""
                         if (valueType === "string" || valueType === "number" || valueType === "boolean") {
                             result.push({
                                 key: i,
@@ -80,7 +79,8 @@ export default {
                                 key: i,
                                 type: valueType,
                                 value: "",
-                                children: []
+                                children: [],
+                                description
                             }
                             result.push(current);
                             if (this.getType(obj[i][0]) === "object") {
@@ -88,7 +88,8 @@ export default {
                                     key: "",
                                     type: "object",
                                     value: "",
-                                    children: []
+                                    children: [],
+                                    description
                                 })
                                 foo(obj[i][0], current.children[0].children);
                             } else {
