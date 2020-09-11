@@ -544,6 +544,7 @@ export default {
                         _id: this.currentSelectDoc._id,
                         method: this.request.methods,
                     })
+                    this.getMindParamsEnum();
                 }).catch(err => {
                     this.$errorThrow(err, this);
                 }).finally(() => {

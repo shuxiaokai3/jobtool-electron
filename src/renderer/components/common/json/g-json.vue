@@ -37,6 +37,11 @@ export default {
             activeFullArray: false
         };
     },
+    computed: {
+        mindResponseParams() {
+            return this.$store.state.apidoc.mindParams.mindResponseParams;
+        },
+    },
     created() {
 
     },
@@ -51,11 +56,15 @@ export default {
                     for(let i in obj) {
                         if (!hasOwn.call(obj, i)) continue;
                         const valueType = this.getType(obj[i]);
+                        const matchedVal = this.mindResponseParams.find(val => val.key === i);
+                        console.log(2, matchedVal)
+                        const description = matchedVal ? matchedVal.description : "2"
                         if (valueType === "string" || valueType === "number" || valueType === "boolean") {
                             result.push({
                                 key: i,
                                 type: valueType,
                                 value: obj[i].toString(),
+                                description
                             })
                         } else if (valueType === "object") {
                             const current = {

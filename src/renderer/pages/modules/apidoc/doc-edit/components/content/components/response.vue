@@ -474,9 +474,9 @@ export default {
                 },
                 rKey: "children",
                 hooks: (val) => {
+                    val.description || (this.$set(val, "description", ""))
                     Object.assign(val, {
                         id: uuid(),
-                        description: "", //------描述
                         required: true, //-------是否必填
                     })
                 }
