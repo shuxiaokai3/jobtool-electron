@@ -14,9 +14,11 @@
             <s-diff-view v-if="diffDocInfo.base.path.isChange" label="接口地址：" :old-value="diffDocInfo.base.path.oldValue" :new-value="diffDocInfo.base.path.newValue"></s-diff-view>
         </s-collapse>
         <s-collapse title="请求参数">
-            <pre></pre>
+            <pre>{{ diffDocInfo.response }}</pre>
         </s-collapse>
-        <s-collapse title="返回参数"></s-collapse>
+        <s-collapse title="返回参数">
+            <!-- <s-diff-json :old-value="diffDocInfo.response.old" :new-value="diffDocInfo.response.new"></s-diff-json> -->
+        </s-collapse>
         <s-collapse title="请求头"></s-collapse>
         <!-- <div slot="footer">
             <el-button size="mini" type="primary" @click="handleSubmit">确定</el-button>
@@ -51,7 +53,7 @@ export default {
                 request: {},
                 response: {},
             },
-            records: []
+            records: [],
         };
     },
     computed: {
@@ -62,9 +64,11 @@ export default {
             const newDocBase = this.newDocInfo.base;
             const newDocHeader = this.newDocInfo.header;
             const newDocRequestParams = this.newDocInfo.requestParams;
+            const newDocResponseParams = this.newDocInfo.responseParams;
             const oldDocBase = this.oldDocInfo.base;
             const oldDocHeader = this.oldDocInfo.header;
             const oldDocRequestParams = this.oldDocInfo.requestParams;
+            const oldDocResponseParams = this.oldDocInfo.responseParams;
             const result = {
                 base: {},
                 header: {},
@@ -74,6 +78,7 @@ export default {
             result.base = this.diffBase(newDocBase, oldDocBase);
             result.header = this.diffHeader(newDocHeader, oldDocHeader);
             result.request = this.diffRequestParams(newDocRequestParams, oldDocRequestParams);
+            result.response = this.diffResponseParams(newDocResponseParams, oldDocResponseParams);
             return result
         }
     },
@@ -119,7 +124,48 @@ export default {
         },
         //请求参数对比
         diffRequestParams(newDocRequestParams, oldDocRequestParams) {
-            console.log(newDocRequestParams, oldDocRequestParams);
+            // console.log(newDocRequestParams, oldDocRequestParams);
+            return {
+                new: newDocRequestParams,
+                old: oldDocRequestParams
+            };
+        },
+        diffResponseParams(newDocResponseParams, oldDocResponseParams) {
+            if (newDocResponseParams && oldDocResponseParams) {
+                console.log(newDocResponseParams, oldDocResponseParams);
+                const result = [];
+
+                const foo = (newData, oldData, result) => {
+                    for (let i = 0; i < newData.length; i++) {
+                        const newElement = newData[i]; //最新数据
+                        const newElementKey = newElement.key; //最新数据key值
+                        const newElementValue = newElement.value; //最新数据value值
+                        const newElementType = newElement.type; //最新数据type值
+                        const newElementDescription = newElement.description; //最新数据description值
+
+
+                        const oldElement = oldData.find(val => val.key === newValKey); //旧数据
+
+                        if (oldElement) { //存在旧数据
+
+                        } else { //不存在旧数据
+
+                        }
+
+                        
+
+
+
+                        console.log(element)
+                    }                    
+                }
+                foo(newDocResponseParams, oldDocResponseParams, result);
+            } else {
+                return {};
+            }
+        },
+        generateDiffDocInfo() {
+            return {};
         },
         //=====================================获取远程数据==================================//
         //获取文档历史修改记录
