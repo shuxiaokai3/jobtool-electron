@@ -481,6 +481,7 @@ export default {
                     })
                 }
             });
+            copyData.push(this.generateParams());
             this.requestData.responseParams = copyData
             // console.log(copyData)
         },
@@ -581,7 +582,17 @@ export default {
                 return "string"
             }
         },
-
+        //生成请求数据
+        generateParams(type = "string") {
+            return {
+                id: uuid(),
+                key: "",
+                description: "",
+                type: type,
+                value: "",
+                required: true,
+            }
+        },
     }
 };
 </script>
