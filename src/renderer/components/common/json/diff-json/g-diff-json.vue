@@ -6,7 +6,12 @@
 */
 <template>
     <div class="diff-json-wrap">
-        <s-diff-json-inner :old-value="oldValue" :new-value="newValue"></s-diff-json-inner>
+        <div class="flex0 w-50">
+            <s-diff-json-new :data="data"></s-diff-json-new>
+        </div>
+        <div class="flex0 w-50">
+            <s-diff-json-old :data="data"></s-diff-json-old>
+        </div>
     </div>
 </template>
 
@@ -14,18 +19,20 @@
 import uuid from "uuid/v4"
 export default {
     props: {
-        oldValue: {
+        data: {
             type: [Object, Array],
             default() {
                 return {};
             }
         },
-        newValue: {
-            type: [Object, Array],
-            default() {
-                return {};
+    },
+    watch: {
+        data: {
+            handler() {
+                console.log(this.data, 99)
             },
-        },
+            deep: true
+        }
     },
     data() {
         return {
@@ -46,11 +53,12 @@ export default {
 
 <style lang="scss">
 .diff-json-wrap {
+    display: flex;
     padding: size(10) size(10);
     position: relative; //递归组件只在外层添加relative，否则offsetleft取值会出现问题
     border-radius: $border-radius-sm;
-    background: $gray-200;
-    // background: #1E1E1E;
+    // background: $gray-200;
+    background: #1E1E1E;
     // font-family: SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace;
     // font-size: size(13);
     // max-height: size(400);

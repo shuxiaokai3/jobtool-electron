@@ -14,10 +14,10 @@
             <s-diff-view v-if="diffDocInfo.base.path.isChange" label="接口地址：" :old-value="diffDocInfo.base.path.oldValue" :new-value="diffDocInfo.base.path.newValue"></s-diff-view>
         </s-collapse>
         <s-collapse title="请求参数">
-            <pre>{{ diffDocInfo.response }}</pre>
+            <!-- <pre>{{ diffDocInfo.response }}</pre> -->
         </s-collapse>
         <s-collapse title="返回参数">
-            <!-- <s-diff-json :old-value="diffDocInfo.response.old" :new-value="diffDocInfo.response.new"></s-diff-json> -->
+            <s-diff-json :data="diffDocInfo.response"></s-diff-json>
         </s-collapse>
         <s-collapse title="请求头"></s-collapse>
         <!-- <div slot="footer">
@@ -134,38 +134,111 @@ export default {
             if (newDocResponseParams && oldDocResponseParams) {
                 console.log(newDocResponseParams, oldDocResponseParams);
                 const result = [];
-
                 const foo = (newData, oldData, result) => {
+                    // 1. 原始数据key值在历史数据中存在  2. 原始数据key值在历史数据中没有  3. 历史数据key值在原始数据中没有
+                    //======================================遍历newData===================================//
                     for (let i = 0; i < newData.length; i++) {
+                        if (newData[i].key === "" && newData[i].value === "" && newData[i].description === "") {
+                            continue;
+                        }
                         const newElement = newData[i]; //最新数据
                         const newElementKey = newElement.key; //最新数据key值
                         const newElementValue = newElement.value; //最新数据value值
                         const newElementType = newElement.type; //最新数据type值
                         const newElementDescription = newElement.description; //最新数据description值
-
-
-                        const oldElement = oldData.find(val => val.key === newValKey); //旧数据
-
-                        if (oldElement) { //存在旧数据
-
-                        } else { //不存在旧数据
-
+                        const oldElement = oldData.find(val => val.key === newElementKey); //旧数据
+                        let retData = {};
+                        if (oldElement) { //原始数据key值在历史数据中存在
+                            retData = this.generateDiffDocInfo(newElement, oldElement);
+                            result.push(retData)
+                        } else { //原始数据key值在历史数据中没有
+                            retData = this.generateDiffDocInfo(newElement, null);
+                            result.push(retData);
                         }
-
-                        
-
-
-
-                        console.log(element)
-                    }                    
+                        if (newElement.type === "object") {
+                            foo(newElement.children, oldElement ? oldElement.children : [], retData.children);
+                        }
+                        if (newElement.type === "array") {
+                            foo(newElement.children, oldElement ? oldElement.children : [], retData.children);
+                        }
+                    }      
+                    //=====================================遍历oldData====================================//
+                    for (let i = 0; i < oldData.length; i++) {
+                        if (oldData[i].key === "" && oldData[i].value === "" && oldData[i].description === "") {
+                            continue;
+                        }
+                        const oldElement = oldData[i]; //历史数据
+                        const oldElementKey = oldElement.key; //历史数据key值
+                        const oldElementValue = oldElement.value; //历史数据value值
+                        const oldElementType = oldElement.type; //历史数据type值
+                        const oldElementDescription = oldElement.description; //历史数据description值
+                        //=========================================================================//
+                        const newElement = newData.find(val => val.key === oldElementKey); //新数据
+                        if (!newElement) { //原始数据key值在历史数据中存在
+                            const retData = this.generateDiffDocInfo(null, oldElement);
+                            result.push(retData)
+                            if (oldElement.type === "object") {
+                                foo(newElement ? newElement.children : [], oldElement ? oldElement.children : [], retData.children);
+                            }
+                            if (oldElement.type === "array") {
+                                foo(newElement ? newElement.children : [], oldElement ? oldElement.children : [], retData.children);
+                            }
+                        } 
+                    }                 
                 }
                 foo(newDocResponseParams, oldDocResponseParams, result);
+                return result;
             } else {
                 return {};
             }
         },
-        generateDiffDocInfo() {
-            return {};
+        generateDiffDocInfo(newElement, oldElement) {
+            let oldNull = false;
+            let newNull = false;
+            if (!oldElement) { //保持数据一致
+                oldElement = newElement;
+                oldNull = true;
+            }
+            if (!newElement) { //保持数据一致
+                newElement = oldElement;
+                newNull = true;
+            }
+            const result = {
+                key: {
+                    new: newElement.key,
+                    old: oldElement.key,
+                },
+                value: {
+                    new: newElement.value,
+                    old: oldElement.value,
+                },
+                type: {
+                    new: newElement.type,
+                    old: oldElement.type,
+                },
+                description: {
+                    new: newElement.description,
+                    old: oldElement.description,
+                },
+                children: [],
+                operation: {
+                    oldOp: "",
+                    newOp: ""
+                }, //add delete update
+            };
+            if (newElement.type !== oldElement.type || newElement.value !== oldElement.value || newElement.description !== oldElement.description) { //修改
+                result.operation.oldOp = "edit";
+                result.operation.newOp = "eidt";
+            }
+            if (oldNull) { 
+                result.operation.oldOp = "empty"
+                result.operation.newOp = "add"
+            }
+            if (newNull) { 
+                result.operation.oldOp = "exist"
+                result.operation.newOp = "delete"
+            }
+            return result;
         },
         //=====================================获取远程数据==================================//
         //获取文档历史修改记录
