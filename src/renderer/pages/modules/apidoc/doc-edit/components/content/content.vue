@@ -689,7 +689,8 @@ export default {
                 rKey: "children",
                 hooks: (data) => {
                     if (data.key !== "" && data.value !== "" && data.description !== "") {
-                        mindResponseParams.push(data);
+                        const copyData = JSON.parse(JSON.stringify(data));
+                        mindResponseParams.push(copyData);
                     }
                     if (data.key !== "" && (data.type === "object" || data.type === "array") && data.description !== "") {
                         const copyData = JSON.parse(JSON.stringify(data));
