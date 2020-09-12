@@ -20,14 +20,14 @@
                         <div title="编辑" @click="handleOpenEditDialog(item)">
                             <i class="el-icon-edit"></i>
                         </div>
+                        <div title="成员管理" @click="handleOpenEditDialog(item)">
+                            <i class="el-icon-user"></i>
+                        </div>
                         <div title="查看" @click="handleView(item)">
                             <i class="el-icon-view"></i>
                         </div>
                         <div title="删除" @click="deleteProject(item._id)">
                             <i class="el-icon-delete"></i>
-                        </div>
-                        <div title="详情">
-                            <i class="el-icon-more"></i>
                         </div>
                     </div>
                 </div>
