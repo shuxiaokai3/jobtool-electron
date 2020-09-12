@@ -102,6 +102,14 @@ const allRoutes = [
         },
         component: () => import("@/pages/modules/rtc/rtc")
     },
+    {
+        path: "/v1/easycode",
+        name: "代码生成",
+        meta: {
+            title: "代码生成"
+        },
+        component: () => import("@/pages/modules/easycode/easycode")
+    },
     
 ]
 
