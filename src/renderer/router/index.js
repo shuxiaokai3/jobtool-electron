@@ -112,13 +112,12 @@ const allRoutes = [
     },
     
 ]
-
-
+const lastVisitPage = localStorage.getItem("history/lastVisitePage"); //回复上次访问的页面
 const router = new Router({
     routes: [
         {
             path: "/",
-            redirect: "/v1/apidoc/doc-list"
+            redirect: lastVisitPage
         },
         {
             path: "/login",
@@ -154,10 +153,11 @@ router.beforeEach((to, from, next) => {
             NProgress.done()
         });
     }
-    next()
+    next();
 })
 
-router.afterEach(() => {
+router.afterEach((to) => {
+    localStorage.setItem("history/lastVisitePage", to.fullPath);
     NProgress.done() // 页面顶部的加载条
 })
 
