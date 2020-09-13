@@ -216,7 +216,6 @@ export default {
         }
         &.active {
             animation: blink 4s infinite alternate;
-            // background: rgb(187, 187, 89);
         }
         @keyframes blink {
             0% {

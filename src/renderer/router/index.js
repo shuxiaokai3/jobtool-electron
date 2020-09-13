@@ -94,6 +94,23 @@ const allRoutes = [
         },
         component: () => import("@/pages/modules/permission/permission")
     },
+    {
+        path: "/v1/rtc",
+        name: "音视频通讯",
+        meta: {
+            title: "音视频通讯"
+        },
+        component: () => import("@/pages/modules/rtc/rtc")
+    },
+    {
+        path: "/v1/easycode",
+        name: "代码生成",
+        meta: {
+            title: "代码生成"
+        },
+        component: () => import("@/pages/modules/easycode/easycode")
+    },
+    
 ]
 
 
@@ -101,7 +118,7 @@ const router = new Router({
     routes: [
         {
             path: "/",
-            redirect: "/login"
+            redirect: "/v1/apidoc/doc-list"
         },
         {
             path: "/login",

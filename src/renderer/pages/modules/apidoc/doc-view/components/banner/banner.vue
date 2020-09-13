@@ -37,12 +37,12 @@
                     >
                         <!-- file渲染 -->
                         <template v-if="!scope.data.isFolder">
-                            <span v-if="scope.data.item.methods === 'get'" :class="{'gray-400': !scope.data.publish, green: scope.data.publish}" class="label">get</span>
-                            <span v-else-if="scope.data.item.methods === 'post'" :class="{'gray-400': !scope.data.publish, yellow: scope.data.publish}" class="label">post</span>
-                            <span v-else-if="scope.data.item.methods === 'put'" :class="{'gray-400': !scope.data.publish, blue: scope.data.publish}" class="label">put</span>
-                            <span v-else-if="scope.data.item.methods === 'delete'" :class="{'gray-400': !scope.data.publish, red: scope.data.publish}" class="label">del</span>  
+                            <span v-if="scope.data.item.methods === 'get'" :class="{'gray-500': !scope.data.publish, green: scope.data.publish}" class="label">get</span>
+                            <span v-else-if="scope.data.item.methods === 'post'" :class="{'gray-500': !scope.data.publish, yellow: scope.data.publish}" class="label">post</span>
+                            <span v-else-if="scope.data.item.methods === 'put'" :class="{'gray-500': !scope.data.publish, blue: scope.data.publish}" class="label">put</span>
+                            <span v-else-if="scope.data.item.methods === 'delete'" :class="{'gray-500': !scope.data.publish, red: scope.data.publish}" class="label">del</span>  
                             <img v-else :src="require('@/assets/imgs/apidoc/file.png')" width="16px" height="16px"/> 
-                            <s-emphasize v-if="renameNodeId !== scope.data._id" :title="scope.data.docName" :value="scope.data.docName" :keyword="queryData" :class="{'gray-400': !scope.data.publish}" class="node-name text-ellipsis ml-1"></s-emphasize>
+                            <s-emphasize v-if="renameNodeId !== scope.data._id" :title="scope.data.docName" :value="scope.data.docName" :keyword="queryData" class="node-name text-ellipsis ml-1"></s-emphasize>
                             <!-- <span v-if="renameNodeId !== scope.data._id" :title="scope.data.docName" class="node-name text-ellipsis ml-1">{{ scope.data.docName }}</span> -->
                             <input v-else v-model="scope.data.docName" placeholder="不能为空" type="text" class="rename-ipt f-sm ml-1" @blur="handleChangeNodeName(scope.data)" @keydown.enter="handleChangeNodeName(scope.data)">
                         </template>
@@ -257,10 +257,10 @@ export default {
             height: 30px;
             width: 100%;
             &:hover {
-                background: mix($theme-color, $white, 10%);
+                background: mix($theme-color, $white, 25%);
             }
             &.active {
-                background: mix($theme-color, $white, 10%);
+                background: mix($theme-color, $white, 25%);
             }
             //selected放在后面覆盖掉active样式
             &.selected {

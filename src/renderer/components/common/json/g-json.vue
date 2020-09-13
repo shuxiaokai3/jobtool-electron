@@ -37,6 +37,11 @@ export default {
             activeFullArray: false
         };
     },
+    computed: {
+        mindResponseParams() {
+            return this.$store.state.apidoc.mindParams.mindResponseParams;
+        },
+    },
     created() {
 
     },
@@ -51,11 +56,14 @@ export default {
                     for(let i in obj) {
                         if (!hasOwn.call(obj, i)) continue;
                         const valueType = this.getType(obj[i]);
+                        const matchedVal = this.mindResponseParams.find(val => val.key === i);
+                        const description = matchedVal ? matchedVal.description : ""
                         if (valueType === "string" || valueType === "number" || valueType === "boolean") {
                             result.push({
                                 key: i,
                                 type: valueType,
                                 value: obj[i].toString(),
+                                description
                             })
                         } else if (valueType === "object") {
                             const current = {
@@ -71,7 +79,8 @@ export default {
                                 key: i,
                                 type: valueType,
                                 value: "",
-                                children: []
+                                children: [],
+                                description
                             }
                             result.push(current);
                             if (this.getType(obj[i][0]) === "object") {
@@ -79,7 +88,8 @@ export default {
                                     key: "",
                                     type: "object",
                                     value: "",
-                                    children: []
+                                    children: [],
+                                    description
                                 })
                                 foo(obj[i][0], current.children[0].children);
                             } else {

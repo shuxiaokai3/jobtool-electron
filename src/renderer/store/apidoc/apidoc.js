@@ -15,6 +15,10 @@ export default {
         tabs: {}, //------------------api文档tabs
         activeDoc: {}, //-------------当前被选中的tab页
         variables: [], //--------------api文档全局变量
+        mindParams: { //--------------文档联想参数
+            mindRequestParams: [],
+            mindResponseParams: []
+        },
     },
     mutations: {
         //=====================================全局变量====================================//
@@ -109,6 +113,11 @@ export default {
             }
             localStorage.setItem("apidoc/activeTab", JSON.stringify(state.activeDoc))
         },
+        //=====================================联想参数====================================//
+        changeMindParams(state, payload) {
+            state.mindParams.mindRequestParams = payload.mindRequestParams;
+            state.mindParams.mindResponseParams = payload.mindResponseParams;
+        },
     },
     actions: {
         //获取文档左侧banner
@@ -143,5 +152,20 @@ export default {
                 });                
             })
         },
+        //获取文档请求参数
+        async getMindParamsEnum(context, payload) {
+            return new Promise((resolve, reject) => {
+                const params = {
+                    projectId: payload.projectId
+                };
+                axios.get("/api/project/doc_params_mind", { params }).then(res => {
+                    const result = res.data;
+                    context.commit("changeMindParams", result);
+                    resolve();
+                }).catch(err => {
+                    console.error(err);
+                });              
+            })
+        }
     },
 };

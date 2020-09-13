@@ -7,7 +7,7 @@
 export default {
     isDev: process.env.NODE_ENV === "development",
     updateConfig: {
-        version: "0.8.8",
+        version: "0.8.9",
         server: "http://job.xrdev.cn",
         filePath: "/electron/windows"
     },

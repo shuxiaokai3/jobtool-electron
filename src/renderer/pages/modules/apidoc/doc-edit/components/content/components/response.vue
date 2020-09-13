@@ -474,13 +474,14 @@ export default {
                 },
                 rKey: "children",
                 hooks: (val) => {
+                    val.description || (this.$set(val, "description", ""))
                     Object.assign(val, {
                         id: uuid(),
-                        description: "", //------描述
                         required: true, //-------是否必填
                     })
                 }
             });
+            copyData.push(this.generateParams());
             this.requestData.responseParams = copyData
             // console.log(copyData)
         },
@@ -500,6 +501,7 @@ export default {
                         if (!hasOwn.call(localData, i)) {
                             continue;
                         }
+                        // console.log(remoteData)
                         const remoteKeys = Object.keys(remoteData); //-----远程keys
                         const localKeys = Object.keys(localData); //-------本地keys
                         const isLackKey = localKeys.some(val => !remoteKeys.includes(val)); //远程结果是否缺少对应字段
@@ -525,7 +527,8 @@ export default {
                         if (localType === "object") {
                             foo(localValue, remoteValue);
                         }
-                        if (localType === "array") {
+                        if (localType === "array" && remoteValue[0]) {
+                            console.log(remoteValue, remoteValue[0], 999)
                             foo(localValue[0], remoteValue[0]);
                         }
                     }                    
@@ -579,7 +582,17 @@ export default {
                 return "string"
             }
         },
-
+        //生成请求数据
+        generateParams(type = "string") {
+            return {
+                id: uuid(),
+                key: "",
+                description: "",
+                type: type,
+                value: "",
+                required: true,
+            }
+        },
     }
 };
 </script>

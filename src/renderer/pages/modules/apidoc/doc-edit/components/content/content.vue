@@ -269,6 +269,7 @@ export default {
     mounted() {
         this.getHostEnum(); //获取host枚举值
         this.getPresetEnum(); //获取快捷参数枚举值
+        this.getMindParamsEnum(); //获取联想参数枚举
         window.addEventListener("keydown", this.shortcutSave)
     },
     beforeDestroy() {
@@ -276,6 +277,13 @@ export default {
     },
     methods: {
         //=====================================获取数据====================================//
+        //获取联想参数枚举
+        getMindParamsEnum() {
+            this.$store.dispatch("apidoc/getMindParamsEnum", {
+                projectId: this.$route.query.id,
+            });
+        },
+        //获取预设参数枚举
         getPresetEnum() {
             const params = {
                 projectId: this.$route.query.id,
@@ -536,6 +544,7 @@ export default {
                         _id: this.currentSelectDoc._id,
                         method: this.request.methods,
                     })
+                    this.getMindParamsEnum();
                 }).catch(err => {
                     this.$errorThrow(err, this);
                 }).finally(() => {
@@ -680,7 +689,13 @@ export default {
                 rKey: "children",
                 hooks: (data) => {
                     if (data.key !== "" && data.value !== "" && data.description !== "") {
-                        mindResponseParams.push(data);
+                        const copyData = JSON.parse(JSON.stringify(data));
+                        mindResponseParams.push(copyData);
+                    }
+                    if (data.key !== "" && (data.type === "object" || data.type === "array") && data.description !== "") {
+                        const copyData = JSON.parse(JSON.stringify(data));
+                        copyData.children = []; //只记录扁平数据
+                        mindResponseParams.push(copyData);
                     }
                 }
             });
@@ -696,48 +711,54 @@ export default {
                 }
             });
             const projectId = this.$route.query.id;
-            let currentLocalRequestMindParams = localStorage.getItem("pages/mindParams/request") || "{}";
-            let currentLocalResponseMindParams = localStorage.getItem("pages/mindParams/response") || "{}";
-            currentLocalRequestMindParams = JSON.parse(currentLocalRequestMindParams);
-            currentLocalResponseMindParams = JSON.parse(currentLocalResponseMindParams);
-            currentLocalRequestMindParams[projectId] || (currentLocalRequestMindParams[projectId] = []); 
-            currentLocalResponseMindParams[projectId] || (currentLocalResponseMindParams[projectId] = []); 
-            for (let i = 0; i < mindRequestParams.length; i++ ) {
-                const ele = mindRequestParams[i];
-                const sameDoc = currentLocalRequestMindParams[projectId].find(val => (val.key === ele.key && val.value === ele.value && val.description === ele.description));
-                if (!sameDoc) {
-                    currentLocalRequestMindParams[projectId].push(ele)
-                } else {
-                    if (!sameDoc._selectNum) {
-                        sameDoc._selectNum = 0;
-                    }
-                    sameDoc._selectNum ++;                
-                }
-                localStorage.setItem("pages/mindParams/request", JSON.stringify(currentLocalRequestMindParams))
-            }
-            for (let i = 0; i < mindResponseParams.length; i++ ) {
-                const ele = mindResponseParams[i];
-                const sameDoc = currentLocalResponseMindParams[projectId].find(val => (val.key === ele.key && val.value === ele.value && val.description === ele.description));
-                if (!sameDoc) {
-                    currentLocalResponseMindParams[projectId].push(ele)
-                } else {
-                    if (!sameDoc._selectNum) {
-                        sameDoc._selectNum = 0;
-                    }
-                    sameDoc._selectNum ++;                
-                }
-                localStorage.setItem("pages/mindParams/response", JSON.stringify(currentLocalResponseMindParams))
-            }
-            const mindParamsList = [...mindRequestParams, ...mindResponseParams];
-            mindParamsList.forEach(val => {
-                val._projectId = this.$route.query.id
-            })
-            // console.log(mindRequestParams, mindResponseParams)
-            // this.axios.post("/api/project/doc_params_mind", { mindParamsList }).then(res => {
+            // let currentLocalRequestMindParams = localStorage.getItem("pages/mindParams/request") || "{}";
+            // let currentLocalResponseMindParams = localStorage.getItem("pages/mindParams/response") || "{}";
+            // currentLocalRequestMindParams = JSON.parse(currentLocalRequestMindParams);
+            // currentLocalResponseMindParams = JSON.parse(currentLocalResponseMindParams);
+            // currentLocalRequestMindParams[projectId] || (currentLocalRequestMindParams[projectId] = []); 
+            // currentLocalResponseMindParams[projectId] || (currentLocalResponseMindParams[projectId] = []); 
+            // for (let i = 0; i < mindRequestParams.length; i++ ) {
+            //     const ele = mindRequestParams[i];
+            //     const sameDoc = currentLocalRequestMindParams[projectId].find(val => (val.key === ele.key));
+            //     if (!sameDoc) {
+            //         currentLocalRequestMindParams[projectId].push(ele)
+            //     } else {
+            //         if (!sameDoc._selectNum) {
+            //             sameDoc._selectNum = 0;
+            //         }
+            //         sameDoc._selectNum ++;                
+            //     }
+            //     localStorage.setItem("pages/mindParams/request", JSON.stringify(currentLocalRequestMindParams))
+            // }
+            // for (let i = 0; i < mindResponseParams.length; i++ ) {
+            //     const ele = mindResponseParams[i];
+            //     const sameDoc = currentLocalResponseMindParams[projectId].find(val => (val.key === ele.key));
+            //     if (!sameDoc) {
+            //         currentLocalResponseMindParams[projectId].push(ele)
+            //     } else {
+            //         if (!sameDoc._selectNum) {
+            //             sameDoc._selectNum = 0;
+            //         }
+            //         sameDoc._selectNum ++;                
+            //     }
+            //     localStorage.setItem("pages/mindParams/response", JSON.stringify(currentLocalResponseMindParams))
+            // }
+            // const mindParamsList = [...mindRequestParams, ...mindResponseParams];
+            // mindParamsList.forEach(val => {
+            //     val._projectId = this.$route.query.id
+            // })
+
+            console.log(mindResponseParams)
+            const params = {
+                projectId,
+                mindRequestParams,
+                mindResponseParams,
+            };
+            this.axios.post("/api/project/doc_params_mind", params).then(res => {
                 
-            // }).catch(err => {
-            //     console.error(err);
-            // });
+            }).catch(err => {
+                console.error(err);
+            });
         },
         //ctrl + s 保存
         shortcutSave(e) {

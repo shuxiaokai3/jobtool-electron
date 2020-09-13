@@ -68,20 +68,28 @@ export default {
             cancelTimer: null
         };
     },
+    computed: {
+        mindRequestParams() {
+            return this.$store.state.apidoc.mindParams.mindRequestParams
+        },
+        mindResponseParams() {
+            return this.$store.state.apidoc.mindParams.mindResponseParams
+        },
+    },
     mounted() {
         
     },
     methods: {
         //初始化联想参数
         initMindParams() {
-            const projectId = this.$route.query.id;
-            let reqMindParams = localStorage.getItem("pages/mindParams/request") || "{}";
-            let resMindParams = localStorage.getItem("pages/mindParams/response") || "{}";
-            reqMindParams = JSON.parse(reqMindParams);
-            resMindParams = JSON.parse(resMindParams);
-            reqMindParams[projectId] || (reqMindParams[projectId] = []) 
-            resMindParams[projectId] || (resMindParams[projectId] = []) 
-            this.mindParams = [...reqMindParams[projectId], ...resMindParams[projectId]];
+            // const projectId = this.$route.query.id;
+            // let reqMindParams = localStorage.getItem("pages/mindParams/request") || "{}";
+            // let resMindParams = localStorage.getItem("pages/mindParams/response") || "{}";
+            // reqMindParams = JSON.parse(reqMindParams);
+            // resMindParams = JSON.parse(resMindParams);
+            // reqMindParams[projectId] || (reqMindParams[projectId] = []) 
+            // resMindParams[projectId] || (resMindParams[projectId] = []) 
+            // this.mindParams = [...reqMindParams[projectId], ...resMindParams[projectId]];
         },
         //=====================================组件间交互====================================//  
         //查看规范
@@ -93,11 +101,9 @@ export default {
             // if (!this.couldGetMindParams) { //必须在输入的时候才允许联想
             //     cb([]);
             // }
+            const mindParams = this.mindRequestParams.concat(this.mindResponseParams)
             this.currentQuerystring = queryString;
-            if (this.mindParams.length === 0) {
-                this.initMindParams();
-            }
-            const matchedParams = this.mindParams.filter(val => val.key.toLocaleLowerCase().includes(queryString))
+            const matchedParams = mindParams.filter(val => val.key.toLocaleLowerCase().includes(queryString))
             // console.log(matchedParams, this.mindParams, queryString)
             if (queryString.trim() === "") {
                 cb([]);
