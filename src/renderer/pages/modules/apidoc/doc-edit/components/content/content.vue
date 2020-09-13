@@ -33,11 +33,8 @@
                                 @keyup.enter.native.stop="checkUrlRule"
                         >
                             <div slot="prepend" class="request-input">
-                                <el-select v-model="request.methods" @change="handleChangeRequestMethods">
-                                    <el-option value="get" label="get"></el-option>
-                                    <el-option value="post" label="post"></el-option>
-                                    <el-option value="put" label="put"></el-option>
-                                    <el-option value="delete" label="delete"></el-option>
+                                <el-select v-model="request.methods" value-key="name" @change="handleChangeRequestMethods">
+                                    <el-option v-for="(item, index) in docRules.requestMethod.config" :key="index" :value="item" :label="item.name"></el-option>
                                 </el-select>
                             </div>                        
                         </s-v-input>
@@ -52,18 +49,31 @@
                 </div>       
                 <pre v-copy="request.url.path" v-copy2="request.url.host + request.url.path" class="w-100">{{ request.url.host }}{{ request.url.path }}</pre>
                 <div class="w-100 mt-2">
+                    <!-- {{ currentReqeustLimit.contentType }} -->
                     <el-radio-group v-model="request.requestType">
-                        <el-radio :disabled="request.methods !== 'get'" label="query">query</el-radio>
-                        <el-radio :disabled="request.methods === 'get'" label="json">json</el-radio>
-                        <el-radio :disabled="request.methods === 'get' || request.methods === 'put' || request.methods === 'delete'" label="formData">formData</el-radio>
-                        <el-radio disabled label="x-www-form-urlencoded">x-www-form-urlencoded</el-radio>
+                        <el-radio 
+                                v-for="(item, index) in docRules.requestMethod.contentType"
+                                :key="index"
+                                :label="item"
+                                :disabled="!currentReqeustLimit.contentType.find(val => val === item)"
+                        >
+                            {{ item }}
+                        </el-radio>
                     </el-radio-group>
                 </div>
                 <hr>
             </div>
             <!-- 请求参数 -->
             <div class="params-wrap">
-                <s-params-tree ref="reqTree" :tree-data="request.requestParams" title="请求参数" :ready="ready" :is-form-data="request.requestType === 'formData'" showCheckbox :plain="request.methods === 'get'">
+                <s-params-tree 
+                    ref="reqTree"
+                    :tree-data="request.requestParams"
+                    title="请求参数"
+                    :ready="ready"
+                    :is-form-data="request.requestType === 'formData'"
+                    showCheckbox
+                    :plain="currentReqeustLimit.contentType.length === 1 && currentReqeustLimit.contentType[0] === 'query'"
+                >
                     <div slot="operation" class="operation d-flex h-100 flex1 pl-3 a-center">
                         <div class="op_item" @click.stop="dialogVisible3 = true">json转换</div>
                         <el-dropdown trigger="click" :show-timeout="0" @command="handleSelectRequestPresetParams">
@@ -199,6 +209,7 @@ export default {
                 _variableChange: true, //----------hack强制触发request数据发生改变
             },
             origin: location.origin,
+            currentReqeustLimit: { contentType: [] }, //----------当前请求限制条件
             //=====================================快捷参数====================================//
             presetRequestParamsList: [], //------请求参数预设值
             usefulPresetRequestParamsList: [], //常用请求参数预设值
@@ -236,7 +247,10 @@ export default {
         },
         keyWhiteList() {
             return this.$store.state.apidocRules.keyWhiteList
-        }
+        },
+        docRules() { //---------文档规则
+            return this.$store.state.apidocRules;
+        },
     },
     watch: {
         currentSelectDoc: {
@@ -308,7 +322,7 @@ export default {
                 this.request.requestParams.forEach(val => this.$set(val, "id", val._id))
                 this.request.responseParams.forEach(val => this.$set(val, "id", val._id))
                 this.request.header.forEach(val => this.$set(val, "id", val._id))
-
+                this.currentReqeustLimit = this.docRules.requestMethod.config.find(val => val.name === res.data.item.methods);
 
                 const reqParams = this.request.requestParams;
                 const resParams = this.request.responseParams;
@@ -385,7 +399,7 @@ export default {
                 this.urlInvalid = true;
                 return;
             }
-            if (this.request.methods === "get") { //只允许get请求将查询参数转换为请求参数
+            if (this.currentReqeustLimit.contentType.length === 1 && this.currentReqeustLimit.contentType[0] === "query") { //contetnType为query的自动将查询参数转换为请求参数
                 this.convertQueryToParams();
             }
             this.request.url.path = "/" + this.request.url.path; //在首部添加/方式纯字符串被替换掉
@@ -433,20 +447,19 @@ export default {
         },
         //改变请求方法
         handleChangeRequestMethods(val) {
-            if (val === "get") { //get请求需要清空嵌套数据
+            // console.log(val, 999)
+            this.currentReqeustLimit = val;
+            if (val.name === "get") { //get请求需要清空嵌套数据
                 this.request.requestParams.forEach(params => {
                     params.children = [];
                 })
                 this.request.requestType = "query"; 
-            } else if (val === "post") {
-                if (this.request.requestType === "query" || this.request.requestType === "x-www-form-urlencoded") {
-                    this.request.requestType = "json";
+            } else {
+                if (!val.contentType.includes(this.request.requestType)) {
+                    this.request.requestType = val.contentType[0];
                 }
-            } else if (val === "put") {
-                this.request.requestType = "json";
-            } else if (val === "delete") {
-                this.request.requestType = "json";
-            }
+            } 
+            this.request.methods = val.name;
         },
         //=====================================title编辑处理====================================//
         //改变title

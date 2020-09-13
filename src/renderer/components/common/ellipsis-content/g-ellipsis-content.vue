@@ -5,10 +5,11 @@
     备注：xxxx
 */
 <template>
-    <span v-copy="value" :class="{'cursor-pointer': value}">
-        <el-tooltip effect="light" placement="top-start" :content="value.toString()" :disabled="isOverflow">
+    <span v-copy="value">
+        <el-tooltip effect="light" placement="top-start" :content="value.toString()" :disabled="!isOverflow">
             <span ref="text" class="s-ellipsis-content" @dblclick="handleSelect">{{ value }}</span>
         </el-tooltip>        
+        <!-- 拷贝图标 -->
         <span v-if="copy" class="el-icon-document-copy cursor-pointer orange"></span>
     </span>
 
@@ -38,7 +39,7 @@ export default {
                     if (textDom) {
                         const textOverWidth = textDom.scrollWidth;
                         const warpWidth = textDom.getBoundingClientRect()["width"];
-                        this.isOverflow = textOverWidth < warpWidth;
+                        this.isOverflow = textOverWidth > Math.ceil(warpWidth);
                     }                    
                 })
 
@@ -61,11 +62,11 @@ export default {
     },
     methods: {
         handleSelect(e) {
-            const selection = window.getSelection();
-            selection.removeAllRanges();
-            const range = document.createRange();
-            range.selectNodeContents(e.target);
-            selection.addRange(range);
+            // const selection = window.getSelection();
+            // selection.removeAllRanges();
+            // const range = document.createRange();
+            // range.selectNodeContents(e.target);
+            // selection.addRange(range);
         }
         //=====================================获取远程数据==================================//
 
