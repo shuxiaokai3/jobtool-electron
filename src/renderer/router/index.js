@@ -117,7 +117,7 @@ const router = new Router({
     routes: [
         {
             path: "/",
-            redirect: lastVisitPage
+            redirect: lastVisitPage || "/v1/apidoc/doc-list"
         },
         {
             path: "/login",
