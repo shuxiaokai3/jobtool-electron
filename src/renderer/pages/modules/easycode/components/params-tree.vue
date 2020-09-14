@@ -19,12 +19,10 @@
                     :draggable="enableDrag"
                     :allow-drop="handleCheckNodeCouldDrop"
                     @node-drop="handleNodeDrop"
-                    @check-change="handleCheckChange"
-                    :show-checkbox="showCheckbox"
             >
                 <template slot-scope="scope">
                     <div class="custom-tree-node">
-                        <el-button type="text" :title="disableTitleTip" icon="el-icon-plus" :disabled="scope.data.type === 'file' || plain" @click="addNestTreeData(scope.data)"></el-button>
+                        <el-button type="text" title="新增嵌套数据" icon="el-icon-plus" @click="addNestTreeData(scope.data)"></el-button>
                         <el-button 
                                 class="mr-2"
                                 :disabled="!scope.node.nextSibling && scope.node.level === 1"
@@ -33,62 +31,121 @@
                                 icon="el-icon-close"
                                 @click="deleteTreeData(scope)">
                         </el-button>
-                        <div class="w-20 mr-2 d-flex a-center">
+                        <!-- 参数名称 -->
+                        <div class="w-10 mr-2 d-flex a-center">
                             <s-v-input 
                                     v-model="scope.data.key" 
                                     size="mini"
-                                    :tip="keyTip"
-                                    :error="scope.data._keyError"
                                     placeholder="参数名称"
+                                    class="w-100"
                                     remote
                                     @mindParamsSelect="(val) => { handleAddMindParams(scope.data, val) }"
                                     @input="addNewLine(scope)"
                                     @focus="enableDrag = false"
-                                    @blur="handleCheckKey(scope);enableDrag=true"
+                                    @blur="enableDrag=true"
                             >
                             </s-v-input>
                         </div>
-                        <el-select v-model="scope.data.type" :disabled="plain" :title="disableTypeTip" placeholder="类型" size="mini" class="mr-2" @change="handleChangeParamsType(scope.data)">
-                            <el-option :disabled="scope.data.children && scope.data.children.length > 0" label="String" value="string"></el-option>
-                            <el-option :disabled="plain || (scope.data.children && scope.data.children.length > 0)" label="Number" value="number"></el-option>
-                            <el-option :disabled="plain || (scope.data.children && scope.data.children.length > 0)" label="Boolean" value="boolean"></el-option>
-                            <el-option :disabled="plain" label="Object" value="object"></el-option>
-                            <el-option :disabled="plain" label="List | Array" value="array"></el-option>
+                        <!-- 参数类型 -->
+                        <el-select v-model="scope.data.type" placeholder="类型" size="mini" class="mr-2" @change="handleChangeParamsType(scope.data)">
+                            <el-option :disabled="scope.data.children && scope.data.children.length > 0" label="String" value="String"></el-option>
+                            <el-option :disabled="(scope.data.children && scope.data.children.length > 0)" label="Number" value="Number"></el-option>
+                            <el-option :disabled="(scope.data.children && scope.data.children.length > 0)" label="Boolean" value="Boolean"></el-option>
+                            <el-option label="Object" value="Object"></el-option>
+                            <el-option label="Array" value="Array"></el-option>
+                            <el-option label="Date" value="Date"></el-option>
+                            <el-option label="ObjectIds" value="ObjectIds"></el-option>
                         </el-select>
-                        <el-select v-if="scope.data.type === 'boolean'" v-model="scope.data.value" placeholder="请选择" size="mini" class="w-25 mr-2">
-                            <el-option label="true" value="true"></el-option>
-                            <el-option label="false" value="false"></el-option>
-                        </el-select>
+                        <!-- 默认值 -->
                         <s-v-input 
-                                v-if="scope.data.type !== 'boolean' && scope.data.type !== 'file'"
-                                :disabled="scope.data.type === 'array' || scope.data.type === 'object'"
+                                :disabled="scope.data.type === 'Array' || scope.data.type === 'Object'"
                                 title="对象和数组不必填写参数值"
-                                v-model="scope.data.value"
+                                v-model="scope.data.default"
                                 size="mini"
-                                :tip="valueTip"
-                                :error="scope.data._valueError"
-                                class="w-25 mr-2"
+                                class="w-10 mr-2"
                                 placeholder="默认值"
                                 @focus="enableDrag = false"
-                                @blur="handleCheckValue(scope);enableDrag=true"
+                                @blur="enableDrag=true"
                         >
                         </s-v-input>
+                        <!-- 是否必填 -->
                         <el-checkbox v-model="scope.data.required" label="必填"></el-checkbox>
-                        <!-- {{ scope.data.value }} -->
+                        <!-- 参数描述与备注 -->
                         <s-v-input 
-                                v-model="scope.data.description"
+                                v-model="scope.data.comment"
                                 size="mini" 
-                                :tip="requiredTip"
-                                :error="scope.data._descriptionError"
-                                class="w-40 ml-2"
+                                class="w-15 mx-2"
                                 placeholder="参数描述与备注"
                                 @focus="enableDrag = false"
-                                @blur="handleCheckDescription(scope);enableDrag=true">
+                                @blur="enableDrag=true">
                         </s-v-input>
+                        <!-- 字符串类型单独处理 -->
+                        <template v-if="scope.data.type === 'String'">
+                            <el-select v-model="scope.data.stringOp.limit" placeholder="限制" multiple size="mini" class="w-10 mr-2">
+                                <el-option label="trim" value="trim"></el-option>
+                                <el-option label="lowercase" value="lowercase"></el-option>
+                                <el-option label="uppercase" value="uppercase"></el-option>
+                            </el-select>
+                            <el-input-number 
+                                v-model="scope.data.stringOp.minlength"
+                                size="mini"
+                                placeholder="最小长度"
+                                :controls="false"
+                                class="w-5 mr-2"
+                                @focus="enableDrag = false"
+                                @blur="enableDrag=true">
+                            </el-input-number>
+                            <el-input-number 
+                                v-model="scope.data.stringOp.maxlength"
+                                size="mini"
+                                placeholder="最大长度"
+                                :controls="false"
+                                class="w-5"
+                                @focus="enableDrag = false"
+                                @blur="enableDrag=true">
+                            </el-input-number>
+                            <s-v-input 
+                                v-model="scope.data.stringOp.enum"
+                                size="mini" 
+                                class="w-15 mx-2"
+                                placeholder="枚举值逗号分隔"
+                                @focus="enableDrag = false"
+                                @blur="enableDrag=true">
+                            </s-v-input>
+                        </template>
+                        <!-- 数字类型单独处理 -->
+                        <template v-if="scope.data.type === 'Number'">
+                            <el-input-number 
+                                v-model="scope.data.numberOp.min"
+                                size="mini"
+                                placeholder="最小值"
+                                :controls="false"
+                                class="w-5 mr-2"
+                                @focus="enableDrag = false"
+                                @blur="enableDrag=true">
+                            </el-input-number>
+                            <el-input-number 
+                                v-model="scope.data.numberOp.max"
+                                size="mini"
+                                placeholder="最大值"
+                                :controls="false"
+                                class="w-5"
+                                @focus="enableDrag = false"
+                                @blur="enableDrag=true">
+                            </el-input-number>
+                            <s-v-input 
+                                v-model="scope.data.numberOp.enum"
+                                size="mini" 
+                                class="w-15 mx-2"
+                                placeholder="枚举值逗号分隔"
+                                @focus="enableDrag = false"
+                                @blur="enableDrag=true">
+                            </s-v-input>
+                        </template>
                     </div>
                 </template>
             </el-tree>
-        </div>     
+        </div>   
     </s-card2>
 </template>
 
@@ -107,78 +164,16 @@ export default {
                 return [];
             }
         },
-        plain: { //-------------是否为扁平数据，扁平数据不允许嵌套并且数据类型只能为string
-            type: Boolean,
-            default: false
-        },
         fold: { //--------------默认是否折叠
             type: Boolean,
             default: false
         },
-        validKey: { //----------是否验证key值必须为指定类型
-            type: Boolean,
-            default: true
-        },
-        isFormData: { //----------是否为formData类型的文件上传
-            type: Boolean,
-            default: false
-        },
-        showCheckbox: { //是否展示checkbox
-            type: Boolean,
-            default: false
-        },
-        ready: { //是否完成第一次后台数据获取
-            type: Boolean,
-            default: false
-        }
     },
     data() {
         return {
-            //=====================================提示====================================//
-            keyTip: {
-                message: "字母,数字,驼峰命名",
-                reference: "http://baidu.com"
-            },
-            valueTip: {
-                message: "不能为空并且类型必须一致",
-            },
-            requiredTip: {
-                message: "不能为空",
-            },
             //=====================================其他参数====================================//
             enableDrag: true,
         };
-    },
-    computed: {
-        disableTitleTip() {
-            if (!this.plain) {
-                return "点击添加嵌套数据"
-            } else {
-                return "当前类型只允许扁平数据，不允许存在复杂数据"
-            }
-        },
-        disableTypeTip() {
-            if (this.plain) {
-                return "get请求或者header的值只允许为string"
-            } else {
-                return ""
-            }
-        },
-        keyWhiteList() {
-            return this.$store.state.apidocRules.keyWhiteList
-        }
-    },
-    watch: {
-        ready: {
-            handler(value) {
-                if (value === true) { //第一次值改变
-                    setTimeout(() => {
-                        this.$refs["tree"].setCheckedNodes(this.treeData);
-                    })
-                }
-            },
-            immediate: true
-        }
     },
     created() {
         
@@ -243,12 +238,6 @@ export default {
         },
         //改变参数类型
         handleChangeParamsType(data) {
-            if (data.type === "boolean") {
-                data.value = "true";
-            }
-            if (data.type === "file") {
-                data.value = "image"
-            }
             if (data.type === "object" || data.type === "array") {
                 if (data.type === "array" && data.children && data.children.length > 0) { //清空子元素所有参数名称
                     dfsForest(data.children, {
@@ -269,107 +258,31 @@ export default {
                 this.$set(data, "_valuePlaceholder", "");
             }
         },
-        handleCheckChange() {     
-            //首先清空所有选中数据  
-            dfsForest(this.treeData, {
-                rCondition(value) {
-                    return value.children;
-                },
-                rKey: "children",
-                hooks: (data) => {
-                    this.$set(data, "_select", false);
-                }
-            });
-            const checkedNodes = this.$refs["tree"].getCheckedNodes();
-            const halfCheckedNodes = this.$refs["tree"].getHalfCheckedNodes();
-            checkedNodes.forEach(val => {
-                this.$set(val, "_select", true)
-            })
-            halfCheckedNodes.forEach(val => {
-                this.$set(val, "_select", true)
-            })
-        },
         //快捷新增一条参数
         handleAddMindParams(data, val) {
-            if (this.plain && val.type !== "string") {
-                val.type = "string";
-            }
             val.uuid = uuid();
-            // val._id = uuid(); //防止_id相同导致vue跟新错误
-            // val.id = uuid(); //防止_id相同导致vue跟新错误
             Object.assign(data, val)
-        },
-        //=====================================数据校验====================================//
-        //检查参数是否输入完备
-        handleCheckKey({ node, data }) {
-            const parentNode = node.parent;
-            const parentData = node.parent.data;
-            const nodeIndex = (parentNode.level === 0) ? parentData.findIndex(val => val.id === data.id) : parentData.children.findIndex(val => val.id === data.id);
-            if (parentNode.level === 0 && parentData.length === 1) { //根元素第一个可以不必校验因为参数可以不必填
-                return;
-            }
-            if (nodeIndex !== parentData.length - 1) { //只要不是最后一个值都需要做数据校验 
-                if (this.keyWhiteList.includes(data.key)) { //白名单
-                    this.$set(data, "_keyError", false)
-                } else if (data.key.trim() === "") { //非空校验
-                    this.$set(data, "_keyError", true)
-                } else if (this.validKey && !data.key.match(/^[a-zA-Z0-9]*$/)) { //字母数据
-                    this.$set(data, "_keyError", true)
-                } else {
-                    this.$set(data, "_keyError", false)
-                }         
-            } 
-        },
-        //检查参数值
-        handleCheckValue({ node, data }) {
-            const parentNode = node.parent;
-            const parentData = node.parent.data;
-            const nodeIndex = (parentNode.level === 0) ? parentData.findIndex(val => val.id === data.id) : parentData.children.findIndex(val => val.id === data.id);
-            if (data.type === "object" || data.type === "array") { //数据和对象不必校验
-                return;
-            }
-            if (parentNode.level === 0 && parentData.length === 1) { //根元素第一个可以不必校验因为参数可以不必填
-                return;
-            }
-            if (nodeIndex !== parentData.length - 1) { //只要不是最后一个值都需要坐数据校验 
-                console.log(data.value)
-                if (data.value && data.value.trim() === "") { //非空校验
-                    this.valueTip.message = "不能为空"
-                    this.$set(data, "_valueError", true);
-                } else if (data.type === "number" && !data.value.match(/^-?(0\.\d+|[1-9]+\.\d+|[1-9]\d{0,20}|[0-9])$/)) { //纯数字校验
-                    this.valueTip.message = "不能为空，并且值必须为数字"
-                    this.$set(data, "_valueError", true);
-                } else {
-                    this.$set(data, "_valueError", false);
-                }                
-            } 
-        },
-        //检查参数描述
-        handleCheckDescription({ node, data }) {
-            const parentNode = node.parent;
-            const parentData = node.parent.data;
-            const nodeIndex = (parentNode.level === 0) ? parentData.findIndex(val => val.id === data.id) : parentData.children.findIndex(val => val.id === data.id);
-            if (parentNode.level === 0 && parentData.length === 1) { //根元素第一个可以不必校验因为参数可以不必填
-                return;
-            }
-            if (nodeIndex !== parentData.length - 1) { //只要不是最后一个值都需要坐数据校验 
-                if (data.description && data.description.trim() === "") { //非空校验
-                    this.$set(data, "_descriptionError", true)
-                } else {
-                    this.$set(data, "_descriptionError", false)
-                }                
-            } 
         },
         //=====================================组件间交互====================================//  
         //生成请求数据
         generateParams(type = "string") {
             return {
                 id: uuid(),
-                key: "",
-                description: "",
-                type: type,
-                value: "",
+                key: "", 
+                type: "string",
+                default: "",
                 required: true,
+                children: [],
+                comment: "",
+                stringOp: {
+                    limit: [],
+                    minlength: 0,
+                    maxlength: 255,
+                    enum: "",
+                    match: null,
+                },
+                numberOp: {},
+                DateOp: {},
             }
         },
         //=====================================其他操作=====================================//

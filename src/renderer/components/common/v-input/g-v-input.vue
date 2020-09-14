@@ -16,6 +16,7 @@
                 v-bind="$attrs"
                 value-key="key"
                 popper-class="g-v-autocomplete"
+                class="w-100"
                 v-on="$listeners"
                 :fetch-suggestions="querySearchAsync"
                 :trigger-on-focus="false"
