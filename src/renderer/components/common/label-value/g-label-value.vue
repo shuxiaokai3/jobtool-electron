@@ -51,10 +51,12 @@ export default {
     display: inline-flex;
     align-items: center;
     margin-bottom: size(10);
+    flex: 0 0 auto;
     .label {
         color: $gray-800;
         display: inline-flex;
         align-items: center;
+        justify-content: flex-end;
     }
     .value {
         color: $gray-600;

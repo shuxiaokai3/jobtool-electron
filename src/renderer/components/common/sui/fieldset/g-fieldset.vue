@@ -7,7 +7,7 @@
 <template>
     <div class="s-fieldset">
         <div class="legend">{{ title }}</div>
-        <div class="w-100">
+        <div class="w-100 pt-3">
             <slot></slot>
         </div>
         <div class="operation">
@@ -49,9 +49,11 @@ export default {
         height: 30px;
         left: 20px;
         top: -10px;
-        color: #333;
+        color: $gray-700;
         background: #fff;
         padding: 0 20px;
+        font-size: size(18);
+        font-weight: bolder;
     }
     .operation {
         text-align: right;
