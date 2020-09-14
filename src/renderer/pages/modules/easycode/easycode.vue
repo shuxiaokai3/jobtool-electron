@@ -83,8 +83,8 @@ export default {
                     DateOp: {},
                 },
                 {
-                    key: "", 
-                    type: "String",
+                    key: "sex", 
+                    type: "Boolean",
                     default: "",
                     required: true,
                     children: [],
@@ -112,7 +112,8 @@ export default {
         convertTreeDataToMongooseModelData() {
             const result = {};
             const copyTreeData = JSON.parse(JSON.stringify(this.treeData));
-            const foo = (treeData, result) => {
+            let schemaStr = ""; //schema内部数据
+            const foo = (treeData) => {
                 for (let i = 0; i < treeData.length; i++) {
                     const el = treeData[i];
                     const key = el.key; //key
@@ -120,24 +121,27 @@ export default {
                     const defaultValue = el.default; //默认值
                     const comment = el.comment; //注释
                     const required = el.required; //是否必填
-                    let schemaStr = ""; //schema内部数据
+                    
                     if (key === "") {
                         continue;
                     }
                     //=========================================================================//
                     if (type === "String") { //字符串
                         schemaStr += this.convertString(el);
-                    } else if (type === "Number") {
+                    } else if (type === "Number") { //数字
                         schemaStr += this.convertNumber(el);
-                    } else if (type === "Boolean") {
+                    } else if (type === "Boolean") { //布尔值
                         schemaStr += this.convertBoolean(el);
+                    } else if (type === "ObjectId") { //objectId
+                        schemaStr += this.convertObjectId(el);
+                    } else if (type === "Object") { //对象
+                        schemaStr += foo(el.children);
                     }
-                    //=====================================数字====================================//
-
-                    console.log(schemaStr)
                 }
+                return schemaStr;
             }
-            foo(copyTreeData, result);
+            foo(copyTreeData);
+            console.log(schemaStr)
             return result;
         },
         //转换数字类型
@@ -168,7 +172,7 @@ export default {
             result = `
                 ${el.key}: { //${el.comment}
                     type: ${el.type},
-                    ${el.default ? `default: "${el.default}",` : ""}
+                    ${el.default ? `default: "${Number(el.default)}",` : ""}
                     ${numberLimitStr ? numberLimitStr : ""}
                     ${(numberMinLength != null) ? `min: ${numberMinLength},` : ""}
                     ${(numberMaxLength != null) ? `max: ${numberMaxLength},` : ""}
@@ -203,7 +207,7 @@ export default {
             result = `
                 ${el.key}: { //${el.comment}
                     type: ${el.type},
-                    ${el.default ? `default: "${Number(el.default)}",` : ""}
+                    ${el.default ? `default: "${el.default}",` : ""}
                     ${stringLimitStr ? stringLimitStr : ""}
                     ${(stringMinLength != null) ? `minlength: ${stringMinLength},` : ""}
                     ${(stringMaxLength != null) ? `maxlength: ${stringMaxLength},` : ""}
@@ -231,7 +235,6 @@ export default {
             result = `
                 ${el.key}: { //${el.comment}
                     type: mongoose.Schema.Types.ObjectId,
-                    ${el.default ? `default: ${!!el.default},` : ""}
                     ${el.required ? `required: true,` : ""}
                 },
             `;

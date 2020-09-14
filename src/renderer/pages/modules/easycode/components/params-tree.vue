@@ -54,11 +54,11 @@
                             <el-option label="Object" value="Object"></el-option>
                             <el-option label="Array" value="Array"></el-option>
                             <el-option label="Date" value="Date"></el-option>
-                            <el-option label="ObjectIds" value="ObjectIds"></el-option>
+                            <el-option label="ObjectId" value="ObjectId"></el-option>
                         </el-select>
                         <!-- 默认值 -->
                         <s-v-input 
-                                :disabled="scope.data.type === 'Array' || scope.data.type === 'Object'"
+                                :disabled="scope.data.type === 'Array' || scope.data.type === 'Object' || scope.data.type === 'ObjectId'"
                                 title="对象和数组不必填写参数值"
                                 v-model="scope.data.default"
                                 size="mini"
