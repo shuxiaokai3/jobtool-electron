@@ -193,10 +193,10 @@ export default {
             data.value = "";
             this.$set(data, "_valueError", false);
             this.$set(data, "_valuePlaceholder", "对象和数组不必填写参数值");
-            if (data.type === "object" || data.type === "array") {
+            if (data.type === "Object" || data.type === "Array") {
                 return
-            } else { //默认设置为object
-                data.type = "object"
+            } else { //默认设置为Object
+                data.type = "Object"
             }
         },
         //删除数据
@@ -265,11 +265,11 @@ export default {
         },
         //=====================================组件间交互====================================//  
         //生成请求数据
-        generateParams(type = "string") {
+        generateParams(type = "String") {
             return {
                 id: uuid(),
                 key: "", 
-                type: "string",
+                type: "String",
                 default: "",
                 required: true,
                 children: [],
@@ -281,7 +281,12 @@ export default {
                     enum: "",
                     match: null,
                 },
-                numberOp: {},
+                numberOp: {
+                    limit: [],
+                    min: 0,
+                    max: 999999,
+                    enum: "",
+                },
                 DateOp: {},
             }
         },
