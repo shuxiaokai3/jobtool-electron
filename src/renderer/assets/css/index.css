@@ -1178,6 +1178,8 @@ body .el-dropdown-menu {
     flex-direction: row; }
   .d-flex.flex-column {
     flex-direction: column; }
+    .d-flex.flex-wrap {
+        flex-wrap: wrap; }
 
 .d-inline-flex {
   display: inline-flex; }
