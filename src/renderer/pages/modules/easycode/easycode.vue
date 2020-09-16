@@ -6,23 +6,124 @@
 */
 <template>
     <div class="easycode px-5 py-5">
-        <s-fieldset title="基本信息">
-            <s-label-value label="模型名称：" label-width="120px">
-                <el-input v-model="formInfo.modelName" size="mini" placeholder="例如：doc,userInfo 驼峰命名" class="w-100" maxlength="100" clearable></el-input>
-            </s-label-value>
-            <s-label-value label="模型描述：" label-width="120px">
-                <el-input v-model="formInfo.description" size="mini" placeholder="例如：企业用户模型" class="w-100" maxlength="100" clearable></el-input>
-            </s-label-value>
-            <s-label-value label="文件路径：" label-width="120px">
-                <el-input v-model="formInfo.path" size="mini" placeholder="使用/分隔：api/user" class="w-100" maxlength="100" clearable></el-input>
-            </s-label-value>
-            <s-label-value label="开发者：" label-width="120px">
-                <el-input v-model="formInfo.creator" size="mini" placeholder="例如：shuxiaokai" class="w-100" maxlength="100" clearable></el-input>
-            </s-label-value>
-        </s-fieldset>
-        <s-fieldset title="模型">
+        <div class="d-flex j-between">
+            <s-fieldset title="基本信息" class="w-19">
+                <s-label-value label="模型名称：" label-width="120px">
+                    <el-input v-model="formInfo.modelName" size="mini" placeholder="例如：doc,userInfo 驼峰命名" class="w-100" maxlength="100" clearable></el-input>
+                </s-label-value>
+                <s-label-value label="模型描述：" label-width="120px">
+                    <el-input v-model="formInfo.description" size="mini" placeholder="例如：企业用户模型" class="w-100" maxlength="100" clearable></el-input>
+                </s-label-value>
+                <s-label-value label="文件路径：" label-width="120px">
+                    <el-input v-model="formInfo.path" size="mini" placeholder="使用/分隔：api/user" class="w-100" maxlength="100" clearable></el-input>
+                </s-label-value>
+                <s-label-value label="开发者：" label-width="120px">
+                    <el-input v-model="formInfo.creator" size="mini" placeholder="例如：shuxiaokai" class="w-100" maxlength="100" clearable></el-input>
+                </s-label-value>
+            </s-fieldset>
+            <s-fieldset title="模型" class="w-80">
+                <div>
+                    <s-params-tree title="字段信息：" label-width="120px" :tree-data="treeData"></s-params-tree>
+                </div>            
+            </s-fieldset>
+        </div>
+        <s-fieldset title="增删改查配置">
             <div>
-                <s-params-tree title="字段信息：" label-width="120px" :tree-data="treeData"></s-params-tree>
+                <el-checkbox-group v-model="formInfo.curd">
+                    <el-checkbox label="create">新增</el-checkbox>
+                    <el-checkbox label="update">修改</el-checkbox>
+                    <el-checkbox label="readById">单个查询</el-checkbox>
+                    <el-checkbox label="readList">列表查询</el-checkbox>
+                    <el-checkbox label="readEnum">枚举查询</el-checkbox>
+                    <el-checkbox label="delete">删除</el-checkbox>
+                </el-checkbox-group>    
+                <div class="d-flex j-between flex-wrap">
+                    <!-- 新增 -->
+                    <div v-show="formInfo.curd.includes('create')" class="op-config">
+                        <div class="header">新增配置</div>
+                        <div class="px-2 py-2">
+                            <el-table :data="treeData" stripe border size="mini">
+                                <el-table-column prop="key" label="字段" align="center"></el-table-column>
+                                <el-table-column label="有效" align="center">
+                                    <template slot-scope="scope">
+                                        <el-checkbox v-model="scope.row._enableAdd"></el-checkbox>
+                                    </template>
+                                </el-table-column>
+                                <el-table-column label="是否唯一" align="center">
+                                    <template slot-scope="scope">
+                                        <el-checkbox v-model="scope.row._uniqueAdd"></el-checkbox>
+                                    </template>
+                                </el-table-column>
+                            </el-table>
+                        </div>
+                    </div>
+                    <!-- 修改 -->
+                    <div v-show="formInfo.curd.includes('update')" class="op-config">
+                        <div class="header">修改配置</div>
+                        <div class="px-2 py-2">
+                            <el-table :data="treeData" stripe border size="mini">
+                                <el-table-column prop="key" label="字段" align="center"></el-table-column>
+                                <el-table-column label="有效" align="center">
+                                    <template slot-scope="scope">
+                                        <el-checkbox v-model="scope.row._enableEdit"></el-checkbox>
+                                    </template>
+                                </el-table-column>
+                                <el-table-column label="是否唯一" align="center">
+                                    <template slot-scope="scope">
+                                        <el-checkbox v-model="scope.row._uniqueEdit"></el-checkbox>
+                                    </template>
+                                </el-table-column>
+                            </el-table>
+                        </div>
+                    </div>
+                    <!-- 查询单个 -->
+                    <div v-show="formInfo.curd.includes('readById')" class="op-config">
+                        <div class="header">单个查询配置</div>
+                        <div class="px-2 py-2">
+                            <el-table :data="treeData" stripe border size="mini">
+                                <el-table-column prop="key" label="字段" align="center"></el-table-column>
+                                <el-table-column label="是否返回当前字段" align="center">
+                                    <template slot-scope="scope">
+                                        <el-checkbox v-model="scope.row._enableField"></el-checkbox>
+                                    </template>
+                                </el-table-column>
+                            </el-table>
+                        </div>
+                    </div>
+                    <!-- 列表查询 -->
+                    <div v-show="formInfo.curd.includes('readList')" class="op-config">
+                        <div class="header">列表查询配置</div>
+                        <div class="px-2 py-2">
+                            <el-table :data="treeData" stripe border size="mini">
+                                <el-table-column prop="key" label="字段" align="center"></el-table-column>
+                                <el-table-column label="是否查询当前字段" align="center">
+                                    <template slot-scope="scope">
+                                        <el-checkbox v-model="scope.row._enableList"></el-checkbox>
+                                    </template>
+                                </el-table-column>
+                            </el-table>
+                        </div>
+                    </div>
+                    <!-- 枚举查询 -->
+                    <div v-show="formInfo.curd.includes('readEnum')" class="op-config">
+                        <div class="header">枚举查询</div>
+                        <div class="px-2 py-2">
+                            <el-table :data="treeData" stripe border size="mini">
+                                <el-table-column prop="key" label="字段" align="center"></el-table-column>
+                                <el-table-column label="是否查询当前字段" align="center">
+                                    <template slot-scope="scope">
+                                        <el-checkbox v-model="scope.row._enableEnumField"></el-checkbox>
+                                    </template>
+                                </el-table-column>
+                            </el-table>
+                        </div>
+                    </div>
+                    <!-- 删除 -->
+                    <div v-show="formInfo.curd.includes('delete')" class="op-config">
+                        <div class="header">删除配置</div>
+                        <div class="px-1 py-1"></div>
+                    </div>
+                </div>            
             </div>            
         </s-fieldset>
         <s-card>
@@ -31,29 +132,21 @@
                     <h2>model</h2>
                     <div class="code-area scroll-y-400">
                         <pre class="">{{ modelValue }}</pre>
-                        <div class="operate green cursor-pointer">复制</div>
+                        <div v-copy="modelValue" class="operate green cursor-pointer">复制</div>
                     </div>
                 </div>
                 <div class="w-30">
                     <h2>controller</h2>
-                    <el-checkbox-group v-model="formInfo.curd">
-                        <el-checkbox label="create">新增</el-checkbox>
-                        <el-checkbox label="update">修改</el-checkbox>
-                        <el-checkbox label="readById">单个查询</el-checkbox>
-                        <el-checkbox label="readList">列表查询</el-checkbox>
-                        <el-checkbox label="delete">删除</el-checkbox>
-                    </el-checkbox-group>
                     <div class="code-area scroll-y-400">
                         <pre class="">{{ controllerValue }}</pre>
-                        <!-- <div style="height: 999px"></div> -->
-                        <div class="operate hover-green cursor-pointer">复制</div>
+                        <div v-copy="controllerValue" class="operate green cursor-pointer">复制</div>
                     </div>
                 </div>
                 <div class="w-30">
                     <h2>service</h2>
                     <div class="code-area scroll-y-400">
-                        <pre class="">{{ modelValue }}</pre>
-                        <span class="operate hover-green cursor-pointer">复制</span>
+                        <pre class="">{{ serviceValue }}</pre>
+                        <span v-copy="serviceValue" class="operate green cursor-pointer">复制</span>
                     </div>
                 </div>
             </div>
@@ -78,6 +171,10 @@ export default {
             const result = this.convertTreeDataToMongooseControllerData();
             return result;
         },
+        serviceValue() {
+            const result = this.convertTreeDataToMongooseServiceData();
+            return result;
+        },
     },
     data() {
         return {
@@ -85,7 +182,8 @@ export default {
                 modelName: "user", //模型名称
                 creator: "shuxiaokai", //创建者名称
                 description: "用户",
-                curd: ["create", "update", "readList", "readById", "delete"], //增删改查, create update readList readById delete 
+                // curd: ["create", "update", "readList", "readById", "readEnum", "delete"], //增删改查, create update readEnum readList readById delete 
+                curd: ["readEnum"], //增删改查, create update readEnum readList readById delete 
                 path: "apidoc/docs"
             },
             rules: {},
@@ -95,28 +193,32 @@ export default {
                     type: "string",
                     comment: "每页数据大小",
                     required: true,
-                    default: "10"
+                    default: "10",
+                    _enableList: true
                 },
                 {
                     key: "pageNum",
                     type: "string",
                     comment: "当前页码",
                     required: false,
-                    default: "1"
+                    default: "1",
+                    _enableList: true
                 },
                 {
                     key: "startTime",
                     type: "string",
                     comment: "起始日期",
                     required: false,
-                    default: "1"
+                    default: "1",
+                    _enableList: true
                 },
                 {
                     key: "endTime",
                     type: "string",
                     comment: "结束日期",
                     required: false,
-                    default: "1"
+                    default: "1",
+                    _enableList: true
                 }
             ],
             treeData: [
@@ -141,6 +243,15 @@ export default {
                         enum: "",
                     },
                     DateOp: {},
+                    _enableAdd: true,
+                    _enableEdit: true,
+                    _enableList: false,
+                    _enableField: true,
+                    _enableEnumField: false,
+                    _uniqueAdd: false,
+                    _uniqueEdit: false,
+                    _tip: ""
+
                 },
                 {
                     key: "age", 
@@ -163,6 +274,14 @@ export default {
                         enum: "",
                     },
                     DateOp: {},
+                    _enableAdd: true,
+                    _enableEdit: true,
+                    _enableList: false,
+                    _enableField: true,
+                    _enableEnumField: false,
+                    _uniqueAdd: false,
+                    _uniqueEdit: false,
+                    _tip: ""
                 },
                 {
                     key: "sex", 
@@ -185,6 +304,14 @@ export default {
                         enum: "",
                     },
                     DateOp: {},
+                    _enableAdd: true,
+                    _enableEdit: true,
+                    _enableList: false,
+                    _enableField: true,
+                    _enableEnumField: false,
+                    _uniqueAdd: false,
+                    _uniqueEdit: false,
+                    _tip: ""
                 },
             ],
         };
@@ -344,9 +471,9 @@ export default {
             const createControllerStr = (this.formInfo.curd.includes("create")) ? this.generateCreateController() : "";
             const updateControllerStr = (this.formInfo.curd.includes("update")) ? this.generateUpdateController() : "";
             const readListControllerStr = (this.formInfo.curd.includes("readList")) ? this.generateReadListController() : "";
+            const readEnumControllerStr = (this.formInfo.curd.includes("readEnum")) ? this.generateReadEnumController() : "";
             const readByIdControllerStr = (this.formInfo.curd.includes("readById")) ? this.generateReadByIdController() : "";
             const deleteControllerStr = (this.formInfo.curd.includes("delete")) ? this.generateDeleteController() : "";
-
             
             let result = `
                 /** 
@@ -357,9 +484,10 @@ export default {
                 const Controller = require("egg").Controller;
                 class ${camelCase(this.formInfo.modelName, { pascalCase: true })}Controller extends Controller {
                     ${createControllerStr}
-                    ${updateControllerStr}
                     ${readListControllerStr}
+                    ${readEnumControllerStr}
                     ${readByIdControllerStr}
+                    ${updateControllerStr}
                     ${deleteControllerStr}
                 }
                 module.exports = ${camelCase(this.formInfo.modelName, { pascalCase: true })}Controller;
@@ -483,6 +611,32 @@ export default {
             `;
             return result;
         },
+        //枚举形式读取
+        generateReadEnumController() {
+            let comments = "";
+            let reqRule = ``;
+            const desc = this.formInfo.description;
+            const creator = this.formInfo.creator;
+            const space = " ".repeat(4);
+            const time = new Date().toLocaleString();
+            let result = `\n/**\n${space}@description${space}以枚举形式获取${desc}\n${space}@author${space}${space} ${creator}\n${space}@create${space}${space} ${time}${comments}\n${space}@return${space}null\n*/
+            \nasync ${camelCase(`read_${this.formInfo.modelName}_enum`)}() {
+                try {
+                    const params = this.ctx.request.query;
+                    const reqRule = {
+                        ${reqRule}
+                    };
+                    this.ctx.validate(reqRule, params);
+                    const result = await this.ctx.service.${this.formInfo.path.split("/").join(".")}.${camelCase(`read_${this.formInfo.modelName}_enum`)}(params);
+                    this.ctx.helper.successResponseData(result);
+                } catch (error) {
+                    this.ctx.helper.throwError(error);
+                    return;
+                }
+            }
+            `;
+            return result;
+        },
         //根据id查询详情
         generateReadByIdController() {
             let comments = `\n    @param {string}        _id 详情数据id`;
@@ -535,6 +689,294 @@ export default {
             `;
             return result;
         },
+        
+        //=====================================Service转换====================================//
+        convertTreeDataToMongooseServiceData() {
+            const createServiceStr = (this.formInfo.curd.includes("create")) ? this.generateCreateService() : "";
+            const updateServiceStr = (this.formInfo.curd.includes("update")) ? this.generateUpdateService() : "";
+            const readListServiceStr = (this.formInfo.curd.includes("readList")) ? this.generateReadListService() : "";
+            const readEnumServiceStr = (this.formInfo.curd.includes("readEnum")) ? this.generateReadEnumService() : "";
+            const deleteServiceStr = (this.formInfo.curd.includes("delete")) ? this.generateDeleteService() : "";
+            const readByIdServiceStr = (this.formInfo.curd.includes("readById")) ? this.generateReadByIdService() : "";
+            let result = `
+                /** 
+                    @description  ${this.formInfo.description}服务
+                    @author       ${this.formInfo.creator}
+                    @create       ${new Date().toLocaleString()}
+                */
+                const Service = require("egg").Service;
+                const escapeStringRegexp = require("escape-string-regexp");
+                class ${camelCase(this.formInfo.modelName, { pascalCase: true })}Service extends Service {
+                    ${createServiceStr}
+                    ${readListServiceStr}
+                    ${readByIdServiceStr}
+                    ${readEnumServiceStr}
+                    ${updateServiceStr}
+                    ${deleteServiceStr}
+                }
+                module.exports = ${camelCase(this.formInfo.modelName, { pascalCase: true })}Service;
+            `;
+            result = beautify(result, { indent_size: 4, "end-with-newline": true, preserve_newlines: false })
+            return result;
+        },
+        //新增
+        generateCreateService() {
+            const copyTreeData = JSON.parse(JSON.stringify(this.treeData));
+            let comments = ""; //前置注释
+            let reqeustParamsStr = "";
+            let uniqueStr = "";
+            const filePathArr = this.formInfo.path.split("/");
+            let filePathStr = "";
+            let docStr = ""; //被创建文档信息
+            for (let i = 0; i < filePathArr.length; i++) {
+                const element = filePathArr[i];
+                filePathStr += `${camelCase(element, { pascalCase: true })}.`
+            }
+            for (let i = 0; i < copyTreeData.length; i++) {
+                const el = copyTreeData[i];
+                const key = el.key; //key
+                const type = el.type; //类型
+                const defaultValue = el.default; //默认值
+                const comment = el.comment; //注释
+                const required = el.required; //是否必填
+                if (key === "" || !el._enableAdd) continue;
+                if (el._uniqueAdd) {
+                    uniqueStr += `
+                        // 判断${comment}是否已经存在
+                        const ${camelCase(`has_${key}`)} = await this.ctx.model.${filePathStr}findOne({ projectName, enabled: true });
+                        if (${camelCase(`has_${key}`)}) {
+                            this.ctx.helper.errorInfo("${comment}已经存在", 1003);
+                        }
+                    `
+                }
+                reqeustParamsStr += `${key},`
+                comments += `\n    @param {${type.toLowerCase()}${required ? "" : "?"}}        ${key} ${comment}`;
+                docStr += `doc.${key} = ${key};`
+            }
+            const desc = this.formInfo.description;
+            const creator = this.formInfo.creator;
+            const space = " ".repeat(4);
+            const time = new Date().toLocaleString();
+            let result = `\n/**\n${space}@description${space}新增${desc}\n${space}@author${space}${space} ${creator}\n${space}@create${space}${space} ${time}${comments}\n${space}@return${space}null\n*/
+            async ${camelCase(`create_${this.formInfo.modelName}`)}(params) {
+                ${ reqeustParamsStr ?  `const { ${reqeustParamsStr} } = params;` : ""}
+                ${uniqueStr ? uniqueStr : ""}
+                const doc = {};
+                ${docStr ? docStr : ""}
+                await this.ctx.model.${filePathStr}create(doc);
+                return;
+            }
+            `;
+            return result;
+        },
+        //修改
+        generateUpdateService() {
+            const copyTreeData = JSON.parse(JSON.stringify(this.treeData));
+            let comments = "\n    @param {String}         _id 数据id"; //前置注释
+            let reqeustParamsStr = "_id,";
+            let uniqueStr = "";
+            const filePathArr = this.formInfo.path.split("/");
+            let filePathStr = "";
+            let docStr = "doc._id = _id;"; //被创建文档信息
+            for (let i = 0; i < filePathArr.length; i++) {
+                const element = filePathArr[i];
+                filePathStr += `${camelCase(element, { pascalCase: true })}.`
+            }
+            for (let i = 0; i < copyTreeData.length; i++) {
+                const el = copyTreeData[i];
+                const key = el.key; //key
+                const type = el.type; //类型
+                const defaultValue = el.default; //默认值
+                const comment = el.comment; //注释
+                const required = el.required; //是否必填
+                if (key === "" || !el._enableEdit) continue;
+                if (el._uniqueEdit) {
+                    uniqueStr += `
+                        // 判断${comment}是否已经存在
+                        const ${camelCase(`has_${key}`)} = await this.ctx.model.${filePathStr}findOne({ _id: { $ne: _id }, ${key} });
+                        if (${camelCase(`has_${key}`)}) {
+                            this.ctx.helper.errorInfo("${comment}已经存在", 1003);
+                        }
+                    `
+                }
+                reqeustParamsStr += `${key},`
+                comments += `\n    @param {${type.toLowerCase()}?}        ${key} ${comment}`;
+                docStr += `doc.${key} = ${key};`
+            }
+            const desc = this.formInfo.description;
+            const creator = this.formInfo.creator;
+            const space = " ".repeat(4);
+            const time = new Date().toLocaleString();
+            let result = `\n/**\n${space}@description${space}修改${desc}\n${space}@author${space}${space} ${creator}\n${space}@create${space}${space} ${time}${comments}\n${space}@return${space}null\n*/
+            async ${camelCase(`update_${this.formInfo.modelName}`)}(params) {
+                ${ reqeustParamsStr ?  `const { ${reqeustParamsStr} } = params;` : ""}
+                const doc = {};
+                ${docStr ? docStr : ""}
+                ${uniqueStr ? uniqueStr : ""}
+                await this.ctx.model.${filePathStr}findByIdAndUpdate({ _id }, doc);
+                return;
+            }
+            `;
+            return result;
+        },
+        //列表查询
+        generateReadListService() {
+            const copyTreeData = JSON.parse(JSON.stringify(this.treeData));
+            let comments = ""; //前置注释
+            const filePathArr = this.formInfo.path.split("/");
+            let filePathStr = "";
+            let reqeustParamsStr = "";
+            let queryStr = "";
+            for (let i = 0; i < filePathArr.length; i++) {
+                const element = filePathArr[i];
+                filePathStr += `${camelCase(element, { pascalCase: true })}.`
+            }
+            const listParams = this.listParams.concat(copyTreeData);
+            for (let i = 0; i < listParams.length; i++) {
+                const el = listParams[i];
+                const key = el.key; //key
+                const type = el.type; //类型
+                const defaultValue = el.default; //默认值
+                const comment = el.comment; //注释
+                let defaultValueStr = "";
+                if (type === "string") {
+                    defaultValueStr = `"${defaultValue}"`;
+                }
+                const required = el.required; //是否必填
+                if (el._enableList) {
+                    reqeustParamsStr += `${key},`
+                    comments += `\n    @param {${type.toLowerCase()}${(!required || defaultValue) ? "?" : ""}}        ${key} ${comment}`;
+                }
+            }
+            for (let i = 0; i < copyTreeData.length; i++) {
+                const el = copyTreeData[i];
+                if (el._enableList) {
+                    queryStr += `
+                        if (${el.key}) {
+                            query.${el.key} = new RegExp(escapeStringRegexp(${el.key}));
+                        }
+                    `;
+                }
+            }
+            const desc = this.formInfo.description;
+            const creator = this.formInfo.creator;
+            const space = " ".repeat(4);
+            const time = new Date().toLocaleString();
+            let result = `\n/**\n${space}@description${space}以列表形式获取${desc}\n${space}@author${space}${space} ${creator}\n${space}@create${space}${space} ${time}${comments}\n${space}@return${space}null\n*/
+            async ${camelCase(`read_${this.formInfo.modelName}_list`)}(params) {
+                ${ reqeustParamsStr ?  `const { ${reqeustParamsStr} } = params;` : ""}
+                    const query = {
+                        enabled: true,
+                    };
+                    let skipNum = 0;
+                    let limit = 100;
+                    if (pageSize != null && pageNum != null) {
+                        skipNum = (pageNum - 1) * pageSize;
+                        limit = pageSize;
+                    }
+                    if (startTime != null && endTime != null) {
+                        query.createdAt = { $gt: startTime, $lt: endTime };
+                    }
+                    ${queryStr ? queryStr : ""}
+                    const rows = await this.ctx.model.${filePathStr}find(query).skip(skipNum).limit(limit);
+                    const total = await this.ctx.model.${filePathStr}find(query).countDocuments();
+                    const result = {};
+                    result.rows = rows;
+                    result.total = total;
+                return result;
+            }
+            `;
+            return result;
+        },
+        //单个查询
+        generateReadByIdService() {
+            const copyTreeData = JSON.parse(JSON.stringify(this.treeData));
+            let comments = `\n    @param {string}        _id ${this.formInfo.description}id`;
+            let filePathStr = "";
+            let showFieldStr = "";
+            const filePathArr = this.formInfo.path.split("/");
+            for (let i = 0; i < filePathArr.length; i++) {
+                const element = filePathArr[i];
+                filePathStr += `${camelCase(element, { pascalCase: true })}.`
+            }
+            for (let i = 0; i < copyTreeData.length; i++) {
+                const el = copyTreeData[i];
+                if (!el._enableField) {
+                    showFieldStr += `${el.key}: 0,`;
+                }
+            }
+            const desc = this.formInfo.description;
+            const creator = this.formInfo.creator;
+            const space = " ".repeat(4);
+            const time = new Date().toLocaleString();
+            let result = `\n/**\n${space}@description${space}根据id获取${desc}\n${space}@author${space}${space} ${creator}\n${space}@create${space}${space} ${time}${comments}\n${space}@return${space}null\n*/
+            async ${camelCase(`read_${this.formInfo.modelName}_byId`)}(params) {
+                const { _id } = params;
+                const result = await this.ctx.model.${filePathStr}findOne({ _id, enabled: true }${showFieldStr ? `, { ${showFieldStr} }` : ""});
+                return result;
+            }
+            `;
+            return result;
+        },
+        generateReadEnumService() {
+            const copyTreeData = JSON.parse(JSON.stringify(this.treeData));
+            let comments = ``;
+            let filePathStr = "";
+            let showFieldStr = "";
+            const filePathArr = this.formInfo.path.split("/");
+            for (let i = 0; i < filePathArr.length; i++) {
+                const element = filePathArr[i];
+                filePathStr += `${camelCase(element, { pascalCase: true })}.`
+            }
+            for (let i = 0; i < copyTreeData.length; i++) {
+                const el = copyTreeData[i];
+                if (el._enableEnumField) {
+                    showFieldStr += `${el.key}: 1,`;
+                }
+            }
+            const desc = this.formInfo.description;
+            const creator = this.formInfo.creator;
+            const space = " ".repeat(4);
+            const time = new Date().toLocaleString();
+            let result = `\n/**\n${space}@description${space}以枚举形式获取${desc}\n${space}@author${space}${space} ${creator}\n${space}@create${space}${space} ${time}${comments}\n${space}@return${space}null\n*/
+            async ${camelCase(`read_${this.formInfo.modelName}_enum`)}(params) {
+                const limit = 100;
+                const result = await this.ctx.model.${filePathStr}find({ enabled: true }${showFieldStr ? `, { ${showFieldStr} }` : ""}).limit(limit);
+                return result;
+            }
+            `;
+            return result;
+        },
+        //删除
+        generateDeleteService() {
+            const copyTreeData = JSON.parse(JSON.stringify(this.treeData));
+            let comments = `\n    @param {string}        ids ${this.formInfo.description}id数组`;
+            let filePathStr = "";
+            let showFieldStr = "";
+            const filePathArr = this.formInfo.path.split("/");
+            for (let i = 0; i < filePathArr.length; i++) {
+                const element = filePathArr[i];
+                filePathStr += `${camelCase(element, { pascalCase: true })}.`
+            }
+            for (let i = 0; i < copyTreeData.length; i++) {
+                const el = copyTreeData[i];
+                if (!el._enableField) {
+                    showFieldStr += `${el.key}: 0,`;
+                }
+            }
+            const desc = this.formInfo.description;
+            const creator = this.formInfo.creator;
+            const space = " ".repeat(4);
+            const time = new Date().toLocaleString();
+            let result = `\n/**\n${space}@description${space}根据id删除${desc}\n${space}@author${space}${space} ${creator}\n${space}@create${space}${space} ${time}${comments}\n${space}@return${space}null\n*/
+            async ${camelCase(`delete_${this.formInfo.modelName}`)}(params) {
+                const { ids } = params;
+                const result = await this.ctx.model.${filePathStr}updateMany({ _id: { $in: ids }}, { $set: { enabled: false }});
+                return result;
+            }
+            `;
+            return result;
+        },
     },
 };
 </script>
@@ -543,6 +985,8 @@ export default {
 
 <style lang="scss">
 .easycode {
+    height: calc(100vh - #{size(60)});
+    overflow-y: auto;
     .item {
         width: 50%;
         max-width: size(800);
@@ -550,9 +994,24 @@ export default {
     .code-area {
         position: relative;
         .operate {
-            position: sticky;
+            position: absolute;
             top: 20px;
-            // right: size(10);
+            right: size(10);
+        }
+    }
+    .op-config {
+        margin-top: size(20);
+        width: 45%;
+        border: 1px solid $gray-300;
+        border-radius: $border-radius-sm;
+        .header {
+            background: $gray-200;
+            padding: size(5);
+        }
+        .config-item {
+            height: size(25);
+            display: flex;
+            align-items: center;
         }
     }
 }
