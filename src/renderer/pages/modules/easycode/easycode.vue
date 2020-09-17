@@ -127,7 +127,7 @@
             </div>            
         </s-fieldset>
         <s-card>
-            <div class="d-flex j-between">
+            <div class="d-flex j-between flex-wrap">
                 <div class="w-30">
                     <h2>model</h2>
                     <div class="code-area scroll-y-400">
@@ -147,6 +147,13 @@
                     <div class="code-area scroll-y-400">
                         <pre class="">{{ serviceValue }}</pre>
                         <span v-copy="serviceValue" class="operate green cursor-pointer">复制</span>
+                    </div>
+                </div>
+                <div class="w-50">
+                    <h2>路由</h2>
+                    <div class="code-area scroll-y-400">
+                        <pre class="">{{ routerValue }}</pre>
+                        <span v-copy="routerValue" class="operate green cursor-pointer">复制</span>
                     </div>
                 </div>
             </div>
@@ -175,6 +182,10 @@ export default {
             const result = this.convertTreeDataToMongooseServiceData();
             return result;
         },
+        routerValue() {
+            const result = this.convertTreeDataToMongooseRoutereData();
+            return result;
+        },
     },
     data() {
         return {
@@ -182,9 +193,9 @@ export default {
                 modelName: "user", //模型名称
                 creator: "shuxiaokai", //创建者名称
                 description: "用户",
-                // curd: ["create", "update", "readList", "readById", "readEnum", "delete"], //增删改查, create update readEnum readList readById delete 
-                curd: ["readEnum"], //增删改查, create update readEnum readList readById delete 
-                path: "apidoc/docs"
+                curd: ["create", "update", "readList", "readById", "readEnum", "delete"], //增删改查, create update readEnum readList readById delete 
+                // curd: ["readEnum"], //增删改查, create update readEnum readList readById delete 
+                path: "apidoc/doc"
             },
             rules: {},
             listParams: [
@@ -223,69 +234,8 @@ export default {
             ],
             treeData: [
                 {
-                    key: "name", 
+                    key: "", 
                     type: "String",
-                    default: "shu",
-                    required: true,
-                    children: [],
-                    comment: "名称",
-                    stringOp: {
-                        limit: [],
-                        minlength: 0,
-                        maxlength: 255,
-                        enum: "a,b,c",
-                        match: null,
-                    },
-                    numberOp: {
-                        limit: [],
-                        min: 0,
-                        max: 999999,
-                        enum: "",
-                    },
-                    DateOp: {},
-                    _enableAdd: true,
-                    _enableEdit: true,
-                    _enableList: false,
-                    _enableField: true,
-                    _enableEnumField: false,
-                    _uniqueAdd: false,
-                    _uniqueEdit: false,
-                    _tip: ""
-
-                },
-                {
-                    key: "age", 
-                    type: "Number",
-                    default: "22",
-                    required: true,
-                    children: [],
-                    comment: "年龄",
-                    stringOp: {
-                        limit: [],
-                        minlength: 0,
-                        maxlength: 255,
-                        enum: "",
-                        match: null,
-                    },
-                    numberOp: {
-                        limit: [],
-                        min: 0,
-                        max: 999999,
-                        enum: "",
-                    },
-                    DateOp: {},
-                    _enableAdd: true,
-                    _enableEdit: true,
-                    _enableList: false,
-                    _enableField: true,
-                    _enableEnumField: false,
-                    _uniqueAdd: false,
-                    _uniqueEdit: false,
-                    _tip: ""
-                },
-                {
-                    key: "sex", 
-                    type: "Object",
                     default: "",
                     required: true,
                     children: [],
@@ -312,12 +262,45 @@ export default {
                     _uniqueAdd: false,
                     _uniqueEdit: false,
                     _tip: ""
-                },
+
+                }
             ],
         };
     },
-    created() {},
+    watch: {
+        formInfo: {
+            handler() {
+                const config = {
+                    formInfo: this.formInfo,
+                    treeData: this.treeData
+                }
+                localStorage.setItem("easycode/config", JSON.stringify(config))
+            },
+            deep: true
+        },
+        treeData: {
+            handler() {
+                const config = {
+                    formInfo: this.formInfo,
+                    treeData: this.treeData
+                }
+                localStorage.setItem("easycode/config", JSON.stringify(config))
+            },
+            deep: true
+        },
+    },
+    created() {
+        this.initLocalData(); //初始化本地数据
+    },
     methods: {
+        initLocalData() {
+            let codeConfig = localStorage.getItem("easycode/config");
+            if (codeConfig) {
+                codeConfig = JSON.parse(codeConfig);
+                this.formInfo = codeConfig.formInfo;
+                this.treeData = codeConfig.treeData;
+            }
+        },
         //=====================================Model转换====================================//
         //转换参数为mongooseModel
         convertTreeDataToMongooseModelData() {
@@ -508,8 +491,10 @@ export default {
                 const comment = el.comment; //注释
                 const required = el.required; //是否必填
                 if (key === "") continue;
-                comments += `\n    @param {${type.toLowerCase()}${required ? "" : "?"}}        ${key} ${comment}`;
-                reqRule += `${key}: { type: "${type.toLowerCase()}" },`;
+                if (el._enableAdd) {
+                    comments += `\n    @param {${type.toLowerCase()}${required ? "" : "?"}}        ${key} ${comment}`;
+                    reqRule += `${key}: { type: "${type.toLowerCase()}" },`;
+                }
             }
             const desc = this.formInfo.description;
             const creator = this.formInfo.creator;
@@ -977,6 +962,53 @@ export default {
             `;
             return result;
         },
+        //=====================================Router转换====================================//
+        convertTreeDataToMongooseRoutereData() {
+            let routerStr = "";
+            const descStr = this.formInfo.description;
+            let filePathStr = "";
+            const filePathArr = this.formInfo.path.split("/");
+            for (let i = 0; i < filePathArr.length; i++) {
+                const element = filePathArr[i];
+                filePathStr += `${camelCase(element)}.`
+            }
+            for (let i = 0; i < this.formInfo.curd.length; i++) {
+                const op = this.formInfo.curd[i];
+                let modelName = "";
+                /*eslint-disable indent*/ 
+                switch (op) {
+                    case "create":
+                        modelName = camelCase(`create_${this.formInfo.modelName}`);
+                        routerStr += `router.post("/api/${this.formInfo.path}", controller.${filePathStr}${camelCase(`create_${this.formInfo.modelName}`)}); //新增${descStr}\n`;
+                        break;
+                    case "update":
+                        modelName = camelCase(`update_${this.formInfo.modelName}`);
+                        routerStr += `router.put("/api/${this.formInfo.path}", controller.${filePathStr}${modelName}); //修改${descStr}\n`;
+                        break;
+                    case "readList":
+                        modelName = camelCase(`read_${this.formInfo.modelName}_list`);
+                        routerStr += `router.get("/api/${this.formInfo.path}_list", controller.${filePathStr}${modelName}); //以列表形式获取${descStr}\n`;
+                        break;
+                    case "readById":
+                        modelName = camelCase(`read_${this.formInfo.modelName}_byId`);
+                        routerStr += `router.get("/api/${this.formInfo.path}", controller.${filePathStr}${modelName}); //根据id查询${descStr}\n`;
+                        break;
+                    case "readEnum":
+                        modelName = camelCase(`read_${this.formInfo.modelName}_enum`);
+                        routerStr += `router.get("/api/${this.formInfo.path}_enum", controller.${filePathStr}${modelName}); //以枚举形式获取${descStr}\n`;
+                        break;
+                    case "delete":
+                        modelName = camelCase(`delete_${this.formInfo.modelName}`);
+                        routerStr += `router.delete("/api/${this.formInfo.path}", controller.${filePathStr}${modelName}); //删除${descStr}\n`;
+                        break;
+                    default:
+                        break;
+                }
+            }
+            let result = `//=====================================${this.formInfo.description}相关路由====================================//\n`;
+            result += beautify(routerStr, { indent_size: 4, "end-with-newline": true, preserve_newlines: false })
+            return result
+        },
     },
 };
 </script>
@@ -997,6 +1029,9 @@ export default {
             position: absolute;
             top: 20px;
             right: size(10);
+        }
+        &>pre {
+            min-height: size(100);
         }
     }
     .op-config {
