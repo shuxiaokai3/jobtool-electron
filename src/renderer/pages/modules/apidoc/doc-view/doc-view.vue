@@ -5,7 +5,7 @@
     备注：xxxx
 */
 <template>
-    <div class="doc-edit">
+    <div class="doc-view">
         <s-banner></s-banner>
         <div class="doc-wrap">
             <s-navs></s-navs>
@@ -50,8 +50,8 @@ export default {
 
 
 <style lang="scss">
-.doc-edit {
-    height: calc(100vh - 60px);
+.doc-view {
+    height: 100%;
     display: flex;
     .banner {
         flex: 0 0 auto;
