@@ -153,12 +153,15 @@ export default {
     }
     .string-value {
         color: $orange;
+        font-size: .9em;
     }
     .boolean-value {
         color: #499CB3;
+        font-size: .9em;
     }
     .number-value {
         color: #80C0A8;
+        font-size: .9em;
     }
     .comment {
         color: #6A9955;

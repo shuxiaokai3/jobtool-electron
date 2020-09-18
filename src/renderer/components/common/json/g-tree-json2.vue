@@ -42,13 +42,13 @@
                     <span v-if="!isArray" class="key">{{ item.key }}</span><span v-if="!isArray" class="symbol">:</span>
                     <template v-if="item.type === 'object'">
                         <span class="symbol">{</span>
-                        <s-ellipsis-content :copy="false" :max-width="200" ref="comment" class="comment" :value="`//${item.description}`"></s-ellipsis-content>
+                        <!-- <s-ellipsis-content :copy="false" :max-width="200" ref="comment" class="comment" :value="`//${item.description}`"></s-ellipsis-content> -->
                         <s-tree-json :data="item.children" :level="level + 1"></s-tree-json>
                         <span class="symbol">}</span>
                     </template>
                     <template v-else-if="item.type === 'array'">
                         <span class="symbol">[</span>
-                        <s-ellipsis-content :copy="false" :max-width="200" ref="comment" class="comment" :value="`//${item.description}`"></s-ellipsis-content>
+                        <!-- <s-ellipsis-content :copy="false" :max-width="200" ref="comment" class="comment" :value="`//${item.description}`"></s-ellipsis-content> -->
                         <s-tree-json :data="item.children" :level="level + 1" is-array></s-tree-json>
                         <span class="symbol">]</span>
                     </template>
@@ -140,27 +140,30 @@ export default {
 <style lang="scss">
 .s-tree-json2 {
     // background: #1E1E1E;
-    background: #F0F0F0;
-    font-family: 微软雅黑;
-    font-size: size(13);
+    background: #282c34;
+    font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen,Ubuntu,Cantarell,Fira Sans,Droid Sans,Helvetica Neue,sans-serif;
+    font-size: size(14);
     .indent {
         padding-left: 2em;
     }
     .key {
-        color: #212529,
+        color: #f8c555,
     }
     .symbol {
         font-family: SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace;
-        color: #212529;
+        color: #ccc;
     }
     .string-value {
-        color: #212529;
+        color: #7ec699;
+        font-size: .9em;
     }
     .boolean-value {
-        color: #212529;
+        color: #cc99cd;
+        font-size: .9em;
     }
     .number-value {
-        color: #212529;
+        color: #ccc;
+        font-size: .9em;
     }
     .comment {
         color: #6A9955;
