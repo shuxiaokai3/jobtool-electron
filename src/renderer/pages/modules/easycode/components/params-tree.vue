@@ -288,6 +288,14 @@ export default {
                     enum: "",
                 },
                 DateOp: {},
+                _enableAdd: true,
+                _enableEdit: true,
+                _enableList: false,
+                _enableField: true,
+                _enableEnumField: false,
+                _uniqueAdd: false,
+                _uniqueEdit: false,
+                _tip: "",
             }
         },
         //=====================================其他操作=====================================//

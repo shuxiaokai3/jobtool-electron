@@ -45,7 +45,9 @@
                 </el-dropdown>
             </div>
         </div>
-        <router-view></router-view>
+        <div class="page-wrap">
+            <router-view></router-view>
+        </div>
     </div>
 </template>
 
@@ -209,6 +211,10 @@ export default {
         .el-dropdown {
             color: $white;
         }
+    }
+    .page-wrap {
+        overflow-y: auto;
+        height: calc(100vh - #{size(60)});
     }
 }
 </style>
