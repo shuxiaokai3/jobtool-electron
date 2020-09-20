@@ -31,7 +31,7 @@
                     <h2>model</h2>
                     <div class="code-area scroll-y-400">
                         <pre class="">{{ modelValue }}</pre>
-                        <div class="operate green cursor-pointer">复制</div>
+                        <div v-copy="modelValue" class="operate green cursor-pointer">复制数据</div>
                     </div>
                 </div>
                 <div class="w-30">
@@ -46,14 +46,14 @@
                     <div class="code-area scroll-y-400">
                         <pre class="">{{ controllerValue }}</pre>
                         <!-- <div style="height: 999px"></div> -->
-                        <div class="operate hover-green cursor-pointer">复制</div>
+                        <div v-copy="controllerValue" class="operate green cursor-pointer">复制数据</div>
                     </div>
                 </div>
                 <div class="w-30">
                     <h2>service</h2>
                     <div class="code-area scroll-y-400">
                         <pre class="">{{ modelValue }}</pre>
-                        <span class="operate hover-green cursor-pointer">复制</span>
+                        <span v-copy="modelValue" class="operate green cursor-pointer">复制数据</span>
                     </div>
                 </div>
             </div>
@@ -550,9 +550,10 @@ export default {
     .code-area {
         position: relative;
         .operate {
-            position: sticky;
-            top: 20px;
-            // right: size(10);
+            position: absolute;
+            top: size(20);
+            right: size(10);
+            z-index: 1;
         }
     }
 }
