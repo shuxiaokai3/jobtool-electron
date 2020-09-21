@@ -5,7 +5,7 @@
     备注：包含项目列表和团队管理
 */
 <template>
-    <div class="doc-view">
+    <div class="doc-list">
         <el-tabs v-model="activeName">
             <el-tab-pane name="tab-a">
                 <span slot="label"><i class="el-icon-tickets"></i> 项目列表</span>
@@ -50,7 +50,7 @@ export default {
 
 
 <style lang="scss">
-.doc-view {
+.doc-list {
     width: 70%;
     margin-top: 20px;
     margin-left: auto;

@@ -9,7 +9,7 @@
         <el-divider content-position="left">基础信息</el-divider>
         <s-form v-loading="loading2" :element-loading-text="randomTip()" element-loading-background="rgba(255, 255, 255, 0.9)" ref="form" :editData="formInfo">
             <s-form-item label="登录名称" vModel="loginName" required halfLine></s-form-item>
-            <s-form-item label="真实姓名" vModel="realName" required halfLine disabled></s-form-item>
+            <s-form-item label="真实姓名" vModel="realName" halfLine disabled></s-form-item>
             <s-form-item label="手机号" vModel="phone" required halfLine phone></s-form-item>
             <s-form-item label="部门" vModel="department" required halfLine></s-form-item>
             <s-form-item label="职位" vModel="title" required halfLine></s-form-item>
