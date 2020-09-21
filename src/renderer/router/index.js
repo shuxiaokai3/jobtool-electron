@@ -47,60 +47,12 @@ const allRoutes = [
         component: () => import("@/pages/modules/settings/user/user"),
     },
     {
-        path: "/v1/b/b",
-        name: "项目管理-常用网站列表",
-        meta: {
-            title: "常用网站管理"
-        },
-        component: () => import("@/pages/model/b/b"),
-    },
-    {
-        path: "/v1/c/c",
-        name: "文件管理-文件管理列表",
-        meta: {
-            title: "文件管理列表"
-        },
-        component: () => import("@/pages/model/c/c"),
-    },
-    {
-        path: "/v1/c/c/add",
-        name: "文件新增文件",
-        meta: {
-            title: "新增文件"
-        },
-        component: () => import("@/pages/model/c/add/add"),
-    },
-    {
-        path: "/v1/test",
-        name: "测试界面",
-        meta: {
-            title: "测试界面"
-        },
-        component: () => import("@/pages/test/test"),
-    },
-    {
-        path: "/v1/e/e",
-        name: "在线面试",
-        meta: {
-            title: "在线面试"
-        },
-        component: () => import("@/pages/model/e/e")
-    },
-    {
         path: "/v1/permission/permission",
         name: "权限管理",
         meta: {
             title: "权限管理"
         },
         component: () => import("@/pages/modules/permission/permission")
-    },
-    {
-        path: "/v1/rtc",
-        name: "音视频通讯",
-        meta: {
-            title: "音视频通讯"
-        },
-        component: () => import("@/pages/modules/rtc/rtc")
     },
     {
         path: "/v1/easycode",
@@ -123,14 +75,6 @@ const router = new Router({
             path: "/login",
             name: "登录页面",
             component: login
-        },
-        {
-            path: "/d",
-            name: "文档详情",
-            meta: {
-                title: "文档详情"
-            },
-            component: () => import("@/pages/model/d/d"),
         },
     ]
 })
