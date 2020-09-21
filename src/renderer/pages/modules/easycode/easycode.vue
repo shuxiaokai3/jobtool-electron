@@ -1027,6 +1027,9 @@ export default {
         position: relative;
         .operate {
             position: absolute;
+            top: size(20);
+            right: size(10);
+            z-index: 1;
             top: 20px;
             right: size(10);
         }

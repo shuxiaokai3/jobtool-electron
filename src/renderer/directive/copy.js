@@ -45,6 +45,17 @@ class Copy {
 
 
 export default {
+    bind(el, binding) {
+        if (binding.value != null) {
+            const copy = new Copy();
+            const foo = (e) => {
+                copy.runCopy(e, binding.value)
+                copy.showCopyTip();
+            }
+            el.removeEventListener("click", foo);
+            el.addEventListener("click", foo);   
+        }
+    },
     update(el, binding) {
         if (binding.value != null) {
             const copy = new Copy();

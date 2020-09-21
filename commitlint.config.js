@@ -13,6 +13,7 @@ module.exports = {
                 "style", //样式修改
                 "refactor", //重构
                 "remove", //文件删除
+                "merge", //冲突合并
             ]
         ]
     }
