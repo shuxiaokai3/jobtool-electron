@@ -111,6 +111,7 @@ export default {
         left: 0;
         top: size(36);
         z-index: $zIndex-panel;
+        overflow-y: scroll;
         // padding: size(10) size(20);
         width: size(300);
         max-height: size(200);
