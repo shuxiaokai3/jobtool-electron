@@ -1,25 +1,24 @@
-# my-project
+<div align="center" width="130px" height="130px">
+<img src="" />
+</div>
 
-> An electron-vue project
+<h1 align="center">摸鱼</h1>
+<h3 align="center">一款基于 Vue 和 Electron 的流程管理工具</h3>
+<div align="center">
+[下载]() | [开发文档]()
+<div align="center">
+  <a href="https://github.com/shuxiaokai3/jobtool-electron/releases/latest">
+    <img src="https://img.shields.io/github/v/release/shuxiaokai3/jobtool-electron?style=flat-square" alt="">
+  </a>
 
-#### Build Setup
+  <a href="https://github.com/shuxiaokai3/jobtool-electron/blob/master/LICENSE">
+    <img src="https://img.shields.io/github/license/shuxiaokai3/jobtool-electron" alt="">
+  </a>
 
-``` bash
-# install dependencies
-npm install
+  <a href="https://github.com/shuxiaokai3/jobtool-electron/releases/latest">
+    <img alt="GitHub All Releases" src="https://img.shields.io/github/downloads/shuxiaokai3/jobtool-electron/total">
+  </a>
+</div>
 
-# serve with hot reload at localhost:9080
-npm run dev
-
-# build electron application for production
-npm run build
-
-
-# lint all JS/Vue component files in `src/`
-npm run lint
-
-```
-
----
-
-This project was generated with [electron-vue](https://github.com/SimulatedGREG/electron-vue)@[45a3e22](https://github.com/SimulatedGREG/electron-vue/tree/45a3e224e7bb8fc71909021ccfdcfec0f461f634) using [vue-cli](https://github.com/vuejs/vue-cli). Documentation about the original structure can be found [here](https://simulatedgreg.gitbooks.io/electron-vue/content/index.html).
+## 简介
+摸鱼 是一款用于提高研发效率
