@@ -61,15 +61,15 @@ export default {
 .login-container {
     width: 100vw;
     height: 100vh;
+    background: $gray-200;
     .login-box {
         height: size(500);
-        width: size(750);
+        width: size(850);
         background: $white;
         box-shadow: $box-shadow-base;
         border-radius: $border-radius-base;
         .left {
-            flex: 0 0 40%;
-            background: rgba(68, 99, 178, 1);
+            flex: 0 0 45%;
         }
         .right {
             flex: 1;
