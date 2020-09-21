@@ -1,5 +1,5 @@
 {
-    "name": "jobtool",
+    "name": "moyu",
     "version": "0.9.0",
     "author": "shuxiaokai <2581105856@qq.com>",
     "description": "An electron-vue project",
@@ -24,7 +24,7 @@
         "postinstall": "npm run lint:fix"
     },
     "build": {
-        "productName": "jobtool",
+        "productName": "moyu",
         "appId": "com.example.yourapp",
         "publish": [
             {

@@ -29,7 +29,7 @@ export const BaseConfig = {
         maxErrorMsg: 1024 * 20, //最大允许上传错误信息长度，大约2w个英文字符
     },
     pagesConfig: {
-        headerTitle: "内部管理系统"
+        headerTitle: "摸鱼"
     },
     //=====================================表格和分页====================================//
     tableConfig: {
