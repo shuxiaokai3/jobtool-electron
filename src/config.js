@@ -4,13 +4,19 @@
  * @create             2020-08-24 14:19
  */
 
+import packageJSON from "@/../../package.json"
+
 export default {
     isDev: process.env.NODE_ENV === "development",
     updateConfig: {
-        version: "0.8.9",
+        version: packageJSON.version,
         server: "http://job.xrdev.cn",
         filePath: "/electron/windows"
     },
-    // onlineUrl: `file://${__dirname}/index.html`
-    onlineUrl: "https://jobtool.cn"
+    onlineUrl: "https://jobtool.cn",
+    pagesConfig: {
+        layout: {
+            title: packageJSON.name
+        },
+    },
 };
