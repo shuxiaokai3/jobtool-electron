@@ -8,7 +8,7 @@
     <div class="s-content">
         <div class="s-header hidden-md-and-down">
             <div class="ml-5 header-left fl d-flex a-center">
-                <span class="f-lg mr-5 gray-200 cursor-pointer" @click="jumpToHome">摸鱼</span>
+                <span class="f-lg mr-5 gray-200 cursor-pointer" @click="jumpToHome">{{ config.pagesConfig.layout.title }}</span>
                 <el-menu :default-active="activeMenu" mode="horizontal" background-color="#343a40" text-color="#fff" active-text-color="#ffd04b" :router="true">
                     <el-menu-item v-for="(item, index) in menus" :key="item.path" :index="item.path">{{ item.name }}</el-menu-item>
                 </el-menu>
