@@ -530,7 +530,10 @@ export default {
         },
         //=====================================其他操作=====================================//
         convertVariable(val) {
-            const matchedData = val.match(/{{\s*(\w+)\s*}}/);
+            if (val == null) {
+                return;
+            }
+            const matchedData = val.toString().match(/{{\s*(\w+)\s*}}/);
             if (val && matchedData) {
                 const varInfo = this.variables.find(v => {
                     return v.name === matchedData[1];
