@@ -5,11 +5,54 @@
     备注：xxxx
 */
 <template>
-    <s-curd-model v-if="visible" title="快捷参数维护" left-width="45%" width="80%" @close="closeModel">
+    <s-curd-model v-if="visible" title="快捷参数维护" left-width="55%" width="80%" @close="closeModel">
         <!-- 新增数据 -->
-        <div slot="left" class="pr-2">
+        <div slot="left" v-loading="loading" :element-loading-text="randomTip()" element-loading-background="rgba(255, 255, 255, 0.9)" class="ml-1 flex1">
+            <el-tabs v-model="activeName">
+                <el-tab-pane label="新增参数" name="s-add">
+                    <el-form ref="form" :model="addData" :rules="rules" label-width="120px">
+                        <el-form-item label="参数名称：" prop="name">
+                            <el-input v-model="addData.name" size="mini" placeholder="例如：默认返回值" class="w-80" maxlength="8" clearable show-word-limit></el-input>
+                        </el-form-item>
+                        <el-form-item label="参数类型：" prop="type">
+                            <el-select v-model="addData.type" placeholder="请选择参数类型" size="mini">
+                                <el-option label="请求参数" value="request"></el-option>
+                                <el-option label="返回参数" value="response"></el-option>
+                            </el-select>
+                        </el-form-item>
+                        <div class="scroll-y-450">
+                            <s-params-tree :tree-data="addData.presetParams" title="参数模板"></s-params-tree>
+                        </div>
+                        <div class="d-flex j-end">
+                            <el-button :loading="loading2" type="success" size="mini" @click="handleAddPresetParams">确认新增</el-button>
+                        </div>
+                    </el-form>  
+                </el-tab-pane>
+                <el-tab-pane label="修改参数" name="s-edit">
+                    <el-form v-if="editData._id" ref="form" :model="editData" :rules="rules" label-width="120px">
+                        <el-form-item label="参数名称：" prop="name">
+                            <el-input v-model="editData.name" size="mini" placeholder="例如：默认返回值" class="w-80" maxlength="8" clearable show-word-limit></el-input>
+                        </el-form-item>
+                        <el-form-item label="参数类型：" prop="type">
+                            <el-select v-model="addData.type" placeholder="请选择参数类型" size="mini">
+                                <el-option label="请求参数" value="request"></el-option>
+                                <el-option label="返回参数" value="response"></el-option>
+                            </el-select>
+                        </el-form-item>
+                        <div class="scroll-y-450">
+                            <s-params-tree :tree-data="editData.presetParams" title="参数模板"></s-params-tree>
+                        </div>
+                        <div class="d-flex j-end">
+                            <el-button :loading="loading2" type="success" size="mini" @click="handleEditPresetParams">确认修改</el-button>
+                        </div>
+                    </el-form> 
+                </el-tab-pane>
+            </el-tabs>
+        </div>
+        <!-- 数据展示 -->
+        <div slot="right" class="pr-2">
             <el-divider content-position="left">数据展示</el-divider>
-            <s-table ref="table" url="/api/project/doc_preset_params_list" :params="{projectId: $route.query.id}">
+            <s-table ref="table" url="/api/project/doc_preset_params_list" height="400px" :params="{projectId: $route.query.id}" deleteMany deleteUrl="/api/project/doc_preset_params" deleteKey="ids">
                 <el-table-column label="参数名称" align="center">
                     <template slot-scope="scope">
                         <el-input v-if="scope.row.__active" v-model="scope.row.name" size="mini" class="w-100" maxlength="8" clearable show-word-limit></el-input>
@@ -29,23 +72,8 @@
                         <el-button type="text" size="mini" @click="handleDelete(scope.row._id)">删除</el-button>
                     </template>
                 </el-table-column>
-                <el-button slot="operation" type="success" size="mini" @click="handleChangeOpToAdd">新增快捷参数</el-button>
+                <!-- <el-button slot="operation" type="success" size="mini" @click="handleChangeOpToAdd">新增快捷参数</el-button> -->
             </s-table>
-        </div>
-        <!-- 数据展示 -->
-        <div slot="right" v-loading="loading" :element-loading-text="randomTip()" element-loading-background="rgba(255, 255, 255, 0.9)" class="ml-1 flex1">
-            <el-divider v-if="operationType === 'add'" content-position="left">添加快捷参数</el-divider>
-            <el-divider v-if="operationType === 'edit'" content-position="left">编辑快捷参数</el-divider>
-            <el-form ref="form" :model="formInfo" :rules="rules" label-width="120px">
-                <el-form-item label="参数名称：" prop="name">
-                    <el-input v-model="formInfo.name" size="mini" placeholder="例如：默认返回值" class="w-100" maxlength="8" clearable show-word-limit></el-input>
-                </el-form-item>
-                <s-params-tree :tree-data="formInfo.presetParams" title="参数模板"></s-params-tree>
-                <div class="d-flex j-end">
-                    <el-button v-if="operationType === 'add'" :loading="loading2" type="success" size="mini" @click="handleAddPresetParams">确认新增</el-button>
-                    <el-button v-else-if="operationType === 'edit'" :loading="loading2" type="warning" size="mini" @click="handleEditPresetParams">确认编辑</el-button>
-                </div>
-            </el-form>  
         </div>
     </s-curd-model>
 </template>
@@ -70,9 +98,26 @@ export default {
     data() {
         return {
             //=====================================请求参数====================================//
-            formInfo: {
+            addData: {
                 _id: "",
                 name: "", //-------------------参数名称
+                type: "request", //------------参数类型
+                presetParams: [
+                    {
+                        id: uuid(),
+                        key: "", //--------------请求参数键
+                        value: "", //------------请求参数值
+                        type: "string", //-------------请求参数值类型
+                        description: "", //------描述
+                        required: true, //-------是否必填
+                        children: [], //---------子参数
+                    }
+                ],
+            },
+            editData: {
+                _id: "",
+                name: "", //-------------------参数名称
+                type: "", //------------------参数类型
                 presetParams: [
                     {
                         id: uuid(),
@@ -90,7 +135,7 @@ export default {
                 name: [{ required: true, message: "请输入服务器名称", trigger: "blur" }],
             },
             //=====================================其他参数====================================//
-
+            activeName: "s-add", //参数操作
             operationType: "add", //----------------操作类型， add(新增) edit(编辑)
             loading: false, //----------------------表格加载效果
             loading2: false, //---------------------添加按钮加载效果
@@ -110,10 +155,10 @@ export default {
             this.$refs["form"].validate(valid => {
                 if (valid) {
                     const params = {
-                        name: this.formInfo.name,
+                        name: this.addData.name,
                         presetParamsType: this.type,
                         projectId: this.$route.query.id,
-                        items: this.formInfo.presetParams,
+                        items: this.addData.presetParams,
                     };
                     this.loading2 = true;
                     this.axios.post("/api/project/doc_preset_params", params).then(res => {
@@ -132,10 +177,10 @@ export default {
             this.$refs["form"].validate(valid => {
                 if (valid) {
                     const params = {
-                        _id: this.formInfo._id,
-                        name: this.formInfo.name,
+                        _id: this.editData._id,
+                        name: this.editData.name,
                         presetParamsType: this.type,
-                        items: this.formInfo.presetParams,
+                        items: this.editData.presetParams,
                     };
                     this.loading2 = true;
                     this.axios.put("/api/project/doc_preset_params", params).then(res => {
@@ -170,10 +215,10 @@ export default {
         //=====================================操作====================================//
         //修改
         handleChangeOpToEdit(row) {
-            this.operationType= "edit";
-            this.formInfo._id = row._id;
-            this.formInfo.name = row.name;
-            this.formInfo.presetParams = row.items;
+            this.activeName= "s-edit";
+            this.editData._id = row._id;
+            this.editData.name = row.name;
+            this.editData.presetParams = JSON.parse(JSON.stringify(row.items));
         },
         //新增
         handleChangeOpToAdd() {
