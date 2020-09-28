@@ -14,6 +14,7 @@ module.exports = {
                 "refactor", //重构
                 "remove", //文件删除
                 "merge", //冲突合并
+                "doc", //文档更新(README更新)
             ]
         ]
     }
