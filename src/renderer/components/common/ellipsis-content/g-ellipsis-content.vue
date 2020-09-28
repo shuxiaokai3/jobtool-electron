@@ -5,12 +5,13 @@
     备注：xxxx
 */
 <template>
-    <span v-copy="value">
+    <span>
+
         <el-tooltip effect="light" placement="top-start" :content="value.toString()" :disabled="!isOverflow">
             <span ref="text" class="s-ellipsis-content" @dblclick="handleSelect">{{ value }}</span>
         </el-tooltip>        
         <!-- 拷贝图标 -->
-        <span v-if="copy" class="el-icon-document-copy cursor-pointer orange"></span>
+        <span v-if="copy" v-copy="value" class="el-icon-document-copy cursor-pointer orange"></span>
     </span>
 
 </template>
@@ -34,6 +35,7 @@ export default {
     watch: {
         value: {
             handler() {
+                this.changeValueWidth();
                 setTimeout(() => {
                     const textDom = this.$refs["text"];
                     if (textDom) {
@@ -53,14 +55,20 @@ export default {
         };
     },
     mounted() {
-        const textDom = this.$refs["text"];
-        if (typeof this.maxWidth === "number") {
-            textDom.style.maxWidth = this.maxWidth + "px"
-        } else if (typeof this.maxWidth === "string") {
-            textDom.style.maxWidth = this.maxWidth
-        }
+        this.changeValueWidth();
     },
     methods: {
+        changeValueWidth() {
+            const textDom = this.$refs["text"];
+            if (!textDom) {
+                return;
+            }
+            if (typeof this.maxWidth === "number") {
+                textDom.style.maxWidth = this.maxWidth + "px"
+            } else if (typeof this.maxWidth === "string") {
+                textDom.style.maxWidth = this.maxWidth
+            }
+        },
         handleSelect(e) {
             // const selection = window.getSelection();
             // selection.removeAllRanges();

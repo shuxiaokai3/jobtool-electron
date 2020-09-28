@@ -11,53 +11,51 @@
             <!-- 常规数据类型 -->
             <template v-if="item.type !== 'array' && item.type !== 'object' && item.value">
                 <span>
-                    <span v-if="!isArray" class="key">{{ item.key }}</span>
-                    <span v-if="!isArray" class="symbol">:&nbsp;</span>
+                    <span v-if="!isArray" class="key">{{ item.key }}</span><span v-if="!isArray" class="symbol">:&nbsp;</span>
                     <!-- 对象 -->
                     <template v-if="item.type === 'object'">
                         <span class="symbol">{</span>
-                        <s-tree-json :data="item.children" :level="level + 1"></s-tree-json>
+                        <s-tree-json :value-width="valueWidth" :data="item.children" :level="level + 1"></s-tree-json>
                         <span class="symbol">}</span>
                     </template>
                     <!-- 数组 -->
                     <template v-else-if="item.type === 'array'">
                         <span class="symbol">[</span>
-                        <s-ellipsis-content ref="comment" class="comment" :value="`//${item.description}`"></s-ellipsis-content>
-                        <s-tree-json :data="item.children" :level="level + 1"></s-tree-json>
+                        <s-ellipsis-content :max-width="valueWidth" ref="comment" class="comment" :value="`//${item.description}`"></s-ellipsis-content>
+                        <s-tree-json :value-width="valueWidth" :data="item.children" :level="level + 1"></s-tree-json>
                         <span class="symbol">]</span>
                     </template>
                     <!-- 常规数据 -->
                     <template v-else>
-                        <s-ellipsis-content v-if="item.type === 'string'" class="string-value" :value='`"${item.value}"`'></s-ellipsis-content>
-                        <s-ellipsis-content v-if="item.type === 'number'" class="number-value" :value="item.value"></s-ellipsis-content>
-                        <s-ellipsis-content v-if="item.type === 'boolean'" class="boolean-value" :value="item.value"></s-ellipsis-content>
+                        <s-ellipsis-content :max-width="valueWidth" v-if="item.type === 'string'" class="string-value" :value='`"${item.value}"`'></s-ellipsis-content>
+                        <s-ellipsis-content :max-width="valueWidth" v-if="item.type === 'number'" class="number-value" :value="item.value"></s-ellipsis-content>
+                        <s-ellipsis-content :max-width="valueWidth" v-if="item.type === 'boolean'" class="boolean-value" :value="item.value"></s-ellipsis-content>
                     </template>
                     <span class="symbol">,</span>
-                    <s-ellipsis-content v-show="item.type !== 'object' || item.type !== 'array'" ref="comment" class="comment" :value="`//${item.description}`"></s-ellipsis-content>
+                    <s-ellipsis-content :max-width="valueWidth" v-show="item.type !== 'object' || item.type !== 'array'" ref="comment" class="comment" :value="`//${item.description}`"></s-ellipsis-content>
                     <span v-if="item.required" class="comment">(必填)</span>
                 </span>                
             </template>
             <!-- 对象和数组类型 -->
             <template v-else-if="item.type === 'array'|| item.type === 'object'">
                 <span>
-                    <span v-if="!isArray" class="key">{{ item.key }}</span>
-                    <span v-if="!isArray" class="symbol">:&nbsp;</span>
+                    <span v-if="!isArray" class="key">{{ item.key }}</span><span v-if="!isArray" class="symbol">:&nbsp;</span>
                     <template v-if="item.type === 'object'">
                         <span class="symbol">{</span>
-                        <s-ellipsis-content ref="comment" class="comment" :value="`//${item.description}`"></s-ellipsis-content>
-                        <s-tree-json :data="item.children" :level="level + 1"></s-tree-json>
+                        <s-ellipsis-content :max-width="valueWidth" ref="comment" class="comment" :value="`//${item.description}`"></s-ellipsis-content>
+                        <s-tree-json :value-width="valueWidth" :data="item.children" :level="level + 1"></s-tree-json>
                         <span class="symbol">}</span>
                     </template>
                     <template v-else-if="item.type === 'array'">
                         <span class="symbol">[</span>
-                        <s-ellipsis-content ref="comment" class="comment" :value="`//${item.description}`"></s-ellipsis-content>
-                        <s-tree-json :data="item.children" :level="level + 1" is-array></s-tree-json>
+                        <s-ellipsis-content :max-width="valueWidth" ref="comment" class="comment" :value="`//${item.description}`"></s-ellipsis-content>
+                        <s-tree-json :value-width="valueWidth" :data="item.children" :level="level + 1" is-array></s-tree-json>
                         <span class="symbol">]</span>
                     </template>
                     <template v-else>
-                        <s-ellipsis-content v-if="item.type === 'string'" class="string-value" :value='`"${item.value}"`'></s-ellipsis-content>
-                        <s-ellipsis-content v-if="item.type === 'number'" class="number-value" :value="item.value"></s-ellipsis-content>
-                        <s-ellipsis-content v-if="item.type === 'boolean'" class="boolean-value" :value="item.value"></s-ellipsis-content>
+                        <s-ellipsis-content :max-width="valueWidth" v-if="item.type === 'string'" class="string-value" :value='`"${item.value}"`'></s-ellipsis-content>
+                        <s-ellipsis-content :max-width="valueWidth" v-if="item.type === 'number'" class="number-value" :value="item.value"></s-ellipsis-content>
+                        <s-ellipsis-content :max-width="valueWidth" v-if="item.type === 'boolean'" class="boolean-value" :value="item.value"></s-ellipsis-content>
                     </template>
                     <span class="symbol">,</span>
                 </span> 
@@ -107,7 +105,11 @@ export default {
         type: {
             type: String,
             default: ""
-        }
+        },
+        valueWidth: {
+            type: String,
+            default: "200px"
+        },
     },
     watch: {
         data: {
