@@ -75,11 +75,11 @@ export default {
         },
         deleteKey: { //批量删除key值
             type: String,
-            default: "id"
+            default: "ids"
         },
         deleteDataKey: { //表格数据的key值
             type: String,
-            default: "id"
+            default: "_id"
         },
         reserveSelection: { //是否记住选中项目
             type: Boolean,
@@ -205,9 +205,9 @@ export default {
                 type: "warning"
             }).then(() => {
                 const params = {};
-                params[this.deleteKey] = this.selectData.map(val => val[this.deleteDataKey]).join(",");
+                params[this.deleteKey] = this.selectData.map(val => val[this.deleteDataKey]);
                 this.loading2 = true;
-                this.axios.delete(this.deleteUrl, { params }).then(() => {
+                this.axios.delete(this.deleteUrl, { data: params }).then(() => {
                     this.getData();
                 }).catch(err => {
                     this.$errorThrow(err, this);
