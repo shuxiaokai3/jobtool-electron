@@ -1,5 +1,5 @@
 <div align="center" width="130px" height="130px">
-    <img src="" />
+    <img src="https://job.xrdev.cn/imgs/moyu128x128.png" alt="logo"/>
 </div>
 <h1 align="center">摸鱼</h1>
 <h3 align="center">一款基于 Vue 和 Electron 的研发管理工具</h3>
