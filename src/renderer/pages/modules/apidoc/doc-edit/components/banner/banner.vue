@@ -131,7 +131,7 @@
         <s-add-folder-dialog v-if="dialogVisible" :visible.sync="dialogVisible" :pid="docParentId" @success="handleAddFileAndFolderCb"></s-add-folder-dialog>
         <s-add-file-dialog v-if="dialogVisible2" :visible.sync="dialogVisible2" :pid="docParentId" @success="handleAddFileAndFolderCb"></s-add-file-dialog>
         <s-import-doc-dialog v-if="dialogVisible3" :visible.sync="dialogVisible3" @success="init"></s-import-doc-dialog>
-        <s-history-dialog v-if="dialogVisible4" :visible.sync="dialogVisible4"></s-history-dialog>
+        <s-history-dialog :visible.sync="dialogVisible4"></s-history-dialog>
     </div>
 </template>
 
