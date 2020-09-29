@@ -64,6 +64,10 @@ pre {
 #app .is-view .el-form-item {
   margin-bottom: 0; }
 
+#app .el-table .cell {
+    line-height: 24px; 
+}
+
 body .el-dropdown-menu {
   max-height: 300px;
   overflow-y: auto;

@@ -8,6 +8,9 @@
             margin-bottom: 0;
         }
     }
+    .el-table .cell {
+        line-height: size(24); //修复奇数高度文本错位
+    }
 }
 body {
     .el-dropdown-menu {
