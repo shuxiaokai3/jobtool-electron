@@ -21,7 +21,7 @@ export default {
             if (window.require) {
                 window.addEventListener("keyup", (e) => {
                     // console.log(e, e.ctrlKey)
-                    e.stopPropagation();
+                    // e.stopPropagation();
                     if (e.ctrlKey && e.key === "F5") {
                         e.preventDefault();
                         ipcRenderer.send("vue-strong-reload")

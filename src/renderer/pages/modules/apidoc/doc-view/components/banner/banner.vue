@@ -116,7 +116,7 @@ export default {
                 this.loading = false;
             });
             document.documentElement.addEventListener("click", (e) => {
-                e.stopPropagation();
+                // e.stopPropagation();
                 this.clearContextmenu();
                 this.multiSelectNode = [];
             })

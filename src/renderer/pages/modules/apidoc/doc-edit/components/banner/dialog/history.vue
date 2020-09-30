@@ -46,23 +46,43 @@
                             </template>
                             <!-- 复制文档 -->
                             <template v-if="scope.row.operation === 'copyDoc'">
-                                <span class="svg-icon mr-1 green">cp</span>
+                                <span class="svg-icon mr-1 green">CP</span>
                                 <span>{{ scope.row.docInfo[0].docName }}</span>
                             </template>
                             <!-- 删除文档 -->
                             <template v-if="scope.row.operation === 'deleteDoc'">
-                                <span class="svg-icon mr-1 red iconfont iconshanchuwenjian"></span>
+                                <svg class="svg-icon mr-1">
+                                    <use xlink:href="#icondel"></use>
+                                </svg> 
                                 <span>{{ scope.row.docInfo[0].docName }}</span>
                                 <span class="red">&nbsp;-&nbsp;-</span>
                             </template>
                             <!-- 删除文件夹 -->
                             <template v-if="scope.row.operation === 'deleteFolder'">
-                                 <svg v-if="scope.row.docInfo[0].isFolder" class="svg-icon mr-1">
+                                <svg v-if="scope.row.docInfo[0].isFolder" class="svg-icon mr-1">
                                     <use xlink:href="#iconshanchuwenjianjia"></use>
                                 </svg> 
                                 <span>{{ scope.row.docInfo[0].docName }}</span>
                                 <span class="red">&nbsp;-&nbsp;-</span>
                             </template>
+                            <!-- 删除多个 -->
+                            <template v-if="scope.row.operation === 'deleteMany'">
+                                <span class="svg-icon mr-1 red">批</span> 
+                                <span>{{ scope.row.docInfo[0].docName }}</span>
+                                <span class="red">&nbsp;-&nbsp;-</span>
+                            </template>
+                            <!-- 修改文档内容 -->
+                            <template v-if="scope.row.operation === 'editDoc'">
+                                <span class="svg-icon mr-1 orange">修</span> 
+                                <span>{{ scope.row.docInfo[0].docName }}</span>
+                            </template>
+                            <!-- 改变文档位置 -->
+                            <template v-if="scope.row.operation === 'position'">
+                                <span class="svg-icon mr-1 orange">位</span> 
+                                <span>{{ scope.row.docInfo[0].docName }}</span>
+                                <span class="red">&nbsp;-&nbsp;-</span>
+                            </template>
+                            
                         </div>
                    </template>
                 </el-table-column>
@@ -86,19 +106,22 @@
                         <span>{{ new Date(scope.row.createdAt).toLocaleString() }}</span>
                     </template>
                 </el-table-column>
-                <el-table-column label="操作者" align="center" width="100px">
+                <el-table-column label="操作者" align="center">
                     <template slot-scope="scope">
                         <span>{{ scope.row.operator }}</span>
                     </template>
                 </el-table-column>
-                <!-- <el-table-column label="操作" align="center">
-                    <template>
-                        <el-button type="text">修改</el-button>
-                        <el-button type="text">删除</el-button>
+                <el-table-column label="操作" align="center">
+                    <template slot-scope="scope">
+                        <el-popover placement="right" width="400" trigger="click">
+                            <pre>
+                                {{ historyDetail }}
+                            </pre>
+                            <span slot="reference" class="ml-2 theme-color cursor-pointer" @click="handleGetHistoryDetail(scope.row.docId)">详情</span>
+                        </el-popover>
                     </template>
-                </el-table-column> -->
+                </el-table-column>
             </s-table>
-            
         </el-drawer>
     </div>
 </template>
@@ -113,6 +136,7 @@ export default {
     },
     data() {
         return {
+            historyDetail: [],
             //=====================================其他参数====================================//
             loading: false, //----确认按钮状态
         };
@@ -126,10 +150,19 @@ export default {
     },
     methods: {
         //=====================================获取远程数据==================================//
-
-        //=====================================前后端交互====================================//
-
-        //=====================================组件间交互====================================//  
+        //获取数据
+        handleGetHistoryDetail(docId) {
+            const params = {
+                docId,
+            };
+            this.axios.get("/api/docs/docs_records", { params }).then(res => {
+                this.historyDetail = res.data;
+            }).catch(err => {
+                console.error(err);
+            }).finally(() => {
+                this.loading = false;
+            });
+        },
         //=====================================其他操作=====================================//
         //关闭弹窗
         handleClose() {
@@ -145,9 +178,9 @@ export default {
 <style lang="scss">
 .history-dailog {
     .svg-icon {
-        width: size(25);
-        height: size(25);
-        padding: size(5);
+        width: size(28);
+        height: size(28);
+        padding: size(4);
         display: inline-flex;
         align-items: center;
         justify-content: center;
