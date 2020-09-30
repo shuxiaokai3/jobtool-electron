@@ -8,6 +8,7 @@
     <div class="tree-json">
         <div class="operation">
             <div v-copy="JSON.stringify(convertPlainParamsToTreeData(data))" class="item" title="复制为json" @click="handleCopy">复制为json</div>
+            <slot name="operation" :data="opData" />
         </div>
         <s-tree-json-inner :data="data" v-bind="$attrs"></s-tree-json-inner>
     </div>
@@ -22,6 +23,14 @@ export default {
                 return {};
             }
         },
+    },
+    computed: {
+        opData() {
+            return {
+                raw: this.data,
+                json: this.convertPlainParamsToTreeData(this.data),
+            }
+        }
     },
     data() {
         return {
@@ -99,9 +108,9 @@ export default {
 
 <style lang="scss">
 .tree-json {
-    background: #1E1E1E;
-    font-family: SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace;
-    font-size: size(13);
+    background: #282c34;
+    font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen,Ubuntu,Cantarell,Fira Sans,Droid Sans,Helvetica Neue,sans-serif;
+    font-size: size(14);
     padding: size(10) size(10);
     position: relative; //递归组件只在外层添加relative，否则offsetleft取值会出现问题
     border-radius: $border-radius-sm;
@@ -111,7 +120,7 @@ export default {
         justify-content: flex-end;
         height: size(20);
         color: $gray-500;
-        font-family: Helvetica Neue,Helvetica,PingFang SC,Hiragino Sans GB,Microsoft YaHei,SimSun,sans-serif;
+        font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen,Ubuntu,Cantarell,Fira Sans,Droid Sans,Helvetica Neue,sans-serif;
         .item {
             cursor: pointer;
             user-select: none;

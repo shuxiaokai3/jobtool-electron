@@ -1,25 +1,35 @@
-# my-project
+<div align="center" width="130px" height="130px">
+    <img src="https://job.xrdev.cn/imgs/moyu128x128.png" alt="logo"/>
+</div>
+<h1 align="center">摸鱼</h1>
+<h3 align="center">一款基于 Vue 和 Electron 的研发管理工具</h3>
+<div align="center">
+[下载]() | [开发文档]()
+<div align="center">
+  <a href="https://github.com/shuxiaokai3/jobtool-electron/releases/latest">
+    <img src="https://img.shields.io/github/v/release/shuxiaokai3/jobtool-electron?style=flat-square" alt="">
+  </a>
 
-> An electron-vue project
+  <a href="https://github.com/shuxiaokai3/jobtool-electron/blob/master/LICENSE">
+    <img src="https://img.shields.io/github/license/shuxiaokai3/jobtool-electron" alt="">
+  </a>
 
-#### Build Setup
+  <a href="https://github.com/shuxiaokai3/jobtool-electron/releases/latest">
+    <img alt="GitHub All Releases" src="https://img.shields.io/github/downloads/shuxiaokai3/jobtool-electron/total">
+  </a>
+</div>
 
-``` bash
-# install dependencies
-npm install
+## 简介
 
-# serve with hot reload at localhost:9080
-npm run dev
+**摸鱼**是一款用于提高研发效率的工具集。它的目标是把研发过程中能够提高开发效率和规范流程的功能都集中在一起，你可以把它看作研发过程中的一把瑞士军刀。
 
-# build electron application for production
-npm run build
+## 功能
+
+- 接口文档管理
+- 用户权限管理
+- 敬请期待
+
+## demo体验
+web端：
 
 
-# lint all JS/Vue component files in `src/`
-npm run lint
-
-```
-
----
-
-This project was generated with [electron-vue](https://github.com/SimulatedGREG/electron-vue)@[45a3e22](https://github.com/SimulatedGREG/electron-vue/tree/45a3e224e7bb8fc71909021ccfdcfec0f461f634) using [vue-cli](https://github.com/vuejs/vue-cli). Documentation about the original structure can be found [here](https://simulatedgreg.gitbooks.io/electron-vue/content/index.html).

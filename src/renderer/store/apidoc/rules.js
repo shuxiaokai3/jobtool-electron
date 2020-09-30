@@ -49,6 +49,7 @@ export default {
         },
     },
     mutations: {
+        //改变请求状态值
         changeCurrentCondition(state, payload) {
             const { connected, status, size, localParams, resType, responseErrorType, remoteResponse } = payload;
             if (connected != null) state.currentCondition.connected = connected; 

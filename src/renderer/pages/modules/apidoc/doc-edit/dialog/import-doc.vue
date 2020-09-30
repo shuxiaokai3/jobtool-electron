@@ -10,6 +10,7 @@
             <span>文档类型：</span>
             <el-radio-group v-model="formInfo.type">
                 <el-radio label="postman">postman 2.1</el-radio>
+                <el-radio label="raw">内部工具</el-radio>
             </el-radio-group>            
         </div>
         <div class="mb-5">
@@ -49,11 +50,12 @@ export default {
     data() {
         return {
             formInfo: {
-                type: "postman",
+                type: "raw",
                 cover: true
             }, //-------项目信息
             docs: [], //-----------导入的文档列表
             loading: false, //-----导入第三方加载效果
+            jsonText: "",
         };
     },
     created() {
@@ -65,16 +67,22 @@ export default {
         //=====================================图片上传====================================//
         handleBeforeUpload(file) {
             const isJson = file.type === "application/json";
-            const isLt300kb = file.size / 1024 < 300;
+            const isLt1M = file.size / 1024 < 1024;
             if (!isJson) {
                 this.$message.error("只能上传json文件");
             }
-            if (!isLt300kb) {
-                this.$message.error("文件大小不超过300kb");
+            if (!isLt1M) {
+                this.$message.error("文件大小不超过1M");
             }
-            return isJson && isLt300kb;
+            return isJson && isLt1M;
         },
-        //=====================================数据转换====================================//
+        requestHook(e) {
+            console.log(2222, e.file)
+            e.file.text().then(jsonText => {
+                this.jsonText = jsonText;
+            })
+        },
+        //=====================================postman数据转换====================================//
         //转换postman数据为标准格式
         convertPostmanData(data) {
             const result = [];
@@ -159,7 +167,6 @@ export default {
             });
             this.docs = result;
         },
-        
         //将对象转换为扁平数据
         convertObjToPlainData(objData) {
             const result = [];
@@ -270,15 +277,30 @@ export default {
             doc.item.methods = config.methods;
             doc.item.description = config.docName;
         },
-        requestHook(e) {
-            console.log(2222, e.file)
-            e.file.text().then(jsonText => {
-                this.convertPostmanData(JSON.parse(jsonText));
+
+        //=====================================原始数据转换====================================//
+        convertRawData(data) {
+            data.forEach(val => {
+                val.uuid = val._id
+                val.enabled = true
             })
+            this.docs = data;
         },
         //=====================================组件间交互====================================//  
         handleSubmit() {
             this.loading = true;
+            try {
+                if (this.formInfo.type === "postman") {
+                    this.convertPostmanData(JSON.parse(this.jsonText));
+                } else if (this.formInfo.type === "raw") {
+                    console.log(JSON.parse(this.jsonText))
+                    this.convertRawData(JSON.parse(this.jsonText));
+                }                
+            } catch (error) {
+                console.error(error);
+                this.loading = false;
+            }
+
             this.axios.post("/api/project/doc_multi", { docs: this.docs, projectId: this.$route.query.id }).then(() => {
                 this.$emit("success");
                 this.handleClose();

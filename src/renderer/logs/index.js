@@ -22,56 +22,15 @@ class Logs {
         this.httpCatch = this.httpCatch.bind(this);
         this.httpFailCatch = this.httpFailCatch.bind(this);
         this.langTimeCatch = this.langTimeCatch.bind(this);
-        
         this.initUnHandledRejection();
     }
-
-
     /* 
         @description  封装http错误上报信息
         @author        shuxiaokai
         @create       2019-07-29 15:45"
     */
     async addHttpErrorPayload(err, time, route) {
-        return new Promise(async(resolve, reject) => {
-            let resText = "";
-            //pdf类型请求可能返回为blob需要异步将blob翻译为text
-            if (err.request.responseType === "blob") {
-                if (err.request.response.type === "application/json") {
-                    resText = await err.request.response.text();
-                } else {
-                    resText = "blob"
-                }
-            } else {
-                resText = err.request.responseText;
-            }
-            if (resText.length > BaseConfig.errorRequest.maxErrorMsg) {
-                resText = `请求内容超出限制(大于约${BaseConfig.errorRequest.maxErrorMsg}个字符)`
-            }
-            const result = {
-                route: {
-                    path: route.path,
-                    fullPath: route.fullPath,
-                    meta: route.meta
-                },
-                developer: route.meta ? route.meta.developer : {},
-                userInfo: {
-                    token: sessionStorage.getItem("token"),
-                    userName: sessionStorage.getItem("userName"),
-                    companyName: sessionStorage.getItem("companyName"),
-                },
-                request: {
-                    url: err.request.responseURL,
-                    status: err.request.status,
-                    resText: resText,
-                    time: time,
-                    headers: err.config ? err.config.headers : {},
-                    method: err.config ? err.config.method : "",
-                    params: err.config ? err.config.params : {}
-                }
-            }    
-            resolve(result);        
-        });
+        console.error(err)
     }
 
     /* 
@@ -80,26 +39,7 @@ class Logs {
         @create       2019-07-29 16:28"
     */
     addCodeErrorPayload(err, vm) {
-        const result = {
-            errorInfo: {
-                msg: err.message,
-                stack: err.stack,
-                stackArr: err.stack.split("./"),
-                componentName: vm.$options.name,                
-            },
-            developer: vm.$route.meta ? vm.$route.meta.developer : {},
-            route: {
-                path: vm.$route.path,
-                fullPath: vm.$route.fullPath,
-                meta: vm.$route.meta
-            },
-            userInfo: {
-                token: sessionStorage.getItem("token"),
-                userName: sessionStorage.getItem("userName"),
-                companyName: sessionStorage.getItem("companyName"),
-            }
-        }
-        return result;
+        console.error(err)
     }
 
 
@@ -109,28 +49,7 @@ class Logs {
         @create       2019-07-09 14:10"
     */
     initUnHandledRejection() {
-        window.addEventListener("unhandledrejection", (e, a) => {
-            console.log(e)
-            e.reason = e.reason ? e.reason : {}
-            const result = {
-                msg: e.reason.message,
-                stack: e.reason.stack,
-                stackArr: e.reason.stack ? e.reason.stack.split("./") : "无堆栈信息",
-            }
-            
-            fetch(BaseConfig.errorRequest.uploadUrl + "/api/uncatch_error", {
-                headers: {
-                    "content-type": "application/json"
-                },
-                method: "POST",
-                body: JSON.stringify(result)
-            }).catch(() => {
-                return;
-            });
-            if (process.env.NODE_ENV === "development" && BaseConfig.errorRequest.enableErrorAlert) {
-                alert("uncatchError")
-            }
-        });
+      
     }
 
     /* 
@@ -139,20 +58,7 @@ class Logs {
         @create       2019-07-08 16:42"
     */
     httpCatch(err, time, vm) {
-        console.dir(err);
-        const result = this.addHttpErrorPayload(err, time, vm.$route);
-        fetch(BaseConfig.errorRequest.uploadUrl + "/api/http_error", {
-            headers: {
-                "content-type": "application/json"
-            },
-            method: "POST",
-            body: JSON.stringify(result)
-        }).catch(() => {
-            return;
-        });
-        if (process.env.NODE_ENV === "development" && BaseConfig.errorRequest.enableErrorAlert) {
-            alert("httpError")
-        }
+        console.error(err)
     }
 
 
@@ -162,19 +68,7 @@ class Logs {
         @create       2019-07-29 11:36"
     */
     async httpFailCatch(err, time, route) {
-        const result = await this.addHttpErrorPayload(err, time, route);
-        fetch(BaseConfig.errorRequest.uploadUrl + "/api/http_fail_error", {
-            headers: {
-                "content-type": "application/json"
-            },
-            method: "POST",
-            body: JSON.stringify(result)
-        }).catch(() => {
-            return;
-        });
-        if (process.env.NODE_ENV === "development" && BaseConfig.errorRequest.enableErrorAlert) {
-            alert("用户操作出错")
-        }
+        console.error(err)
     }
 
     /* 
@@ -185,20 +79,7 @@ class Logs {
         @return       
     */
     langTimeCatch(err, time, route) {
-        console.warn(time)
-        const result = this.addHttpErrorPayload(err, time, route);
-        fetch(BaseConfig.errorRequest.uploadUrl + "/api/http_long_time_error", {
-            headers: {
-                "content-type": "application/json"
-            },
-            method: "POST",
-            body: JSON.stringify(result)
-        }).catch(() => {
-            return;
-        });
-        if (process.env.NODE_ENV === "development" && BaseConfig.errorRequest.enableErrorAlert) {
-            alert("超时警告")
-        }
+        console.error(err)
     }
     /* 
         @description  代码错误捕获
@@ -209,39 +90,7 @@ class Logs {
     */
     errorCatch(err, vm, info) {
         console.error(err)
-        if (err.__isHttpError) {
-            this.httpCatch(err, err.__time, vm);
-            return;
-        }
-        const result = this.addCodeErrorPayload(err, vm);
-        fetch(BaseConfig.errorRequest.uploadUrl + "/api/code_error", {
-            headers: {
-                "content-type": "application/json"
-            },
-            method: "POST",
-            body: JSON.stringify(result)
-        }).catch(() => {
-            return;
-        });
-        if (process.env.NODE_ENV === "development" && BaseConfig.errorRequest.enableErrorAlert) {
-            alert("codeError")
-        }
     }
-    /* 
-        @description  vue自带warn捕获
-        @author        shuxiaokai
-        @create       2019-07-07 13:22"
-        @params       msg<String> 错误提示信息
-        @params       vm<Object> 虚拟dom
-        @params       trace<Object> 堆栈
-        @return       
-    */
-    // warningCatch(msg, vm, trace) {
-    //     console.error("xxx", msg)
-    //     if (process.env.NODE_ENV === "development" && BaseConfig.errorRequest.enableErrorAlert) {
-    //         alert("vueWarning")
-    //     }
-    // }
 }
 
 

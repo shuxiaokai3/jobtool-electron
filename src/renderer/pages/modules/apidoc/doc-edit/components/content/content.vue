@@ -43,11 +43,10 @@
                         <el-button :loading="loading" type="primary" size="small" @click="saveRequest">保存接口</el-button>
                         <el-button :loading="loading4" type="primary" size="small" @click="publishRequest">发布接口</el-button>
                         <el-button type="primary" size="small" @click="dialogVisible2 = true" @close="dialogVisible2 = false">全局变量</el-button>
+                        <el-button type="primary" size="small" @click="dialogVisible6 = true" @close="dialogVisible6 = false">内置参数</el-button>
                     </div>
                 </div>         
-                <div class="d-flex">
-                </div>       
-                <pre v-copy="request.url.path" v-copy2="request.url.host + request.url.path" class="w-100">{{ request.url.host }}{{ request.url.path }}</pre>
+                <pre class="w-100">{{ request.url.host }}{{ request.url.path }}</pre>
                 <div class="w-100 mt-2">
                     <!-- {{ currentReqeustLimit.contentType }} -->
                     <el-radio-group v-model="request.requestType">
@@ -75,54 +74,83 @@
                     :plain="currentReqeustLimit.contentType.length === 1 && currentReqeustLimit.contentType[0] === 'query'"
                 >
                     <div slot="operation" class="operation d-flex h-100 flex1 pl-3 a-center">
-                        <div class="op_item" @click.stop="dialogVisible3 = true">json转换</div>
-                        <el-dropdown trigger="click" :show-timeout="0" @command="handleSelectRequestPresetParams">
-                            <span class="cursor-pointer hover-theme-color" @click.stop.prevent="freshLocalUsefulParams">快捷参数</span>
-                            <div class="op_item" slot="dropdown">
-                                <el-dropdown-menu>
-                                    <div class="manage-params">
-                                        <div class="cyan mb-2">常用</div>
-                                        <template v-for="(item, index) in usefulPresetRequestParamsList.slice(0, 3)">
-                                            <span class="params-item">{{ item.name }}</span>
-                                        </template>
-                                        <span class="theme-color cursor-pointer ml-2" @click="dialogVisible5 = true,presetParamsType = 'request'">新增</span>
-                                        <hr>
-                                    </div>
-                                    <el-dropdown-item v-for="(item, index) in presetRequestParamsList.slice(0, 3)" :key="index" :command="item">
-                                        <span class="d-flex j-between">
-                                            <span>{{ item.name }}</span>
-                                            <span class="gray-400">{{ item.creatorName }}</span>
+                        <div class="op_item" @click.stop="dialogVisible3 = true">
+                            <el-popover placement="top-start" width="200" trigger="hover" content="将json格式数据转换为请求或者返回参数，之前保存过的参数描述也会同时被转化">
+                                <span slot="reference">
+                                    <span>json转换</span>
+                                    <i class="el-icon-warning theme-color"></i>
+                                </span>
+                            </el-popover>
+                        </div>
+                        <div class="op_item">
+                            <el-dropdown trigger="click" :show-timeout="0" @command="handleSelectRequestPresetParams">
+                                <div @click.stop.prevent="freshLocalUsefulParams">
+                                    <el-popover placement="top-start" width="200" trigger="hover" content="应用一段常用的请求或者返回参数">
+                                        <span slot="reference">
+                                            <span class="cursor-pointer hover-theme-color">应用模板</span>
+                                            <i class="el-icon-warning theme-color"></i>
                                         </span>
-                                    </el-dropdown-item>
-                                </el-dropdown-menu>                        
-                            </div>
-                        </el-dropdown>
+                                    </el-popover>                                
+                                </div>
+                                <div slot="dropdown">
+                                    <el-dropdown-menu>
+                                        <div class="manage-params">
+                                            <div class="cyan mb-2">常用</div>
+                                            <template v-for="(item, index) in usefulPresetRequestParamsList.slice(0, 3)">
+                                                <span class="params-item">{{ item.name }}</span>
+                                            </template>
+                                            <span class="theme-color cursor-pointer ml-2" @click="dialogVisible5 = true,presetParamsType = 'request'">维护</span>
+                                            <hr>
+                                        </div>
+                                        <el-dropdown-item v-for="(item, index) in presetRequestParamsList" :key="index" :command="item">
+                                            <span class="d-flex j-between">
+                                                <span>{{ item.name }}</span>
+                                                <span class="gray-400">{{ item.creatorName }}</span>
+                                            </span>
+                                        </el-dropdown-item>
+                                    </el-dropdown-menu>                        
+                                </div>
+                            </el-dropdown>                            
+                        </div>
+                        <div class="op_item" @click="dialogVisible7 = true,presetParamsType = 'request'">
+                            <el-popover placement="top-start" width="200" trigger="hover" content="将当前请求或者返回参数保存为模板">
+                                <span slot="reference">
+                                    <span>保存为模板</span>
+                                    <i class="el-icon-warning theme-color"></i>
+                                </span>
+                            </el-popover>
+                        </div>
                     </div>
                 </s-params-tree>
                 <s-params-tree ref="resTree" :tree-data="request.responseParams" title="响应参数">
                     <div slot="operation" class="operation d-flex h-100 flex1 pl-3 d-flex a-center">
                         <div class="op_item" @click.stop="dialogVisible4 = true">json转换</div>
-                        <el-dropdown trigger="click" :show-timeout="0" @command="handleSelectResponsePresetParams">
-                            <span class="cursor-pointer hover-theme-color" @click.stop.prevent="freshLocalUsefulParams">快捷参数</span>
-                            <div class="op_item" slot="dropdown">
-                                <el-dropdown-menu>
-                                    <div class="manage-params">
-                                        <div class="cyan mb-2">常用</div>
-                                        <template v-for="(item, index) in usefulPresetResponseParamsList.slice(0, 3)">
-                                            <span class="params-item">{{ item.name }}</span>
-                                        </template>
-                                        <span class="theme-color cursor-pointer ml-2" @click="dialogVisible5 = true,presetParamsType = 'response'">新增</span>
-                                        <hr>
-                                    </div>
-                                    <el-dropdown-item v-for="(item, index) in presetResponseParamsList" :key="index" :command="item">
-                                        <span class="d-flex j-between">
-                                            <span>{{ item.name }}</span>
-                                            <span class="gray-400">{{ item.creatorName }}</span>
-                                        </span>
-                                    </el-dropdown-item>
-                                </el-dropdown-menu>                        
-                            </div>
-                        </el-dropdown>
+                        <div class="op_item">
+                            <el-dropdown trigger="click" :show-timeout="0" @command="handleSelectResponsePresetParams">
+                                <span class="cursor-pointer hover-theme-color" @click.stop.prevent="freshLocalUsefulParams">快捷参数</span>
+                                <div slot="dropdown">
+                                    <el-dropdown-menu>
+                                        <div class="manage-params">
+                                            <div class="cyan mb-2">常用</div>
+                                            <template v-for="(item, index) in usefulPresetResponseParamsList.slice(0, 3)">
+                                                <span class="params-item">{{ item.name }}</span>
+                                            </template>
+                                            <span class="theme-color cursor-pointer ml-2" @click="dialogVisible5 = true,presetParamsType = 'response'">维护</span>
+                                            <hr>
+                                        </div>
+                                        <el-dropdown-item v-for="(item, index) in presetResponseParamsList" :key="index" :command="item">
+                                            <span class="d-flex j-between">
+                                                <span>{{ item.name }}</span>
+                                                <span class="gray-400">{{ item.creatorName }}</span>
+                                            </span>
+                                        </el-dropdown-item>
+                                    </el-dropdown-menu>                        
+                                </div>
+                            </el-dropdown>                            
+                        </div>
+                        <div class="op_item" @click="dialogVisible7 = true,presetParamsType = 'response'">
+                            <span>保存为模板</span>
+                        </div>
                     </div>
                 </s-params-tree>
                 <s-params-tree :tree-data="request.header" title="请求头" plain :fold="foldHeader" :valid-key="false"></s-params-tree>            
@@ -136,6 +164,26 @@
         <s-json-schema :visible.sync="dialogVisible3" :plain="request.methods === 'get'" @success="handleConvertJsonToRequestParams"></s-json-schema>
         <s-json-schema :visible.sync="dialogVisible4" @success="handleConvertJsonToResponseParams"></s-json-schema>
         <s-preset-params :visible.sync="dialogVisible5" :type="presetParamsType" @success="getPresetEnum"></s-preset-params>
+        <!-- <s-save-preset-params-as-template :visible.sync="dialogVisible7" :type="presetParamsType" : @success="getPresetEnum"></s-save-preset-params-as-template> -->
+        <s-internal-params :visible.sync="dialogVisible6"></s-internal-params>
+        <s-dialog title="保存当前请求值为模板" :isShow.sync="dialogVisible7" width="30%">
+            <s-form v-if="dialogVisible7" ref="form" :formInfo="formInfo">
+                <s-form-item label="请输入模板名称" vModel="name" required :max-len="8" one-line></s-form-item>
+            </s-form>  
+            <div slot="footer">
+                <el-button size="mini" type="primary" :loading="loading5" @click="handleAddRequestTemplate">确定</el-button>
+                <el-button size="mini" type="warning" @click="dialogVisible7 = false">取消</el-button>
+            </div>
+        </s-dialog>
+        <s-dialog title="保存当前返回值为模板" :isShow.sync="dialogVisible8" width="30%">
+            <s-form v-if="dialogVisible8" ref="form2" :formInfo="formInfo2">
+                <s-form-item label="请输入模板名称" vModel="name" required :max-len="8" one-line></s-form-item>
+            </s-form>  
+            <div slot="footer">
+                <el-button size="mini" type="primary" :loading="loading6" @click="handleAddResponseTemplate">确定</el-button>
+                <el-button size="mini" type="warning" @click="dialogVisible8 = false">取消</el-button>
+            </div>
+        </s-dialog>
     </div>
     <div v-else></div>
 </template>
@@ -148,6 +196,8 @@ import hostManage from "./dialog/host-manage"
 import variableManage from "./dialog/variable-manage"
 import jsonSchema from "./dialog/json-schema"
 import presetParams from "./dialog/preset-params"
+import internalParams from "./dialog/internal-params"
+import savePresetParamsTemplate from "./dialog/preset-params-temp"
 import { dfsForest, findParentNode } from "@/lib/utils"
 import uuid from "uuid/v4"
 import qs from "qs"
@@ -160,6 +210,8 @@ export default {
         "s-response": response,
         "s-json-schema": jsonSchema,
         "s-preset-params": presetParams,
+        "s-internal-params": internalParams,
+        "s-save-preset-params-as-template": savePresetParamsTemplate,
     },
     data() {
         return {
@@ -215,8 +267,9 @@ export default {
             usefulPresetRequestParamsList: [], //常用请求参数预设值
             presetResponseParamsList: [], //-----返回参数预设值
             usefulPresetResponseParamsList: [], //常用返回参数预设值
-            presetParamsType: "", //-------------
-            selectedPresetParams: "",
+            presetParamsType: "", //-------------预设参数类型(请求参数，返回参数...)
+            formInfo: {}, //---------------------请求参数模板信息
+            formInfo2: {}, //--------------------返回参数模板信息
             //=====================================域名相关====================================//
             hostEnum: [], //---------------------域名列表
             //=====================================其他参数====================================//
@@ -226,12 +279,17 @@ export default {
             loading2: false, //------------------获取文档详情接口
             loading3: false, //------------------发送请求状态
             loading4: false, //------------------发布接口状态
+            loading5: false, //------------------保存为请求值模板确认按钮
+            loading6: false, //------------------保存为返回值模板确认按钮
             foldHeader: true, //-----------------是否折叠header，当校验错误时候自动展开header
             dialogVisible: false, //-------------域名维护弹窗
             dialogVisible2: false, //------------全局变量管理弹窗
             dialogVisible3: false, //------------将json格式的请求参数转换为标准请求参数弹窗
             dialogVisible4: false, //------------将json格式的返回参数转换为标准返回参数弹窗
             dialogVisible5: false, //------------快捷参数维护弹窗
+            dialogVisible6: false, //------------内置参数
+            dialogVisible7: false, //------------保存为请求值模板
+            dialogVisible8: false, //------------保存为返回值模板
             ready: false, //---------------------是否完成第一次数据请求
         };
     },
@@ -250,6 +308,9 @@ export default {
         },
         docRules() { //---------文档规则
             return this.$store.state.apidocRules;
+        },
+        mindParams() {
+            return this.$store.state.apidoc.mindParams;
         },
     },
     watch: {
@@ -271,6 +332,7 @@ export default {
         this.getPresetEnum(); //获取快捷参数枚举值
         this.getMindParamsEnum(); //获取联想参数枚举
         window.addEventListener("keydown", this.shortcutSave)
+        console.log(this.$router.app.$route.query)
     },
     beforeDestroy() {
         window.removeEventListener("keydown", this.shortcutSave)
@@ -593,18 +655,41 @@ export default {
                     this.$store.commit("apidocRules/changeCurrentCondition", {
                         localParams: 0, 
                     })
+                    this.$confirm("接口未通过验证，无法提交", "提示", {
+                        confirmButtonText: "确定",
+                        cancelButtonText: "关闭",
+                        type: "warning"
+                    }).then(() => {
+                    
+                    }).catch(err => {
+                        if (err === "cancel" || err === "close") {
+                            return;
+                        }
+                        this.$errorThrow(err, this);
+                    });
                 }).finally(() => {
                     this.loading4 = false;
                 })                
             }  
         },
         //=====================================快捷操作====================================//
-        handleConvertJsonToRequestParams(val) {
-            this.request.requestParams = val;
-            
+        handleConvertJsonToRequestParams(reqParams) {
+            reqParams.forEach(val => {
+                const matchMindParams = this.mindParams.mindRequestParams.find(p => p.key === val.key)
+                if (matchMindParams) {
+                    val.description = matchMindParams.description;
+                }
+            })
+            this.request.requestParams = reqParams;
         },
-        handleConvertJsonToResponseParams(val) {
-            this.request.responseParams = val;
+        handleConvertJsonToResponseParams(resParams) {
+            resParams.forEach(val => {
+                const matchMindParams = this.mindParams.mindResponseParams.find(p => p.key === val.key)
+                if (matchMindParams) {
+                    val.description = matchMindParams.description;
+                }
+            })
+            this.request.responseParams = resParams;
         },
         //选择快捷请求参数
         handleSelectRequestPresetParams(item) {
@@ -747,7 +832,6 @@ export default {
             // mindParamsList.forEach(val => {
             //     val._projectId = this.$route.query.id
             // })
-
             console.log(mindResponseParams)
             const params = {
                 projectId,
@@ -767,6 +851,49 @@ export default {
                 e.stopPropagation();
                 this.saveRequest()
             }
+        },
+        //保存为模板
+        handleAddRequestTemplate() {
+            this.$refs["form"].validate(valid => {
+                if (valid) {
+                    const params = {
+                        name: this.formInfo.name,
+                        presetParamsType: "request",
+                        projectId: this.$route.query.id,
+                        items: this.request.requestParams,
+                    };
+                    this.loading5 = true;
+                    this.axios.post("/api/project/doc_preset_params", params).then(res => {
+                        this.dialogVisible7 = false;
+                        this.getPresetEnum();
+                    }).catch(err => {
+                        console.error(err);
+                    }).finally(() => {
+                        this.loading5 = false;
+                    });
+                } 
+            });
+        },
+        handleAddResponseTemplate() {
+            this.$refs["form2"].validate(valid => {
+                if (valid) {
+                    const params = {
+                        name: this.formInfo2.name,
+                        presetParamsType: "response",
+                        projectId: this.$route.query.id,
+                        items: this.response.responseParams,
+                    };
+                    this.loading6 = true;
+                    this.axios.post("/api/project/doc_preset_params", params).then(res => {
+                        this.dialogVisible8 = false;
+                        this.getPresetEnum();
+                    }).catch(err => {
+                        console.error(err);
+                    }).finally(() => {
+                        this.loading6 = false;
+                    });
+                } 
+            });
         },
         //=====================================其他操作=====================================//
         //检查参数是否完备
@@ -914,7 +1041,7 @@ export default {
         }
     }
     .params-wrap {
-        height: calc(100vh - 320px);
+        max-height: calc(100vh - 350px);
         overflow-y: auto;
         .operation {
             .op_item {
@@ -924,6 +1051,7 @@ export default {
                 justify-content: center;
                 padding: size(0) size(10);
                 cursor: pointer;
+                margin-right: size(10);
                 &:hover {
                     // background: mix($theme-color, $white, 80%);
                     color: $theme-color;

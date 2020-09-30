@@ -76,7 +76,7 @@ export default {
     created() {
         this.getData();
         document.body.addEventListener("click", (e) => {
-            e.stopPropagation();
+            // e.stopPropagation();
             if (this.mouseContext) {
                 document.body.removeChild(this.mouseContext.$el)
                 this.mouseContext = null;

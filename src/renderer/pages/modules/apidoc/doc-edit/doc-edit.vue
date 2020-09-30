@@ -51,7 +51,7 @@ export default {
 
 <style lang="scss">
 .doc-edit {
-    height: calc(100vh - 60px);
+    height: 100%;
     display: flex;
     .banner {
         flex: 0 0 auto;

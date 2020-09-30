@@ -223,6 +223,9 @@ $border-direction: (
         &.flex-column {
             flex-direction: column;
         }
+        &.flex-wrap {
+            flex-wrap: wrap;
+        }
     }
 }
 
@@ -298,3 +301,15 @@ $i: 5;
 .no-select {
     user-select: none;
 }
+//=====================================溢出隐藏====================================//
+@for $i from 1 through 20 {
+    .scroll-y-#{$i * 50} {
+        max-height: size($i * 50);
+        overflow-y: auto;
+    }
+    .scroll-x-#{$i * 50} {
+        max-width: size($i * 50);
+        overflow-x: auto;
+    }
+}
+

@@ -14,10 +14,10 @@
             <s-diff-view v-if="diffDocInfo.base.path.isChange" label="接口地址：" :old-value="diffDocInfo.base.path.oldValue" :new-value="diffDocInfo.base.path.newValue"></s-diff-view>
         </s-collapse>
         <s-collapse title="请求参数">
-            <!-- <pre>{{ diffDocInfo.response }}</pre> -->
+            <!-- <pre>{{ diffDocInfo.request }}</pre> -->
         </s-collapse>
         <s-collapse title="返回参数">
-            <s-diff-json :data="diffDocInfo.response"></s-diff-json>
+            <s-diff-json :data="diffDocInfo.request"></s-diff-json>
         </s-collapse>
         <s-collapse title="请求头"></s-collapse>
         <!-- <div slot="footer">
@@ -124,11 +124,66 @@ export default {
         },
         //请求参数对比
         diffRequestParams(newDocRequestParams, oldDocRequestParams) {
-            // console.log(newDocRequestParams, oldDocRequestParams);
-            return {
-                new: newDocRequestParams,
-                old: oldDocRequestParams
-            };
+            if (newDocRequestParams && oldDocRequestParams) {
+                console.log(newDocRequestParams, oldDocRequestParams);
+                const result = [];
+                const foo = (newData, oldData, result) => {
+                    // 1. 原始数据key值在历史数据中存在  2. 原始数据key值在历史数据中没有  3. 历史数据key值在原始数据中没有
+                    //======================================遍历newData===================================//
+                    for (let i = 0; i < newData.length; i++) {
+                        if (newData[i].key === "" && newData[i].value === "" && newData[i].description === "") {
+                            continue;
+                        }
+                        const newElement = newData[i]; //最新数据
+                        const newElementKey = newElement.key; //最新数据key值
+                        const newElementValue = newElement.value; //最新数据value值
+                        const newElementType = newElement.type; //最新数据type值
+                        const newElementDescription = newElement.description; //最新数据description值
+                        const oldElement = oldData.find(val => val.key === newElementKey); //旧数据
+                        let retData = {};
+                        if (oldElement) { //原始数据key值在历史数据中存在
+                            retData = this.generateDiffDocInfo(newElement, oldElement);
+                            result.push(retData)
+                        } else { //原始数据key值在历史数据中没有
+                            retData = this.generateDiffDocInfo(newElement, null);
+                            result.push(retData);
+                        }
+                        if (newElement.type === "object") {
+                            foo(newElement.children, oldElement ? oldElement.children : [], retData.children);
+                        }
+                        if (newElement.type === "array") {
+                            foo(newElement.children, oldElement ? oldElement.children : [], retData.children);
+                        }
+                    }      
+                    //=====================================遍历oldData====================================//
+                    for (let i = 0; i < oldData.length; i++) {
+                        if (oldData[i].key === "" && oldData[i].value === "" && oldData[i].description === "") {
+                            continue;
+                        }
+                        const oldElement = oldData[i]; //历史数据
+                        const oldElementKey = oldElement.key; //历史数据key值
+                        const oldElementValue = oldElement.value; //历史数据value值
+                        const oldElementType = oldElement.type; //历史数据type值
+                        const oldElementDescription = oldElement.description; //历史数据description值
+                        //=========================================================================//
+                        const newElement = newData.find(val => val.key === oldElementKey); //新数据
+                        if (!newElement) { //原始数据key值在历史数据中存在
+                            const retData = this.generateDiffDocInfo(null, oldElement);
+                            result.push(retData)
+                            if (oldElement.type === "object") {
+                                foo(newElement ? newElement.children : [], oldElement ? oldElement.children : [], retData.children);
+                            }
+                            if (oldElement.type === "array") {
+                                foo(newElement ? newElement.children : [], oldElement ? oldElement.children : [], retData.children);
+                            }
+                        } 
+                    }                 
+                }
+                foo(newDocRequestParams, oldDocRequestParams, result);
+                return result;
+            } else {
+                return {};
+            }
         },
         diffResponseParams(newDocResponseParams, oldDocResponseParams) {
             if (newDocResponseParams && oldDocResponseParams) {

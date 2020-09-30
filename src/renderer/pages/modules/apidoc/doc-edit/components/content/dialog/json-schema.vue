@@ -40,9 +40,21 @@ export default {
             editorInstance: null,
         };
     },
+    mounted() {
+       
+    },
     methods: {
         handleCodeReady(editor) {
             this.editorInstance = editor;
+            this.editorInstance.on("paste", () => {
+                try {
+                    setTimeout(() => {
+                        this.editorInstance.setValue(JSON.stringify(json5.parse(this.jsonParams), null, "\t"));
+                    })
+                } catch (e) {
+                    console.error(e);
+                }
+            });
         },
         formatJSON() {
             try {

@@ -165,7 +165,7 @@ export default {
             if (!this.plain) {
                 return "点击添加嵌套数据"
             } else {
-                return "当前类型只允许扁平数据，不允许存在复杂数据"
+                return "当前请求类型只允许扁平数据，不允许存在复杂数据(GET请求只能发送查询字符串)"
             }
         },
         disableTypeTip() {

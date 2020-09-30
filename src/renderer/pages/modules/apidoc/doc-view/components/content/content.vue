@@ -106,10 +106,14 @@
                     <div v-else class="f-xs gray-500">暂无数据</div>
                 </s-collapse>
                 <s-collapse title="请求参数">
-                    <s-tree-json2 :data="request.requestParams"></s-tree-json2>
+                    <s-tree-json :data="request.requestParams"></s-tree-json>
                 </s-collapse>
                 <s-collapse title="响应参数">
-                    <s-tree-json2 :data="request.responseParams"></s-tree-json2>
+                    <s-tree-json :data="request.responseParams" value-width="300px">
+                        <template v-slot:operation="{ data }">
+                            <span class="cursor-pointer" @click="handleCopyTable(data)">复制为表格</span>
+                        </template>
+                    </s-tree-json>
                 </s-collapse>
             </div>            
         </div>
@@ -119,6 +123,7 @@
         <s-host-manage v-if="dialogVisible" :visible.sync="dialogVisible" @change="getHostEnum"></s-host-manage>
         <s-variable-manage v-if="dialogVisible2" :visible.sync="dialogVisible2" @change="handleVariableChange"></s-variable-manage>
         <s-doc-record-dialog  v-if="dialogVisible3" :visible.sync="dialogVisible3"></s-doc-record-dialog>
+        <s-convert-code v-if="dialogVisible4" :visible.sync="dialogVisible4" :code-data="codeData"></s-convert-code>
     </div>
     <div v-else></div>
 </template>
@@ -130,6 +135,7 @@ import hostManage from "./dialog/host-manage"
 import historyDialog from "./dialog/history"
 import variableManage from "./dialog/variable-manage"
 import docRecord from "./dialog/doc-record/doc-record"
+import convertCode from "./dialog/convert-code"
 import { dfsForest, findParentNode } from "@/lib/utils"
 import uuid from "uuid/v4"
 import qs from "qs"
@@ -141,6 +147,7 @@ export default {
         "s-history-dialog": historyDialog,
         "s-variable-manage": variableManage,
         "s-doc-record-dialog": docRecord,
+        "s-convert-code": convertCode
     },
     data() {
         return {
@@ -192,14 +199,17 @@ export default {
             docInfo: {}, //----------------------文档基本信息
             //=====================================域名相关====================================//
             hostEnum: [], //---------------------域名列表
+            //=====================================特殊复制操作====================================//
+            codeData: [],
             //=====================================其他参数====================================//
             cancel: [], //-----------------------需要取消的接口
             loading: false, //-------------------保存接口
             loading2: false, //------------------获取文档详情接口
             loading3: false, //------------------发送请求状态
-            dialogVisible: false, //-------------域名维护弹窗
+            dialogVisible: false, //-------------域名维护弹窗  
             dialogVisible2: false, //------------全局变量管理弹窗
             dialogVisible3: false, //------------文档修改记录弹窗
+            dialogVisible4: false, //------------表格参数转换弹窗
             ready: false, //---------------------是否完成第一次数据请求
         };
     },
@@ -368,7 +378,6 @@ export default {
                 children: [], //---------子参数
             };
         },
-        
         //=====================================发送请求====================================//
         //发送请求
         sendRequest() {
@@ -388,9 +397,18 @@ export default {
             this.loading3 = false;
             this.$refs["response"].stopRequest();
         },
+        //=====================================快捷操作====================================//
+        //复制为表格数据
+        handleCopyTable(data) {
+            this.codeData = data.raw;
+            this.dialogVisible4 = true;
+        },
         //=====================================其他操作=====================================//
         convertVariable(val) {
-            const matchedData = val.match(/{{\s*(\w+)\s*}}/);
+            if (val == null) {
+                return;
+            }
+            const matchedData = val.toString().match(/{{\s*(\w+)\s*}}/);
             if (val && matchedData) {
                 const varInfo = this.variables.find(v => {
                     return v.name === matchedData[1];
@@ -409,6 +427,7 @@ export default {
             console.log("change")
             this.request._variableChange = !this.request._variableChange;
         },
+        
     }
 };
 </script>
@@ -429,7 +448,7 @@ export default {
         }
     }
     .params-wrap {
-        height: calc(100vh - 280px);
+        max-height: calc(100vh - 350px);
         overflow-y: auto;
     }
     .svg-icon {
